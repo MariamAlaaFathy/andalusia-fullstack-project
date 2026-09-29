@@ -1,15 +1,11 @@
-import { useContext, useState } from "react";
-import { userContext } from "../types/UserContextType";
+import { useState } from "react";
 import './Navbarcss.css' 
 import { NavLink } from "react-router-dom";
 
 function NavBar(){
-    const context = useContext(userContext); //give value provided by .provider in app  user and set user in this case 
-    const [isloggedin,setIsloggedin] = useState(true);
-    if(!context){
-        return null;
-    }
-
+    
+    const [isloggedin,setIsloggedin] = useState(false);
+   
   
     // const {user,setUser} = context;
 
@@ -20,7 +16,7 @@ function NavBar(){
                 <div >
                     {/* placeholder */}
                   
-                     <NavLink to="/Home">Logo</NavLink> 
+                     <NavLink to="/">Logo</NavLink> 
                    
                     
                 </div>
