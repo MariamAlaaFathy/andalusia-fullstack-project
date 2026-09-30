@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 
 import App from "./App";
-import Homepage from "./pages/Homepage"
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -11,37 +10,61 @@ const router = createBrowserRouter([
     {
         path:"/",
         element:<App/>,
-        children:[
-            {
-                path:"/",
-                element:<Homepage/>
+    },
+    {
+       path:"/About",
+       element:<About/>
+    },
+    {
+        path:"/Contact",
+        element:<Contact/> 
 
-            },
-            {
-                path:"/Contact",
-                element:<Contact/> 
-            },
-            {
-                path:"/About",
-                element:<About/>
-             },
-             {
-                path:"/Login",
-                element: <Login/>
+    },
+    {
+        path:"/Login",
+        element: <Login/>
 
-             },
-             {
-                path:"/Signup",
-                element:<Signup/>
-             },
-             {
-                path:"/Home",
-                element:<Homepage/>
-             }
+    },
+    {
+         path:"/Signup",
+        element:<Signup/>
+    }
+        // path:"/",
+        // element:<App/>,
+        // children:[
+        //     {
+        //         path:"/",
+        //         element:<Homepage/>
+
+        //     },
+        //     {
+        //         path:"/Contact",
+        //         element:<Contact/> 
+        //     },
+        //     {
+        //         path:"/About",
+        //         element:<About/>
+        //      },
+        //      {
+        //         path:"/Login",
+        //         element: <Login/>
+
+        //      },
+        //      {
+        //         path:"/Signup",
+        //         element:<Signup/>
+        //      },
+        //      {
+        //         path:"/Home",
+        //         element:<Homepage/>
+        //      }
             
 
-        ]
-    }
+        // ]
+
+
+        
+    
    
    
 

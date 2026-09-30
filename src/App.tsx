@@ -1,9 +1,8 @@
 import { useState} from 'react'
-import NavBar from './Components/NavBar'
 import type { User } from './types/User';
 import { userContext } from './types/UserContextType';
+import Homepage from './pages/Homepage';
 
-import { Outlet} from 'react-router-dom';
 function App() {
   // const [user,setUser] = useState({name:"Ali",age: 22,job:"developer"});
   const [user,setUser] = useState<User>({
@@ -17,8 +16,7 @@ function App() {
   return (
     <>
       <userContext.Provider value={{user,setUser}}>
-        <NavBar/>
-        <Outlet/>
+        <Homepage/>
       </userContext.Provider>
    
 
