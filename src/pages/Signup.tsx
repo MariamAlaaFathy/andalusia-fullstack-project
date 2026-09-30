@@ -36,7 +36,7 @@ function Signup(){
                 <label>Confirm Password:</label>
                 <input className={errors.password ? "border-2 border-red-500 text-red-600": "w-full border-2 rounded-md"} type="confirmpass" placeholder="type password again" {...register("confirm",{required:"field is required",minLength: {value:8, message:"password should be 8 characters long"},validate:(value)=>value === password})}></input>
 
-                <input className="bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600" type="submit" value="Sign up"></input>
+                <input className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md" type="submit" value="Sign up"></input>
             </form>
             </div>
        
