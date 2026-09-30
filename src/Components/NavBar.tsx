@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 
 function NavBar(){
     const context = useContext(userContext); //give value provided by .provider in app  user and set user in this case 
-    const [isloggedin,setIsloggedin] = useState(true);
+    const [isloggedin,setIsloggedin] = useState(false);
     if(!context){
         return null;
     }
@@ -18,39 +18,24 @@ function NavBar(){
          
                   <nav className="flex gap-x-5 w-full px-8 py-4 text-[30px]">
                 <div >
-                    {/* placeholder */}
-                  
-                     <NavLink to="/Home">Logo</NavLink> 
-                   
-                    
+                     <NavLink to="/Home">Logo</NavLink>   
                 </div>
 
-{/* for basic nav bar (in opening page) */}
 
                 <div className= " flex justify-end w-full gap-x-10 items-center">
                     {/* <a href="">Hi {user.username}</a> */}
                     <NavLink to="/">Home</NavLink>
                     <NavLink to="/About">About</NavLink>
                     <NavLink to= "/contact"> Contact us</NavLink>
-                    <NavLink className="bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600" to="/signup"> Sign up</NavLink>
+                    <NavLink className="border-2 border-[#A16F5E] text-[#A16F5E] hover:bg-[#A16F5E] hover:text-white font-bold px-6 py-3 rounded-md transition-colors cursor-pointer text-sm" to="/signup"> Sign up</NavLink>
                     {
-                        !isloggedin && (<NavLink className= "bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600" to="/login">Login</NavLink>)
+                        !isloggedin && (<NavLink className= "border-2 border-[#A16F5E] text-[#A16F5E] hover:bg-[#A16F5E] hover:text-white font-bold px-6 py-3 rounded-md transition-colors cursor-pointer text-sm" to="/login">Login</NavLink>)
                     }
-                    
                 </div>
-
-                
             </nav>
-           
         </div>
         
     )
-
-    
-          
-
-    
-
 }
 
 export default NavBar;
