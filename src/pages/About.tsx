@@ -28,7 +28,7 @@ export default function About() {
       <div>
         <NavBar />
 
-        <section className="bg-white border-b border-[#F2EDE9] py-16 px-4 md:px-0">
+        <section className="bg-white border-b border-[#F2EDE9] py-12 sm:py-16 px-4 sm:px-6 lg:px-0">
           <div className="max-w-[1180px] mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['El_Messiri',_serif]">
               About Andalusia Academy
@@ -40,7 +40,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="max-w-[1180px] mx-auto my-16 px-4 md:px-0">
+        <section className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0">
           <div className="bg-white rounded-2xl p-8 md:p-12 border border-[#F2EDE9] shadow-sm flex flex-col md:flex-row items-center gap-10">
             <div className="flex-1">
               <h2 className="text-3xl font-bold mb-4 font-['El_Messiri',_serif]">
@@ -71,7 +71,7 @@ export default function About() {
           </div>
         </section>
 
-        <section className="max-w-[1180px] mx-auto mb-20 px-4 md:px-0">
+        <section className="max-w-[1180px] mx-auto mb-16 sm:mb-20 px-4 sm:px-6 lg:px-0">
           <h2 className="text-3xl font-bold mb-8 font-['El_Messiri',_serif] text-center md:text-left">
             Why Learn With Us
           </h2>

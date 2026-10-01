@@ -1,6 +1,6 @@
 export default function AnnouncementBanner() {
   return (
-    <div className="max-w-[1180px] mx-auto my-6 px-4 md:px-0">
+    <div className="max-w-[1180px] mx-auto my-6 px-4 sm:px-6 lg:px-0">
       <div className="w-full bg-gradient-to-r from-[#B99081] to-[#A16F5E] text-white rounded-xl p-8 md:p-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
         <div className="max-w-[750px]">
           <h3 className="text-2xl font-semibold mb-2 font-['El_Messiri',_serif]">

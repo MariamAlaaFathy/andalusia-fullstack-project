@@ -23,7 +23,7 @@ export default function Contact() {
       <div>
         <NavBar />
 
-        <section className="bg-white border-b border-[#F2EDE9] py-16 px-4 md:px-0">
+        <section className="bg-white border-b border-[#F2EDE9] py-12 sm:py-16 px-4 sm:px-6 lg:px-0">
           <div className="max-w-[1180px] mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['El_Messiri',_serif]">
               Contact Us
@@ -35,7 +35,7 @@ export default function Contact() {
           </div>
         </section>
 
-        <section className="max-w-[1180px] mx-auto my-16 px-4 md:px-0 grid grid-cols-1 md:grid-cols-12 gap-12">
+        <section className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0 grid grid-cols-1 md:grid-cols-12 gap-8 sm:gap-12">
           <div className="md:col-span-7 bg-white p-8 md:p-10 rounded-2xl border border-[#F2EDE9] shadow-sm">
             <h2 className="text-2xl font-bold mb-6 font-['El_Messiri',_serif]">
               Send us a message
