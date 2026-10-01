@@ -4,7 +4,7 @@ export default function CTASection() {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-[850px] mx-auto my-24 text-center px-4">
+    <div className="max-w-[850px] mx-auto my-16 sm:my-24 text-center px-4">
       <h2 className="text-4xl md:text-5xl font-bold text-[#333333] mb-5 font-['El_Messiri',_serif]">
         Ready to start your path?
       </h2>

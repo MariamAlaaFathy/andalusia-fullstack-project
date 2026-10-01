@@ -15,16 +15,16 @@ function Signup() {
   const password = watch("password");
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      <div className="w-full md:w-1/2 h-64 md:h-screen">
+      <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-screen">
         <img
           className="w-full h-full object-cover"
           src="public/landscape2.jpg"
         />
       </div>
 
-      <div className="w-full md:w-1/2 flex items-center">
+      <div className="w-full md:w-1/2 flex items-center justify-center">
         <form
-          className="w-full flex flex-col gap-5 px-6 py-10 md:px-12 lg:px-20 text-[30px]"
+          className="w-full max-w-2xl flex flex-col gap-4 sm:gap-5 px-5 sm:px-8 md:px-10 lg:px-16 py-8 sm:py-10 text-base sm:text-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
           <NavLink className="hover:text-red-500" to="/">

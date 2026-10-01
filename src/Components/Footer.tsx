@@ -19,7 +19,7 @@ export default function Footer() {
 
   return (
     <footer className="bg-[#F8F5F2] border-t border-[#EAE3DE] pt-14 pb-10 text-[#555555]">
-      <div className="max-w-[1180px] mx-auto px-4 md:px-0 grid grid-cols-1 md:grid-cols-5 gap-10 items-start">
+      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10 items-start">
         <div>
           <img
             src="https://andalusia-academy.com/images/logo/aha-colored-logo.svg"
@@ -85,10 +85,10 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
+        <div className="col-span-2 sm:col-span-1 min-w-0">
           <h4 className="font-bold text-[#333333] text-lg mb-4">Contact Us</h4>
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               <svg
                 className="w-4 h-4 text-[#A16F5E] shrink-0"
                 fill="currentColor"
@@ -114,13 +114,13 @@ export default function Footer() {
               </svg>
               <a
                 href="mailto:andalusiaacadem@andalusia.com"
-                className="hover:text-[#A16F5E] transition-colors"
+                className="break-words hover:text-[#A16F5E] transition-colors"
               >
                 andalusiaacadem@andalusia.com
               </a>
             </div>
 
-            <div className="flex items-start gap-2.5 leading-relaxed">
+            <div className="flex items-start gap-2.5 leading-relaxed min-w-0">
               <svg
                 className="w-4 h-4 text-[#A16F5E] shrink-0 mt-0.5"
                 fill="currentColor"
@@ -132,7 +132,7 @@ export default function Footer() {
                 href="https://maps.google.com/?q=39+Khaleel+El-Khayat+Basha,+Abu+an+Nawatir,+Sidi+Gaber,+Alexandria+Governorate"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#A16F5E] transition-colors"
+                className="break-words hover:text-[#A16F5E] transition-colors"
               >
                 39 Khaleel El-Khayat Basha, Abu an Nawatir, Sidi Gaber,
                 Alexandria Governorate
@@ -142,7 +142,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-[1180px] mx-auto mt-12 pt-6 border-t border-[#EAE3DE] text-xs text-[#888888] px-4 md:px-0 text-center md:text-left">
+      <div className="max-w-[1180px] mx-auto mt-12 pt-6 border-t border-[#EAE3DE] text-xs text-[#888888] px-4 sm:px-6 lg:px-0 text-center md:text-left">
         © 2026 Andalusia Academy. All rights reserved.
       </div>
     </footer>
