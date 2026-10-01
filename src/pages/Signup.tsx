@@ -117,7 +117,7 @@ function Signup() {
           ></input>
 
           <input
-            className="bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600"
+            className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md"
             type="submit"
             value="Sign up"
           ></input>
