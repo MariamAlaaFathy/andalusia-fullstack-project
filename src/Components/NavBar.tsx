@@ -1,37 +1,67 @@
+
 import { NavLink } from "react-router-dom";
 
 function NavBar() {
   const isloggedin = false;
 
   return (
-    <div>
-      <nav className="flex gap-x-5 w-full px-8 py-4 text-[30px]">
-        <div>
-          <NavLink to="/">Logo</NavLink>
-        </div>
+    <nav className="w-full px-8 py-4 flex items-center">
+      
+     
+      <div className="flex-shrink-0">
+        <NavLink to="/">
+          <img
+            src="https://andalusia-academy.com/images/logo/aha-colored-logo.svg"
+            alt="Logo"
+            className="w-32 h-auto"
+          />
+        </NavLink>
+      </div>
 
-        <div className="flex justify-end w-full gap-x-10 items-center">
-          <NavLink to="/">Home</NavLink>
-          <NavLink to="/About">About</NavLink>
-          <NavLink to="/contact"> Contact us</NavLink>
+    
+      <div className="ml-auto flex items-center gap-x-8">
+
+        <NavLink
+          to="/"
+          className="text-lg hover:text-[#A16F5E] transition-colors"
+        >
+          Home
+        </NavLink>
+
+        <NavLink
+          to="/About"
+          className="text-lg hover:text-[#A16F5E] transition-colors"
+        >
+          About
+        </NavLink>
+
+        <NavLink
+          to="/contact"
+          className="text-lg hover:text-[#A16F5E] transition-colors"
+        >
+          Contact us
+        </NavLink>
+
+        <NavLink
+          to="/signup"
+          className="border-2 border-[#A16F5E] text-[#A16F5E] hover:bg-[#A16F5E] hover:text-white font-bold px-5 py-2 rounded-md transition-colors"
+        >
+          Sign up
+        </NavLink>
+
+        {!isloggedin && (
           <NavLink
-            className="bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600"
-            to="/signup"
+            to="/login"
+            className="bg-[#A16F5E] text-white hover:opacity-90 font-bold px-5 py-2 rounded-md transition-opacity"
           >
-            Sign up
+            Login
           </NavLink>
-          {!isloggedin && (
-            <NavLink
-              className="bg-blue-500 text-white px-2 py-2 rounded-lg hover:bg-blue-600"
-              to="/login"
-            >
-              Login
-            </NavLink>
-          )}
-        </div>
-      </nav>
-    </div>
+        )}
+
+      </div>
+    </nav>
   );
 }
 
 export default NavBar;
+
