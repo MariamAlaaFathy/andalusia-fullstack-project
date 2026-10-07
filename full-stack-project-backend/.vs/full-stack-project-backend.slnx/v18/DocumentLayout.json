@@ -1,0 +1,281 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\services\\icourseservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\services\\icourseservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\services\\courseservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\services\\courseservices.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|solutionrelative:full-stack-project-backend\\controllers\\coursescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\models\\pagedresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\models\\pagedresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\models\\paginatedparam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\models\\paginatedparam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\repository\\icourserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\repository\\icourserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\repository\\courserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\repository\\courserepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|solutionrelative:full-stack-project-backend\\models\\course.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\models\\coursefilterparam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\models\\coursefilterparam.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full-stack-project-backend.csproj|solutionrelative:full-stack-project-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\full_stack_project_backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|c:\\users\\maram\\desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F759DACE-09C5-49CF-9DEB-0B70CBD17A03}|full-stack-project-backend\\full_stack_project_backend.csproj|solutionrelative:full-stack-project-backend\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 22,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{4a9b7e51-aa16-11d0-a8c5-00a0c921a4d2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:5:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:4:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ICourseServices.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Services\\ICourseServices.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Services\\ICourseServices.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Services\\ICourseServices.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Services\\ICourseServices.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:55:10.445Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:6:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CourseServices.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Services\\CourseServices.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Services\\CourseServices.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Services\\CourseServices.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Services\\CourseServices.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAgwBYAAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:55:18.792Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "PaginatedParam.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\PaginatedParam.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Models\\PaginatedParam.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\PaginatedParam.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Models\\PaginatedParam.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T17:59:37.4Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Pagedresult.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\Pagedresult.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Models\\Pagedresult.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\Pagedresult.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Models\\Pagedresult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T17:53:02.847Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "CoursesController.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Controllers\\CoursesController.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Controllers\\CoursesController.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Controllers\\CoursesController.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Controllers\\CoursesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:35:21.899Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ICourseRepository.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Repository\\ICourseRepository.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Repository\\ICourseRepository.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Repository\\ICourseRepository.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Repository\\ICourseRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:56:19.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CourseRepository.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Repository\\CourseRepository.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Repository\\CourseRepository.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Repository\\CourseRepository.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Repository\\CourseRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:56:11.95Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Course.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\Course.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Models\\Course.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\Course.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Models\\Course.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:45:14.737Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "CourseFilterParam.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\CourseFilterParam.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Models\\CourseFilterParam.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Models\\CourseFilterParam.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Models\\CourseFilterParam.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T18:22:37.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "full_stack_project_backend",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\full_stack_project_backend.csproj",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj",
+              "RelativeToolTip": "full-stack-project-backend\\full_stack_project_backend.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-07T15:51:04.754Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Program.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Program.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Program.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Program.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAAACEAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T13:27:38.653Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\appsettings.Development.json",
+              "RelativeToolTip": "full-stack-project-backend\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-10-07T15:37:44.936Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "AppDbcontext.cs",
+              "DocumentMoniker": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Data\\AppDbcontext.cs",
+              "RelativeDocumentMoniker": "full-stack-project-backend\\Data\\AppDbcontext.cs",
+              "ToolTip": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\full-stack-project-backend\\full-stack-project-backend\\Data\\AppDbcontext.cs",
+              "RelativeToolTip": "full-stack-project-backend\\Data\\AppDbcontext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-07T15:30:28.727Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
