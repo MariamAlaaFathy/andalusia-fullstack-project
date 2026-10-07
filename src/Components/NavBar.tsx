@@ -35,6 +35,13 @@ function NavBar() {
           About
         </NavLink>
 
+
+        <NavLink to="/Courses">Courses</NavLink>
+
+        <NavLink to="/Programs">Programs</NavLink>
+
+        <NavLink to="/Careerpath">Career Paths</NavLink>
+
         <NavLink
           to="/contact"
           className="text-lg hover:text-[#A16F5E] transition-colors"
