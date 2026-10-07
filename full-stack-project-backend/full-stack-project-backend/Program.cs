@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using full_stack_project_backend.Data;
+using full_stack_project_backend.Mapping;
 using full_stack_project_backend.Repository;
 using full_stack_project_backend.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
-builder.Services.AddSingleton<ICourseRepository, CourseRepository>();
-builder.Services.AddSingleton<ICourseServices, CourseServices>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ICourseServices, CourseServices>();
+builder.Services.AddScoped<IProgramRepository, ProgramRepository>();
+builder.Services.AddScoped<IProgramServices, ProgramServices>();
+builder.Services.AddScoped<ICareerPathRepository, CareerPathRepository>();
+builder.Services.AddScoped<ICareerPathServices, CareerPathServices>();
 
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(configuration =>
+    configuration.AddProfile<MappingProfile>());
 builder.Services.AddDbContext<AppDbcontext>(options =>
         options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection")

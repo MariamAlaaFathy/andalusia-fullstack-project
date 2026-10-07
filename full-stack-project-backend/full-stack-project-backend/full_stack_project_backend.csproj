@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTO\" />
+    <Folder Include="DTOs\" />
     <Folder Include="Mapping\" />
     <Folder Include="Migrations\" />
     <Folder Include="Validators\" />

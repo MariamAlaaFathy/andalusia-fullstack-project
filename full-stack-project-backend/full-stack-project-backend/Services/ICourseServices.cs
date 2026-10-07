@@ -1,10 +1,13 @@
-﻿using full_stack_project_backend.Models;
+using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
 
 namespace full_stack_project_backend.Services
 {
     public interface ICourseServices
     {
-        public List<Course> GetAllCourses();
-        Pagedresult<Course> GetCourses(PaginatedParam paginationParams);
+        Task<Pagedresult<CourseDto>> GetCoursesAsync(
+            PaginatedParam paginationParams,
+            CancellationToken cancellationToken);
+        Task<CourseDto?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
     }
 }

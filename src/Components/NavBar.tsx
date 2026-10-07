@@ -1,45 +1,56 @@
 import { NavLink } from "react-router-dom";
 
 function NavBar() {
-  const isloggedin = false;
-
   return (
-    <nav className="w-full px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:justify-between gap-4">
-      <div className="flex-shrink-0">
-        <NavLink to="/">
+    <nav className="mx-auto flex w-full max-w-[1300px] flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <NavLink to="/" className="shrink-0 self-center sm:self-auto">
+        <span className="sr-only">Andalusia Academy home</span>
           <img
             src="https://andalusia-academy.com/images/logo/aha-colored-logo.svg"
-            alt="Logo"
-            className="w-32 h-auto"
+            alt=""
+            className="h-auto w-32"
           />
-        </NavLink>
-      </div>
+      </NavLink>
 
-      <div className="w-full sm:w-auto flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-2 sm:gap-x-6">
+      <div className="flex w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:w-auto sm:justify-end sm:gap-x-5">
         <NavLink
           to="/"
-          className="text-sm sm:text-base lg:text-lg hover:text-[#A16F5E] transition-colors"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
         >
           Home
         </NavLink>
 
         <NavLink
           to="/About"
-          className="text-sm sm:text-base lg:text-lg hover:text-[#A16F5E] transition-colors"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
         >
           About
         </NavLink>
 
+        <NavLink
+          to="/Courses"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
+        >
+          Courses
+        </NavLink>
 
-        <NavLink to="/Courses" className="text-lg hover:text-[#A16F5E] transition-colors" >Courses</NavLink>
+        <NavLink
+          to="/Programs"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
+        >
+          Programs
+        </NavLink>
 
-        <NavLink to="/Programs" className="text-lg hover:text-[#A16F5E] transition-colors">Programs</NavLink>
-
-        <NavLink to="/Careerpath" className="text-lg hover:text-[#A16F5E] transition-colors">Career Paths</NavLink>
+        <NavLink
+          to="/Careerpath"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
+        >
+          Career Paths
+        </NavLink>
 
         <NavLink
           to="/contact"
-          className="text-sm sm:text-base lg:text-lg hover:text-[#A16F5E] transition-colors"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
         >
           Contact us
         </NavLink>
@@ -51,14 +62,12 @@ function NavBar() {
           Sign up
         </NavLink>
 
-        {!isloggedin && (
-          <NavLink
-            to="/login"
-            className="bg-[#A16F5E] text-white hover:opacity-90 font-bold px-4 sm:px-5 py-2 rounded-md transition-opacity text-sm sm:text-base"
-          >
-            Login
-          </NavLink>
-        )}
+        <NavLink
+          to="/login"
+          className="rounded-md bg-[#A16F5E] px-4 py-2 text-sm font-bold text-white transition-opacity hover:opacity-90 sm:px-5 sm:text-base"
+        >
+          Login
+        </NavLink>
       </div>
     </nav>
   );

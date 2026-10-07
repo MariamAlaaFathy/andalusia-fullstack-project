@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Footer() {
   const navigate = useNavigate();
@@ -31,14 +31,29 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-[#333333] text-lg mb-4">Learn</h4>
           <ul className="space-y-3 text-sm">
-            <li className="hover:text-[#A16F5E] cursor-pointer transition-colors">
-              Courses
+            <li>
+              <NavLink
+                to="/Courses"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Courses
+              </NavLink>
             </li>
-            <li className="hover:text-[#A16F5E] cursor-pointer transition-colors">
-              Programs
+            <li>
+              <NavLink
+                to="/Programs"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Programs
+              </NavLink>
             </li>
-            <li className="hover:text-[#A16F5E] cursor-pointer transition-colors">
-              Career Paths
+            <li>
+              <NavLink
+                to="/Careerpath"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Career Paths
+              </NavLink>
             </li>
           </ul>
         </div>
@@ -46,23 +61,30 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-[#333333] text-lg mb-4">Company</h4>
           <ul className="space-y-3 text-sm">
-            <li
-              onClick={handleScrollToBusiness}
-              className="hover:text-[#A16F5E] cursor-pointer transition-colors"
-            >
-              For Business
+            <li>
+              <button
+                type="button"
+                onClick={handleScrollToBusiness}
+                className="text-left transition-colors hover:text-[#A16F5E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A16F5E]"
+              >
+                For Business
+              </button>
             </li>
-            <li
-              onClick={() => navigate("/about")}
-              className="hover:text-[#A16F5E] cursor-pointer transition-colors"
-            >
-              About
+            <li>
+              <NavLink
+                to="/about"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                About
+              </NavLink>
             </li>
-            <li
-              onClick={() => navigate("/contact")}
-              className="hover:text-[#A16F5E] cursor-pointer transition-colors"
-            >
-              Contact
+            <li>
+              <NavLink
+                to="/contact"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Contact
+              </NavLink>
             </li>
           </ul>
         </div>
@@ -70,17 +92,21 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-[#333333] text-lg mb-4">Account</h4>
           <ul className="space-y-3 text-sm">
-            <li
-              onClick={() => navigate("/login")}
-              className="hover:text-[#A16F5E] cursor-pointer transition-colors"
-            >
-              Log In
+            <li>
+              <NavLink
+                to="/login"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Log In
+              </NavLink>
             </li>
-            <li
-              onClick={() => navigate("/signup")}
-              className="hover:text-[#A16F5E] cursor-pointer transition-colors"
-            >
-              Sign Up
+            <li>
+              <NavLink
+                to="/signup"
+                className="transition-colors hover:text-[#A16F5E]"
+              >
+                Sign Up
+              </NavLink>
             </li>
           </ul>
         </div>

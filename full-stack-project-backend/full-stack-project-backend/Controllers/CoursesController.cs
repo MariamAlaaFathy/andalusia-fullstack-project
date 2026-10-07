@@ -16,14 +16,23 @@ namespace full_stack_project_backend.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetCourses(
-            [FromQuery] PaginatedParam paginationParams)
+        public async Task<IActionResult> GetCourses(
+            [FromQuery] PaginatedParam paginationParams,
+            CancellationToken cancellationToken)
         {
-            var courses = _courseServices.GetCourses(paginationParams);
-
+            var courses = await _courseServices.GetCoursesAsync(
+                paginationParams,
+                cancellationToken);
             return Ok(courses);
         }
 
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCourse(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var course = await _courseServices.GetCourseByIdAsync(id, cancellationToken);
+            return course is null ? NotFound() : Ok(course);
+        }
     }
 }
-
