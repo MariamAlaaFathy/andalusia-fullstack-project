@@ -1,9 +1,9 @@
+import NavBar from "../Components/NavBar";
+
 function Programs(){
-    return(
-        <div>
-            <p> this is programs</p>
-        </div>
-    )
+    return<>
+    <NavBar/>
+    </>
 }
 
 export default Programs;

@@ -36,11 +36,11 @@ function NavBar() {
         </NavLink>
 
 
-        <NavLink to="/Courses">Courses</NavLink>
+        <NavLink to="/Courses" className="text-lg hover:text-[#A16F5E] transition-colors" >Courses</NavLink>
 
-        <NavLink to="/Programs">Programs</NavLink>
+        <NavLink to="/Programs" className="text-lg hover:text-[#A16F5E] transition-colors">Programs</NavLink>
 
-        <NavLink to="/Careerpath">Career Paths</NavLink>
+        <NavLink to="/Careerpath" className="text-lg hover:text-[#A16F5E] transition-colors">Career Paths</NavLink>
 
         <NavLink
           to="/contact"

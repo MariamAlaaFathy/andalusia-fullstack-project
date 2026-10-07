@@ -1,10 +1,10 @@
+import NavBar from "../Components/NavBar";
+
 function Careerpath(){
 
-    return(
-        <div>
-            <p> this is career path</p>
-        </div>
-    )
+    return<>
+    <NavBar/>
+    </>
 }
 
 

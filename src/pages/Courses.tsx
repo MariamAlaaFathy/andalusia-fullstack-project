@@ -1,10 +1,9 @@
-function Courses(){
-    return(
-        <div>
-            <p>this is courses page</p>
-        </div>
-    )
+import NavBar from "../Components/NavBar";
 
+function Courses(){
+    return<>
+   <NavBar/>
+    </>
 
 }
 
