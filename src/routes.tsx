@@ -6,6 +6,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
 import Programs from "./pages/Programs";
 import Careerpath from "./pages/Careerpath";
 
@@ -31,16 +32,28 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-    path:"/Courses",
-    element:<Courses/>
+    path: "/Courses",
+    element: <Courses />,
   },
   {
-    path:"/Programs",
-    element:<Programs/>
+    path: "/Courses/:courseId",
+    element: <CourseDetail />,
   },
   {
-    path:"/Careerpath",
-    element:<Careerpath/>
+    path: "/Programs",
+    element: <Programs />,
+  },
+  {
+    path: "/Programs/:programId",
+    element: <Programs />,
+  },
+  {
+    path: "/Careerpath",
+    element: <Careerpath />,
+  },
+  {
+    path: "/Careerpath/:careerPathId",
+    element: <Careerpath />,
   }
 ]);
 
