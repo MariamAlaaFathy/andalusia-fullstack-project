@@ -8,6 +8,6 @@
         public int TotalCount { get; set; }
         public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
         public bool HasNextPage => Page < TotalPages;
-        public bool HasPerviousPage => Page > 1;
+        public bool HasPreviousPage => Page > 1;
     }
 }

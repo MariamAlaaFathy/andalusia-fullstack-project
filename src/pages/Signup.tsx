@@ -1,4 +1,4 @@
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import type { formtype } from "../types/formtype";
 import { NavLink } from "react-router-dom";
 
@@ -7,18 +7,19 @@ function Signup() {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
+    control,
   } = useForm<formtype>({ criteriaMode: "all", mode: "onChange" });
   const onSubmit: SubmitHandler<formtype> = (data) => {
     console.log(data);
   };
-  const password = watch("password");
+  const password = useWatch({ control, name: "password" });
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-screen">
         <img
           className="w-full h-full object-cover"
-          src="public/landscape2.jpg"
+          src="/landscape2.jpg"
+          alt="A learner studying"
         />
       </div>
 
@@ -30,12 +31,14 @@ function Signup() {
           <NavLink className="hover:text-red-500" to="/">
             Go back to Homepage
           </NavLink>
-          <label>Username: </label>
+          <label htmlFor="username">Username</label>
           <input
+            id="username"
+            type="text"
             className={
               errors.username
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             placeholder="enter username"
             {...register("username", {
@@ -52,12 +55,14 @@ function Signup() {
                 {error}
               </p>
             ))}
-          <label>Email: </label>
+          <label htmlFor="email">Email</label>
           <input
+            id="email"
+            type="email"
             className={
               errors.email
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             placeholder="example@email.com"
             {...register("email", {
@@ -74,12 +79,13 @@ function Signup() {
                 {error}
               </p>
             ))}
-          <label>Password: </label>
+          <label htmlFor="password">Password</label>
           <input
+            id="password"
             className={
               errors.password
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             type="password"
             placeholder="enter password here"
@@ -97,14 +103,15 @@ function Signup() {
                 {error}
               </p>
             ))}
-          <label>Confirm Password:</label>
+          <label htmlFor="confirm">Confirm Password</label>
           <input
+            id="confirm"
             className={
-              errors.password
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+              errors.confirm
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
-            type="confirmpass"
+            type="password"
             placeholder="type password again"
             {...register("confirm", {
               required: "field is required",
@@ -112,9 +119,12 @@ function Signup() {
                 value: 8,
                 message: "password should be 8 characters long",
               },
-              validate: (value) => value === password,
+              validate: (value) => value === password || "Passwords do not match",
             })}
           ></input>
+          {errors.confirm && (
+            <p className="text-red-600">{errors.confirm.message}</p>
+          )}
 
           <input
             className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md"

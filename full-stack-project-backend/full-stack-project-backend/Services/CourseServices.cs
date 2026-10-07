@@ -1,63 +1,48 @@
-﻿using full_stack_project_backend.Models;
+using AutoMapper;
+using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
 using full_stack_project_backend.Repository;
 
 namespace full_stack_project_backend.Services
 {
     public class CourseServices : ICourseServices
     {
-        private ICourseRepository _courseRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IMapper _mapper;
 
-        public CourseServices(ICourseRepository courseRepository)
+        public CourseServices(ICourseRepository courseRepository, IMapper mapper)
         {
             _courseRepository = courseRepository;
+            _mapper = mapper;
         }
-        public List<Course> GetAllCourses()
+        public async Task<Pagedresult<CourseDto>> GetCoursesAsync(
+            PaginatedParam paginationParams,
+            CancellationToken cancellationToken)
         {
-            return _courseRepository.GetAllCourses();
-            
-        }
+            var page = Math.Max(1, paginationParams.Page);
+            var pageSize = Math.Clamp(paginationParams.PageSize, 1, 100);
+            var (courses, totalCount) = await _courseRepository.GetCoursesAsync(
+                paginationParams.Search,
+                paginationParams.Category,
+                page,
+                pageSize,
+                cancellationToken);
 
-        public Pagedresult<Course> GetCourses(
-        PaginatedParam paginationParams)
-        {
-            var courses = _courseRepository.GetAllCourses();
-
-            
-            if (!string.IsNullOrEmpty(paginationParams.Search))
+            return new Pagedresult<CourseDto>
             {
-                courses = courses
-                    .Where(c => c.Name.Contains(
-                        paginationParams.Search,
-                        StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-           
-            if (!string.IsNullOrEmpty(paginationParams.Category))
-            {
-                courses = courses
-                    .Where(c => c.Category.Equals(
-                        paginationParams.Category,
-                        StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-
-           
-            var totalCount = courses.Count;
-
-     
-            courses = courses
-                .Skip((paginationParams.Page - 1) * paginationParams.PageSize)
-                .Take(paginationParams.PageSize)
-                .ToList();
-
-            return new Pagedresult<Course>
-            {
-                Data = courses,
-                Page = paginationParams.Page,
-                PageSize = paginationParams.PageSize,
+                Data = _mapper.Map<IReadOnlyList<CourseDto>>(courses),
+                Page = page,
+                PageSize = pageSize,
                 TotalCount = totalCount
             };
+        }
+
+        public async Task<CourseDto?> GetCourseByIdAsync(
+            int id,
+            CancellationToken cancellationToken)
+        {
+            var course = await _courseRepository.GetCourseByIdAsync(id, cancellationToken);
+            return course is null ? null : _mapper.Map<CourseDto>(course);
         }
     }
 }

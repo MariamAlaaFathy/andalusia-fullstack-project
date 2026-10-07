@@ -5,10 +5,10 @@ export default function CTASection() {
 
   return (
     <div className="max-w-[850px] mx-auto my-16 sm:my-24 text-center px-4">
-      <h2 className="text-4xl md:text-5xl font-bold text-[#333333] mb-5 font-['El_Messiri',_serif]">
+      <h2 className="mb-5 font-['El_Messiri',_serif] text-3xl font-bold text-[#333333] sm:text-4xl md:text-5xl">
         Ready to start your path?
       </h2>
-      <p className="text-[#666666] text-lg mb-10 max-w-[650px] mx-auto">
+      <p className="mx-auto mb-10 max-w-[650px] text-base text-[#666666] sm:text-lg">
         Create a free account and browse the full catalog in minutes.
       </p>
       <button

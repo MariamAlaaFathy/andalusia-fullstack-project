@@ -20,7 +20,8 @@ function Login() {
       <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-screen">
         <img
           className="w-full h-full object-cover"
-          src="public/landscape2.jpg"
+          src="/landscape2.jpg"
+          alt="A learner studying"
         />
       </div>
 
@@ -33,13 +34,15 @@ function Login() {
             Go back to Homepage
           </NavLink>
 
-          <label>Username: </label>
+          <label htmlFor="username">Username</label>
 
           <input
+            id="username"
+            type="text"
             className={
               errors.username
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             placeholder="enter username"
             {...register("username", {
@@ -60,13 +63,15 @@ function Login() {
 
           {/* must add logic if username doesnt exist since this is login */}
 
-          <label>Email: </label>
+          <label htmlFor="email">Email</label>
 
           <input
+            id="email"
+            type="email"
             className={
               errors.email
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             placeholder="example@email.com"
             {...register("email", {
@@ -85,13 +90,14 @@ function Login() {
               </p>
             ))}
 
-          <label>Password: </label>
+          <label htmlFor="password">Password</label>
 
           <input
+            id="password"
             className={
               errors.password
-                ? "border-2 border-red-500 text-red-600"
-                : "w-full border-2 rounded-md"
+                ? "w-full rounded-md border-2 border-red-500 text-red-600"
+                : "w-full rounded-md border-2"
             }
             type="password"
             placeholder="enter password here"

@@ -1,40 +1,53 @@
-﻿using full_stack_project_backend.Models;
+﻿using full_stack_project_backend.Data;
+using full_stack_project_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace full_stack_project_backend.Repository
 {
-    public class CourseRepository : ICourseRepository
+    public sealed class CourseRepository(AppDbcontext dbContext) : ICourseRepository
     {
-        private List<Course> _courses = new List<Course>
+        public async Task<(IReadOnlyList<Course> Items, int TotalCount)> GetCoursesAsync(
+            string? search,
+            string? category,
+            int page,
+            int pageSize,
+            CancellationToken cancellationToken)
         {
-            new Course
-             {
-                Id = 1,
-                Name = "C# Basics",
-                Description = "Learn the basics of C#",
-                Price = 100,
-                Category = "Programming"
-            },
-            new Course
-            {
-                Id = 2,
-                Name = "ASP.NET Core",
-                Description = "Learn how to build web applications with ASP.NET Core",
-                Price = 200,
-                Category = "Web Development"
-            },
-            new Course
-            {
-                Id = 3,
-                Name = "Entity Framework Core",
-                Description = "Learn how to use Entity Framework Core for data access",
-                Price = 150,
-                Category = "Database"
-            }
-        };
+            var query = dbContext.Courses
+                .AsNoTracking()
+                .Include(course => course.Program)
+                .ThenInclude(program => program.CareerPath)
+                .AsQueryable();
 
-        public List<Course> GetAllCourses()
-        {
-            return _courses;
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                query = query.Where(course => course.Name.Contains(term));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var selectedCategory = category.Trim();
+                query = query.Where(course => course.Category == selectedCategory);
+            }
+
+            var totalCount = await query.CountAsync(cancellationToken);
+            var items = await query
+                .OrderBy(course => course.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            return (items, totalCount);
         }
+
+        public Task<Course?> GetCourseByIdAsync(
+            int id,
+            CancellationToken cancellationToken) =>
+            dbContext.Courses
+                .AsNoTracking()
+                .Include(course => course.Program)
+                .ThenInclude(program => program.CareerPath)
+                .SingleOrDefaultAsync(course => course.Id == id, cancellationToken);
     }
 }
