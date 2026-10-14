@@ -86,13 +86,13 @@ function Login(){
                             <p className="text-red-600" key={index}>{error}</p>
                         )
                     }
-
+                <NavLink className="hover:text-red-500" to="/forgot">forgot password?</NavLink>
                     <input
                         className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md"
                         type="submit"
                         value="Log in"
                     />
-
+                    
                 </form>
 
             </div>

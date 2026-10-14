@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Forgorpassword from "./pages/forgorpassword";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
     path: "/Signup",
     element: <Signup />,
   },
+  {
+    path:"/forgot",
+    element:<Forgorpassword/>
+  }
 ]);
 
 export default router;
