@@ -11,9 +11,12 @@ import { catalogApi } from "../services/catalogApi";
 import type { Coursetype } from "../types/Coursetype";
 import type { PagedResult } from "../types/PagedResult";
 
-const pageSize = 10;
+const pageSize = 8;
 const categories = [
+  "Programming",
   "Web Development",
+  "Database",
+  "Frontend Development",
   "Backend Development",
   "Data",
 ] as const;
@@ -78,7 +81,7 @@ function Courses() {
         <header className="mb-8">
           <h1 className="font-serif text-4xl font-bold sm:text-5xl">Courses</h1>
           <p className="mt-3 text-[17px] text-[#765f52]">
-            {courses.totalCount} courses across 4 categories
+            {courses.totalCount} courses across {categories.length} categories
           </p>
         </header>
 

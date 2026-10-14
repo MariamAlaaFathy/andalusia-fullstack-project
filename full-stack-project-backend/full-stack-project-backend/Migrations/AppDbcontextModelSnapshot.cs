@@ -258,14 +258,120 @@ namespace full_stack_project_backend.Migrations
                             Prerequisites = "[\"Basic C# programming\",\"Basic relational database concepts\"]",
                             Price = 150,
                             ProgramId = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = "Frontend Development",
+                            Description = "Build semantic web pages and style responsive layouts from the ground up.",
+                            Duration = "4 weeks",
+                            LearningOutcomes = "[\"Structure accessible pages with HTML\",\"Style responsive layouts with CSS\",\"Use flexbox and grid to arrange page content\"]",
+                            Level = "Beginner",
+                            Name = "HTML & CSS Foundations",
+                            Prerequisites = "[\"No prior experience required\"]",
+                            Price = 80,
+                            ProgramId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Category = "Programming",
+                            Description = "Learn the language of the web through practical programming exercises.",
+                            Duration = "5 weeks",
+                            LearningOutcomes = "[\"Work with variables, functions, and objects\",\"Control page behavior with events\",\"Use modern JavaScript syntax\"]",
+                            Level = "Beginner",
+                            Name = "JavaScript Fundamentals",
+                            Prerequisites = "[\"Basic computer skills\"]",
+                            Price = 120,
+                            ProgramId = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Category = "Frontend Development",
+                            Description = "Create interactive interfaces with reusable React components.",
+                            Duration = "6 weeks",
+                            LearningOutcomes = "[\"Build interfaces with components and props\",\"Manage state and user events\",\"Create multi-page React applications\"]",
+                            Level = "Intermediate",
+                            Name = "React Foundations",
+                            Prerequisites = "[\"Basic HTML, CSS, and JavaScript\"]",
+                            Price = 180,
+                            ProgramId = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Category = "Backend Development",
+                            Description = "Design and build REST APIs using Node.js and Express.",
+                            Duration = "7 weeks",
+                            LearningOutcomes = "[\"Create REST endpoints with Express\",\"Validate requests and handle errors\",\"Connect an API to a database\"]",
+                            Level = "Intermediate",
+                            Name = "Node.js API Development",
+                            Prerequisites = "[\"JavaScript fundamentals\"]",
+                            Price = 190,
+                            ProgramId = 2
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Category = "Data",
+                            Description = "Query and summarize relational data to answer practical business questions.",
+                            Duration = "5 weeks",
+                            LearningOutcomes = "[\"Filter, sort, and join datasets\",\"Summarize data with aggregate functions\",\"Write queries for common analysis tasks\"]",
+                            Level = "Beginner",
+                            Name = "SQL for Data Analysis",
+                            Prerequisites = "[\"No prior SQL experience required\"]",
+                            Price = 130,
+                            ProgramId = 3
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Category = "Data",
+                            Description = "Turn business data into clear, interactive reports and dashboards.",
+                            Duration = "6 weeks",
+                            LearningOutcomes = "[\"Prepare and transform data\",\"Build interactive Power BI reports\",\"Choose visualizations that communicate insights\"]",
+                            Level = "Intermediate",
+                            Name = "Power BI Dashboards",
+                            Prerequisites = "[\"Basic spreadsheet skills\"]",
+                            Price = 160,
+                            ProgramId = 3
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = "Backend Development",
+                            Description = "Understand cloud concepts, deployment models, and core services.",
+                            Duration = "4 weeks",
+                            LearningOutcomes = "[\"Compare cloud service and deployment models\",\"Understand compute, storage, and networking basics\",\"Recognize cloud security fundamentals\"]",
+                            Level = "Beginner",
+                            Name = "Cloud Computing Essentials",
+                            Prerequisites = "[\"Basic computer skills\"]",
+                            Price = 140,
+                            ProgramId = 2
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = "Web Development",
+                            Description = "Make websites more usable with accessible markup and inclusive design practices.",
+                            Duration = "3 weeks",
+                            LearningOutcomes = "[\"Use semantic HTML and accessible labels\",\"Navigate and test interfaces with a keyboard\",\"Apply color contrast and inclusive content practices\"]",
+                            Level = "Beginner",
+                            Name = "Web Accessibility Basics",
+                            Prerequisites = "[\"Basic HTML knowledge\"]",
+                            Price = 90,
+                            ProgramId = 1
                         });
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.CourseApplication", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -281,9 +387,8 @@ namespace full_stack_project_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("LearnerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("LearnerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -302,9 +407,11 @@ namespace full_stack_project_backend.Migrations
 
             modelBuilder.Entity("full_stack_project_backend.Models.Payment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
@@ -313,8 +420,8 @@ namespace full_stack_project_backend.Migrations
                     b.Property<DateTime?>("CheckoutExpiresAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CourseApplicationId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CourseApplicationId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -398,7 +505,6 @@ namespace full_stack_project_backend.Migrations
                         });
                 });
 
-<<<<<<< HEAD
             modelBuilder.Entity("full_stack_project_backend.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -415,6 +521,12 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -424,8 +536,6 @@ namespace full_stack_project_backend.Migrations
                     b.ToTable("Users");
                 });
 
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPathSkill", b =>
                 {
                     b.HasOne("full_stack_project_backend.Models.CareerPath", "CareerPath")

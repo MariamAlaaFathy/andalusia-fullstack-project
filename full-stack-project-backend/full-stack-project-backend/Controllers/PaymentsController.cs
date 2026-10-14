@@ -1,52 +1,34 @@
-using System.Text;
 using full_stack_project_backend.DTOs;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace full_stack_project_backend.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "Learner")]
 [Route("api/payments")]
-public sealed class PaymentsController(IPaymentService paymentService)
-    : LearnerControllerBase
+public sealed class PaymentsController(
+    IPaymentService paymentService,
+    IHostEnvironment environment) : ControllerBase
 {
-    [HttpPost("application/{applicationId:guid}/checkout")]
-    public async Task<ActionResult<CheckoutResponse>> StartCheckout(
-        Guid applicationId,
+    [HttpPost("application/{applicationId:int}/demo-payment")]
+    public async Task<ActionResult<CourseApplicationResponse>> CompleteDemoPayment(
+        int applicationId,
         CancellationToken cancellationToken)
     {
-        if (!TryGetLearnerId(out var learnerId)) return Unauthorized();
-        return Ok(await paymentService.StartCheckoutAsync(
+        if (!environment.IsDevelopment()) return NotFound();
+        if (!int.TryParse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier),
+                out var learnerId) ||
+            learnerId <= 0)
+        {
+            return Unauthorized();
+        }
+        return Ok(await paymentService.CompleteDemoPaymentAsync(
             applicationId,
             learnerId,
             cancellationToken));
-    }
-
-    [HttpPost("confirm")]
-    public async Task<ActionResult<CourseApplicationResponse>> ConfirmCheckout(
-        ConfirmCheckoutRequest request,
-        CancellationToken cancellationToken)
-    {
-        if (!TryGetLearnerId(out var learnerId)) return Unauthorized();
-        return Ok(await paymentService.ConfirmCheckoutAsync(
-            request.SessionId,
-            learnerId,
-            cancellationToken));
-    }
-
-    [AllowAnonymous]
-    [HttpPost("webhook")]
-    [RequestSizeLimit(64_000)]
-    public async Task<IActionResult> Webhook(CancellationToken cancellationToken)
-    {
-        using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-        var payload = await reader.ReadToEndAsync(cancellationToken);
-        await paymentService.ProcessWebhookAsync(
-            payload,
-            Request.Headers["Stripe-Signature"].ToString(),
-            cancellationToken);
-        return Ok();
     }
 }

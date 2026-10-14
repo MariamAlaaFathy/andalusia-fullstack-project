@@ -1,9 +1,8 @@
-const apiBaseUrl = (
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5075"
-).replace(/\/$/, "");
+import { authenticatedFetch } from "./authApi";
+import { apiBaseUrl } from "./apiConfig";
 
 export type EnrollmentPayment = {
-  id: string;
+  id: number;
   amount: number;
   currency: string;
   status: "Pending" | "Paid" | "Failed";
@@ -11,18 +10,13 @@ export type EnrollmentPayment = {
 };
 
 export type CourseApplication = {
-  id: string;
+  id: number;
   courseId: number;
   courseName: string;
   amount: number;
   status: "AwaitingPayment" | "Enrolled";
   createdAt: string;
   payment: EnrollmentPayment | null;
-};
-
-type CheckoutResponse = {
-  checkoutUrl: string | null;
-  application: CourseApplication;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -32,7 +26,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isPayment(value: unknown): value is EnrollmentPayment {
   return (
     isRecord(value) &&
-    typeof value.id === "string" &&
+    typeof value.id === "number" &&
     typeof value.amount === "number" &&
     typeof value.currency === "string" &&
     (value.status === "Pending" ||
@@ -45,7 +39,7 @@ function isPayment(value: unknown): value is EnrollmentPayment {
 function isApplication(value: unknown): value is CourseApplication {
   return (
     isRecord(value) &&
-    typeof value.id === "string" &&
+    typeof value.id === "number" &&
     typeof value.courseId === "number" &&
     typeof value.courseName === "string" &&
     typeof value.amount === "number" &&
@@ -55,30 +49,22 @@ function isApplication(value: unknown): value is CourseApplication {
   );
 }
 
-function isCheckoutResponse(value: unknown): value is CheckoutResponse {
-  return (
-    isRecord(value) &&
-    (typeof value.checkoutUrl === "string" || value.checkoutUrl === null) &&
-    isApplication(value.application)
-  );
-}
-
 async function request<T>(
   path: string,
-  accessToken: string,
   isPayload: (payload: unknown) => payload is T,
   init: RequestInit = {},
 ): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set("Accept", "application/json");
+  if (init.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl}${path}`, {
+    response = await authenticatedFetch(`${apiBaseUrl}${path}`, {
       ...init,
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${accessToken}`,
-        ...(init.body ? { "Content-Type": "application/json" } : {}),
-        ...init.headers,
-      },
+      headers,
     });
   } catch (error) {
     throw new Error("Could not connect to the enrollment API.", {
@@ -99,14 +85,13 @@ async function request<T>(
 
   if (!response.ok) {
     const detail =
-      typeof payload === "object" &&
-      payload !== null &&
-      "detail" in payload &&
-      typeof payload.detail === "string"
+      isRecord(payload) && typeof payload.detail === "string"
         ? payload.detail
-        : response.status === 401
-          ? "Please sign in again to continue."
-          : `Enrollment request failed with status ${response.status}.`;
+        : isRecord(payload) && typeof payload.message === "string"
+          ? payload.message
+          : response.status === 401
+            ? "Please sign in again to continue."
+            : `Enrollment request failed with status ${response.status}.`;
     throw new Error(detail);
   }
 
@@ -117,40 +102,27 @@ async function request<T>(
 }
 
 export const enrollmentApi = {
-  getMine(accessToken: string, signal?: AbortSignal) {
+  getMine(signal?: AbortSignal) {
     return request(
       "/api/applications/me",
-      accessToken,
       (value): value is CourseApplication[] =>
         Array.isArray(value) && value.every(isApplication),
       { signal },
     );
   },
 
-  create(courseId: number, accessToken: string) {
-    return request(
-      "/api/applications",
-      accessToken,
-      isApplication,
-      { method: "POST", body: JSON.stringify({ courseId }) },
-    );
+  create(courseId: number) {
+    return request("/api/applications", isApplication, {
+      method: "POST",
+      body: JSON.stringify({ courseId }),
+    });
   },
 
-  startCheckout(applicationId: string, accessToken: string) {
+  completeDemoPayment(applicationId: number) {
     return request(
-      `/api/payments/application/${encodeURIComponent(applicationId)}/checkout`,
-      accessToken,
-      isCheckoutResponse,
+      `/api/payments/application/${encodeURIComponent(applicationId)}/demo-payment`,
+      isApplication,
       { method: "POST" },
-    );
-  },
-
-  confirmCheckout(sessionId: string, accessToken: string) {
-    return request(
-      "/api/payments/confirm",
-      accessToken,
-      isApplication,
-      { method: "POST", body: JSON.stringify({ sessionId }) },
     );
   },
 };

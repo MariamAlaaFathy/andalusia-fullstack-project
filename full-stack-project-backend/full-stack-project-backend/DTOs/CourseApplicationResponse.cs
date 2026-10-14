@@ -1,7 +1,7 @@
 namespace full_stack_project_backend.DTOs;
 
 public sealed record CourseApplicationResponse(
-    Guid Id,
+    int Id,
     int CourseId,
     string CourseName,
     decimal Amount,
@@ -10,14 +10,8 @@ public sealed record CourseApplicationResponse(
     PaymentResponse? Payment);
 
 public sealed record PaymentResponse(
-    Guid Id,
+    int Id,
     decimal Amount,
     string Currency,
     string Status,
     DateTime? PaidAt);
-
-public sealed record CheckoutResponse(
-    string? CheckoutUrl,
-    CourseApplicationResponse Application);
-
-public sealed record ConfirmCheckoutRequest(string SessionId);

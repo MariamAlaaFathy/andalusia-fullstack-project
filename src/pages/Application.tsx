@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { useContext, useEffect, useState, type FormEvent } from "react";
+import { Link, useParams } from "react-router-dom";
 import { CatalogEmpty } from "../Components/CatalogFeedback";
 import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
@@ -14,34 +14,10 @@ import { userContext } from "../types/UserContextType";
 
 type FlowStep = "application" | "payment" | "complete";
 
-function createPreviewCourse(id: number): Coursetype {
-  return {
-    id,
-    name: id === 2 ? "ASP.NET Core" : "C# Basics",
-    description:
-      id === 2
-        ? "Learn how to build web applications with ASP.NET Core."
-        : "Learn programming fundamentals with C#.",
-    price: id === 2 ? 200 : 100,
-    category: "Programming",
-    programId: 2,
-    programName: "Backend Developer Program",
-    careerPathId: 2,
-    careerPathName: "Backend Developer",
-    duration: id === 2 ? "8 weeks" : "6 weeks",
-    level: id === 2 ? "Intermediate" : "Beginner",
-    prerequisites: [],
-    learningOutcomes: [],
-  };
-}
-
 function Application() {
   const { courseId } = useParams();
-  const [searchParams] = useSearchParams();
   const context = useContext(userContext);
-  const accessToken = context?.user.accessToken;
-  const previewMode =
-    !accessToken && searchParams.get("preview") === "true";
+  const userId = context?.user?.userId;
   const id = Number(courseId);
   const validId = Number.isSafeInteger(id) && id > 0;
   const [course, setCourse] = useState<Coursetype | null>(null);
@@ -53,46 +29,34 @@ function Application() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // New Credit Card Input and Validation States
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+  const [cardErrors, setCardErrors] = useState<{
+    number?: string;
+    expiry?: string;
+    cvc?: string;
+  }>({});
+
   useEffect(() => {
     const controller = new AbortController();
 
     async function loadCourse() {
       setIsLoading(true);
       setErrorMessage("");
-      if (!validId || (!accessToken && !previewMode)) {
+      if (context?.isLoading) return;
+      if (!validId || typeof userId !== "number") {
         setIsLoading(false);
         return;
       }
 
       try {
-        if (previewMode) {
-          setCourse(createPreviewCourse(id));
-          setIsLoading(false);
-          return;
-        }
-        if (!accessToken) return;
-
         const loadedCourse = await catalogApi.getCourse(id, controller.signal);
         if (controller.signal.aborted) return;
         setCourse(loadedCourse);
 
-        const checkoutStatus = searchParams.get("checkout");
-        const sessionId = searchParams.get("session_id");
-        if (checkoutStatus === "success" && sessionId) {
-          const confirmed = await enrollmentApi.confirmCheckout(
-            sessionId,
-            accessToken,
-          );
-          if (controller.signal.aborted) return;
-          setApplication(confirmed);
-          setStep("complete");
-          return;
-        }
-
-        const applications = await enrollmentApi.getMine(
-          accessToken,
-          controller.signal,
-        );
+        const applications = await enrollmentApi.getMine(controller.signal);
         if (controller.signal.aborted) return;
         const existing = applications.find(
           (item) => item.courseId === loadedCourse.id,
@@ -117,28 +81,14 @@ function Application() {
 
     void loadCourse();
     return () => controller.abort();
-  }, [accessToken, id, previewMode, searchParams, validId]);
+  }, [context?.isLoading, id, userId, validId]);
 
   async function submitApplication() {
-    if (!course) return;
-    if (previewMode) {
-      setApplication({
-        id: "preview-application",
-        courseId: course.id,
-        courseName: course.name,
-        amount: course.price,
-        status: course.price === 0 ? "Enrolled" : "AwaitingPayment",
-        createdAt: new Date().toISOString(),
-        payment: null,
-      });
-      setStep(course.price === 0 ? "complete" : "payment");
-      return;
-    }
-    if (!accessToken) return;
+    if (!course || typeof userId !== "number") return;
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const created = await enrollmentApi.create(course.id, accessToken);
+      const created = await enrollmentApi.create(course.id);
       setApplication(created);
       setStep(created.status === "Enrolled" ? "complete" : "payment");
     } catch (error) {
@@ -153,43 +103,54 @@ function Application() {
     }
   }
 
-  async function completePayment() {
-    if (!application) return;
-    if (previewMode) {
-      setApplication({
-        ...application,
-        status: "Enrolled",
-        payment: {
-          id: "preview-payment",
-          amount: application.amount,
-          currency: "usd",
-          status: "Paid",
-          paidAt: new Date().toISOString(),
-        },
-      });
-      setStep("complete");
+  // Credit Card Validation Logic
+  function validateCardFields() {
+    const errors: { number?: string; expiry?: string; cvc?: string } = {};
+
+    // Clean spaces and dashes from card number
+    const cleanNumber = cardNumber.replace(/[\s-]/g, "");
+    // Standard cards are between 13 and 19 digits (Visa/Mastercard/Amex)
+    if (!/^\d{13,19}$/.test(cleanNumber)) {
+      errors.number = "Enter a valid 13 to 19 digit card number.";
+    }
+
+    // Clean expiry and check MM/YY format (e.g., 12/28)
+    const cleanExpiry = cardExpiry.trim();
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(cleanExpiry)) {
+      errors.expiry = "Use MM/YY format (e.g. 12/28).";
+    }
+
+    // CVC check (3 or 4 digits)
+    const cleanCvc = cardCvc.trim();
+    if (!/^\d{3,4}$/.test(cleanCvc)) {
+      errors.cvc = "Invalid CVC (3-4 digits).";
+    }
+
+    setCardErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  async function completePayment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!application || typeof userId !== "number") return;
+
+    // Run validation check before submitting payment
+    if (!validateCardFields()) {
       return;
     }
-    if (!accessToken) return;
+
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const checkout = await enrollmentApi.startCheckout(
-        application.id,
-        accessToken,
-      );
-      setApplication(checkout.application);
-      if (checkout.checkoutUrl) {
-        window.location.assign(checkout.checkoutUrl);
-      } else if (checkout.application.status === "Enrolled") {
-        setStep("complete");
-      }
+      const paid = await enrollmentApi.completeDemoPayment(application.id);
+      setApplication(paid);
+      setStep("complete");
     } catch (error) {
-      console.error("Secure checkout could not be started.", error);
+      console.error("Demo payment could not be completed.", error);
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Secure checkout could not be started. Please try again.",
+          : "Demo payment could not be completed. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -210,44 +171,40 @@ function Application() {
             Apply &amp; enroll
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#765f52]">
-            Submit your application, review the demo checkout, and track your
-            enrollment from your dashboard.
+            Submit your application, complete payment when required, and track
+            your enrollment from your dashboard.
           </p>
         </header>
 
-        {previewMode && (
-          <aside
-            role="status"
-            className="mb-6 max-w-3xl rounded-xl border border-[#d8cabc] bg-[#f3e7d8] p-4 text-sm text-[#765f52]"
-          >
-            Enrollment flow preview: the buttons below only advance sample
-            stages. Nothing is submitted, charged, or saved.
-          </aside>
-        )}
-
-        {!accessToken && !previewMode ? (
-          <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
-            <h2 className="font-serif text-2xl font-bold">
-              Sign in to apply
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
-              Course applications and payment records are linked to your
-              authenticated learner account.
-            </p>
-            <Link
-              to="/Login"
-              className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
-            >
-              Go to login
-            </Link>
-          </section>
-        ) : isLoading ? (
+        {context?.isLoading || isLoading ? (
           <div
             className="rounded-2xl border border-[#dfd2c3] bg-white p-8 text-[#765f52]"
             role="status"
           >
             Loading course details…
           </div>
+        ) : !context?.user ? (
+          <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+            <h2 className="font-serif text-2xl font-bold">Sign in to apply</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+              Course applications and payment records are linked to your
+              authenticated learner account.
+            </p>
+            <Link
+              to="/Login"
+              state={{ from: `/Apply/${id}` }}
+              className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
+            >
+              Go to login
+            </Link>
+            <Link
+              to="/Signup"
+              state={{ from: `/Apply/${id}` }}
+              className="ml-3 mt-6 inline-flex min-h-11 items-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8]"
+            >
+              Create an account
+            </Link>
+          </section>
         ) : course ? (
           <>
             <ol
@@ -309,11 +266,7 @@ function Application() {
                       disabled={isSubmitting}
                       className="mt-7 min-h-12 w-full rounded-lg bg-[#a9694f] px-5 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f] disabled:cursor-wait disabled:opacity-60 sm:w-auto"
                     >
-                      {previewMode
-                        ? "Preview next stage"
-                        : isSubmitting
-                          ? "Submitting…"
-                          : "Submit application"}
+                      {isSubmitting ? "Submitting…" : "Submit application"}
                     </button>
                   </>
                 )}
@@ -326,42 +279,120 @@ function Application() {
                     <h2 className="mt-2 font-serif text-2xl font-bold">
                       Review your payment
                     </h2>
-                    <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
-                      {previewMode
-                        ? "This preview simulates the payment stage only. It will not open Stripe or charge a card."
-                        : "You’ll enter your card details on Stripe’s secure hosted checkout page. Card numbers and security codes are never sent to or stored by Andalusia Academy."}
-                    </p>
-                    <div className="mt-6 rounded-xl bg-[#f7f1e8] p-5">
-                      <div className="flex justify-between gap-4 text-sm">
-                        <span className="text-[#765f52]">Course fee</span>
-                        <span className="font-semibold">
-                          {formatPrice(course.price)}
-                        </span>
-                      </div>
-                      <div className="mt-4 flex justify-between gap-4 border-t border-[#dfd2c3] pt-4">
-                        <span className="font-semibold">Total</span>
-                        <span className="font-bold text-[#8f5640]">
-                          {formatPrice(course.price)}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => void completePayment()}
-                      disabled={isSubmitting}
-                      className="mt-6 min-h-12 w-full rounded-lg bg-[#a9694f] px-5 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f] disabled:cursor-wait disabled:opacity-60"
-                    >
-                      {isSubmitting
-                        ? "Confirming…"
-                        : previewMode
-                          ? "Preview enrollment confirmation"
-                        : course.price === 0
-                          ? "Confirm free enrollment"
-                          : `Continue to secure card payment · ${formatPrice(course.price)}`}
-                    </button>
-                    {!previewMode && (
-                      <p className="mt-3 text-center text-xs text-[#765f52]">
-                        Payments are processed securely by Stripe.
+                    {import.meta.env.DEV ? (
+                      <form
+                        onSubmit={(event) => void completePayment(event)}
+                        autoComplete="off"
+                      >
+                        <fieldset
+                          disabled={isSubmitting}
+                          className="mt-5 space-y-4"
+                        >
+                          <legend className="mb-3 text-sm font-semibold text-[#2b2420]">
+                            Card details
+                          </legend>
+
+                          <label className="block text-sm font-medium text-[#765f52]">
+                            Card number
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              autoComplete="off"
+                              maxLength={23}
+                              value={cardNumber}
+                              onChange={(e) => setCardNumber(e.target.value)}
+                              className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
+                                cardErrors.number
+                                  ? "border-red-500 focus:ring-red-200"
+                                  : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
+                              }`}
+                            />
+                            {cardErrors.number && (
+                              <span className="mt-1 text-xs text-red-600 block">
+                                {cardErrors.number}
+                              </span>
+                            )}
+                          </label>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <label className="block text-sm font-medium text-[#765f52]">
+                              Expiry
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="off"
+                                placeholder="MM/YY"
+                                maxLength={5}
+                                value={cardExpiry}
+                                onChange={(e) => setCardExpiry(e.target.value)}
+                                className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
+                                  cardErrors.expiry
+                                    ? "border-red-500 focus:ring-red-200"
+                                    : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
+                                }`}
+                              />
+                              {cardErrors.expiry && (
+                                <span className="mt-1 text-xs text-red-600 block">
+                                  {cardErrors.expiry}
+                                </span>
+                              )}
+                            </label>
+
+                            <label className="block text-sm font-medium text-[#765f52]">
+                              CVC
+                              <input
+                                type="password"
+                                inputMode="numeric"
+                                autoComplete="off"
+                                maxLength={4}
+                                value={cardCvc}
+                                onChange={(e) => setCardCvc(e.target.value)}
+                                className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
+                                  cardErrors.cvc
+                                    ? "border-red-500 focus:ring-red-200"
+                                    : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
+                                }`}
+                              />
+                              {cardErrors.cvc && (
+                                <span className="mt-1 text-xs text-red-600 block">
+                                  {cardErrors.cvc}
+                                </span>
+                              )}
+                            </label>
+                          </div>
+                        </fieldset>
+
+                        <div className="mt-6 rounded-xl bg-[#f7f1e8] p-5">
+                          <div className="flex justify-between gap-4 text-sm">
+                            <span className="text-[#765f52]">Course fee</span>
+                            <span className="font-semibold">
+                              {formatPrice(course.price)}
+                            </span>
+                          </div>
+                          <div className="mt-4 flex justify-between gap-4 border-t border-[#dfd2c3] pt-4">
+                            <span className="font-semibold">Total</span>
+                            <span className="font-bold text-[#8f5640]">
+                              {formatPrice(course.price)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="mt-6 min-h-12 w-full rounded-lg bg-[#a9694f] px-5 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f] disabled:cursor-wait disabled:opacity-60"
+                        >
+                          {isSubmitting
+                            ? "Recording demo payment…"
+                            : `Accept demo payment · ${formatPrice(course.price)}`}
+                        </button>
+                      </form>
+                    ) : (
+                      <p
+                        role="status"
+                        className="mt-5 rounded-xl border border-[#dfd2c3] bg-[#f7f1e8] p-4 text-sm text-[#765f52]"
+                      >
+                        Checkout is not configured for this environment.
                       </p>
                     )}
                   </>
@@ -382,12 +413,11 @@ function Application() {
                       You’re in!
                     </h2>
                     <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-[#765f52]">
-                      {previewMode
-                        ? `This preview shows the confirmation stage for ${course.name}. It has not been saved.`
-                        : `Your enrollment in ${course.name} is saved. Find your application and payment status on your dashboard.`}
+                      Your enrollment in {course.name} is saved. Find your
+                      application and payment status on your dashboard.
                     </p>
                     <Link
-                      to={previewMode ? "/Dashboard?preview=true" : "/Dashboard"}
+                      to="/Dashboard"
                       className="mt-7 inline-flex min-h-12 items-center justify-center rounded-lg bg-[#a9694f] px-6 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
                     >
                       Go to dashboard
@@ -415,7 +445,9 @@ function Application() {
                   <div className="mt-5 border-t border-[#eee2d5] pt-4">
                     <div className="flex justify-between gap-3 text-sm">
                       <span className="text-[#765f52]">Course fee</span>
-                      <span className="font-bold">{formatPrice(course.price)}</span>
+                      <span className="font-bold">
+                        {formatPrice(course.price)}
+                      </span>
                     </div>
                   </div>
                 </div>

@@ -7,7 +7,6 @@ namespace full_stack_project_backend.Repository
 
     public class UserRepository : IUserRepository
     {
-        private readonly List<User> _users = new List<User>();
         private readonly AppDbcontext _context;
         public UserRepository(AppDbcontext context)
         {
@@ -36,26 +35,26 @@ namespace full_stack_project_backend.Repository
             return true;
         }
 
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
             return await _context.Users
        .FirstOrDefaultAsync(u => u.UserId == id);
         }
 
-        public async Task<User> GetByEmail(string email)
+        public async Task<User?> GetByEmail(string email)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<User> GetByRefreshToken(string refreshToken)
+        public async Task<User?> GetByRefreshToken(string refreshToken)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
         }
 
         
-        public async Task<User> UpdateUser(int id, User updatedUser)
+        public async Task<User?> UpdateUser(int id, User updatedUser)
         {
             var user = await _context.Users
             .FirstOrDefaultAsync(u => u.UserId == id);
@@ -81,6 +80,19 @@ namespace full_stack_project_backend.Repository
             await _context.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task RevokeRefreshToken(int userId)
+        {
+            var user = await _context.Users
+                .FirstOrDefaultAsync(existingUser => existingUser.UserId == userId);
+
+            if (user == null)
+                return;
+
+            user.RefreshToken = null;
+            user.RefreshTokenExpiry = null;
+            await _context.SaveChangesAsync();
         }
     }
 }

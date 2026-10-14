@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type ReactNode } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import {
@@ -11,67 +11,29 @@ import { userContext } from "../types/UserContextType";
 
 type DashboardSection = "applications" | "payments";
 
-const previewApplications: CourseApplication[] = [
-  {
-    id: "preview-application-enrolled",
-    courseId: 2,
-    courseName: "ASP.NET Core",
-    amount: 200,
-    status: "Enrolled",
-    createdAt: "2026-10-02T10:00:00Z",
-    payment: {
-      id: "preview-payment-paid",
-      amount: 200,
-      currency: "usd",
-      status: "Paid",
-      paidAt: "2026-10-03T14:30:00Z",
-    },
-  },
-  {
-    id: "preview-application-pending",
-    courseId: 1,
-    courseName: "C# Basics",
-    amount: 100,
-    status: "AwaitingPayment",
-    createdAt: "2026-10-10T09:15:00Z",
-    payment: {
-      id: "preview-payment-pending",
-      amount: 100,
-      currency: "usd",
-      status: "Pending",
-      paidAt: null,
-    },
-  },
-];
-
 function Dashboard() {
   const context = useContext(userContext);
-  const accessToken = context?.user.accessToken;
-  const [searchParams] = useSearchParams();
-  const previewMode =
-    !accessToken && searchParams.get("preview") === "true";
-  const hasDashboard = Boolean(accessToken) || previewMode;
+  const userId = context?.user?.userId;
+  const hasDashboard = Boolean(context?.user);
   const [applications, setApplications] = useState<CourseApplication[]>([]);
-  const [loadedToken, setLoadedToken] = useState<string>();
+  const [loadedUserId, setLoadedUserId] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
   const [section, setSection] = useState<DashboardSection>("applications");
-  const isLoading = Boolean(accessToken && loadedToken !== accessToken);
+  const isLoading = typeof userId === "number" && loadedUserId !== userId;
 
   useEffect(() => {
-    if (typeof accessToken !== "string" || accessToken.length === 0) return;
-    const token = accessToken;
+    if (context?.isLoading) return;
+    if (typeof userId !== "number") return;
+
     const controller = new AbortController();
 
     async function loadApplications() {
       setErrorMessage("");
       try {
-        const records = await enrollmentApi.getMine(
-          token,
-          controller.signal,
-        );
+        const records = await enrollmentApi.getMine(controller.signal);
         if (controller.signal.aborted) return;
         setApplications(records);
-        setLoadedToken(token);
+        setLoadedUserId(userId);
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Dashboard data could not be loaded.", error);
@@ -80,24 +42,21 @@ function Dashboard() {
             ? error.message
             : "Dashboard data could not be loaded.",
         );
-        setLoadedToken(token);
+        setLoadedUserId(userId);
       }
     }
 
     void loadApplications();
     return () => controller.abort();
-  }, [accessToken]);
+  }, [context?.isLoading, userId]);
 
-  const displayedApplications = previewMode
-    ? previewApplications
-    : applications;
-  const enrolledCount = displayedApplications.filter(
+  const enrolledCount = applications.filter(
     (application) => application.status === "Enrolled",
   ).length;
-  const pendingCount = displayedApplications.filter(
+  const pendingCount = applications.filter(
     (application) => application.status === "AwaitingPayment",
   ).length;
-  const payments = displayedApplications.flatMap((application) =>
+  const payments = applications.flatMap((application) =>
     application.payment
       ? [{ application, payment: application.payment }]
       : [],
@@ -128,41 +87,35 @@ function Dashboard() {
           </Link>
         </header>
 
-        {previewMode && (
-          <aside
-            role="status"
-            className="mb-6 rounded-xl border border-[#d8cabc] bg-[#f3e7d8] p-4 text-sm text-[#765f52]"
-          >
-            This is a dashboard preview with sample data only. It is not
-            connected to an account or the database.{" "}
-            <Link className="font-semibold text-[#8f5640] underline" to="/Login">
-              Sign in for your own records
-            </Link>
-            .
-          </aside>
+        {context?.isLoading && (
+          <p role="status" className="mb-6 text-sm text-[#765f52]">
+            Checking your session…
+          </p>
         )}
 
-        {!accessToken && !previewMode && (
+        {!context?.isLoading && !context?.user && (
           <section className="mb-6 rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
             <h2 className="font-serif text-2xl font-bold">
-              Preview your dashboard
+              Sign in to view your dashboard
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
-              Login and signup are being built separately. You can still
-              preview the dashboard layout with clearly labeled sample data.
+              Your applications, enrollments, and payment history are private
+              to your account.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                to="/Dashboard?preview=true"
-                className="inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
-              >
-                Open sample preview
-              </Link>
-              <Link
                 to="/Login"
+                state={{ from: "/Dashboard" }}
                 className="inline-flex min-h-11 items-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8]"
               >
                 Go to login
+              </Link>
+              <Link
+                to="/Signup"
+                state={{ from: "/Dashboard" }}
+                className="inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
+              >
+                Create an account
               </Link>
             </div>
           </section>
@@ -183,7 +136,7 @@ function Dashboard() {
             hasDashboard ? "" : "hidden"
           }`}
         >
-          <OverviewCard label="Applications" value={displayedApplications.length} />
+          <OverviewCard label="Applications" value={applications.length} />
           <OverviewCard label="Awaiting payment" value={pendingCount} />
           <OverviewCard label="Enrolled courses" value={enrolledCount} />
         </section>
@@ -200,7 +153,7 @@ function Dashboard() {
             >
               My applications
               <span className="ml-2 rounded-full bg-white/20 px-2 py-0.5 text-xs">
-                {displayedApplications.length}
+                {applications.length}
               </span>
             </SectionButton>
             <SectionButton
@@ -224,9 +177,9 @@ function Dashboard() {
                 Dashboard records could not be loaded.
               </p>
             ) : section === "applications" ? (
-              displayedApplications.length ? (
+              applications.length ? (
                 <div className="space-y-4">
-                  {displayedApplications.map((application) => (
+                  {applications.map((application) => (
                     <article
                       key={application.id}
                       className="flex flex-col gap-4 rounded-xl border border-[#eee2d5] p-5 sm:flex-row sm:items-center sm:justify-between"
@@ -245,18 +198,13 @@ function Dashboard() {
                           </span>
                         </div>
                       </div>
-                      {application.status === "AwaitingPayment" &&
-                      !previewMode ? (
+                      {application.status === "AwaitingPayment" ? (
                         <Link
                           to={`/Apply/${application.courseId}`}
                           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#a9694f] px-4 py-2 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
                         >
                           Continue enrollment
                         </Link>
-                      ) : application.status === "AwaitingPayment" ? (
-                        <span className="shrink-0 text-sm font-semibold text-[#8a5a2b]">
-                          Preview only
-                        </span>
                       ) : (
                         <span className="shrink-0 text-sm font-semibold text-[#166534]">
                           Ready to learn
@@ -322,9 +270,8 @@ function Dashboard() {
                   </tbody>
                 </table>
                 <p className="mt-4 text-xs leading-relaxed text-[#765f52]">
-                  {previewMode
-                    ? "Sample payment records only; no real transactions were made."
-                    : "Payment records show transaction status and do not include card details."}
+                  Payment records show transaction status and do not include
+                  card details.
                 </p>
               </div>
             ) : (

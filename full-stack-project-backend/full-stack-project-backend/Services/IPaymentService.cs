@@ -4,18 +4,8 @@ namespace full_stack_project_backend.Services;
 
 public interface IPaymentService
 {
-    Task<CheckoutResponse> StartCheckoutAsync(
-        Guid applicationId,
-        string learnerId,
-        CancellationToken cancellationToken);
-
-    Task<CourseApplicationResponse> ConfirmCheckoutAsync(
-        string sessionId,
-        string learnerId,
-        CancellationToken cancellationToken);
-
-    Task ProcessWebhookAsync(
-        string payload,
-        string signature,
+    Task<CourseApplicationResponse> CompleteDemoPaymentAsync(
+        int applicationId,
+        int learnerId,
         CancellationToken cancellationToken);
 }

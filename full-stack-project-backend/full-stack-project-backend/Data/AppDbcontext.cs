@@ -17,16 +17,42 @@ namespace full_stack_project_backend.Data
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
-<<<<<<< HEAD
         public DbSet<User> Users { get; set; }
-=======
         public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
         public DbSet<Payment> Payments => Set<Payment>();
-
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<CourseApplication>(application =>
+            {
+                application.Property(item => item.CourseName).IsRequired();
+                application.Property(item => item.Amount).HasPrecision(18, 2);
+                application.Property(item => item.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(32);
+                application.HasIndex(item => new { item.LearnerId, item.CourseId })
+                    .IsUnique();
+                application.HasOne(item => item.Course)
+                    .WithMany()
+                    .HasForeignKey(item => item.CourseId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                application.HasOne(item => item.Payment)
+                    .WithOne(payment => payment.CourseApplication)
+                    .HasForeignKey<Payment>(payment => payment.CourseApplicationId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Payment>(payment =>
+            {
+                payment.Property(item => item.Amount).HasPrecision(18, 2);
+                payment.Property(item => item.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(32);
+                payment.HasIndex(item => item.StripeCheckoutSessionId)
+                    .IsUnique()
+                    .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+            });
 
             modelBuilder.Entity<ProgramEntity>()
                 .HasOne(program => program.CareerPath)
@@ -171,54 +197,151 @@ namespace full_stack_project_backend.Data
                             "Query and update data with Entity Framework Core",
                             "Manage database schema changes with migrations"
                         ]
+                    },
+                    new Course
+                    {
+                        Id = 4,
+                        Name = "HTML & CSS Foundations",
+                        Description = "Build semantic web pages and style responsive layouts from the ground up.",
+                        Price = 80,
+                        Category = "Frontend Development",
+                        ProgramId = 1,
+                        Duration = "4 weeks",
+                        Level = "Beginner",
+                        Prerequisites = ["No prior experience required"],
+                        LearningOutcomes =
+                        [
+                            "Structure accessible pages with HTML",
+                            "Style responsive layouts with CSS",
+                            "Use flexbox and grid to arrange page content"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 5,
+                        Name = "JavaScript Fundamentals",
+                        Description = "Learn the language of the web through practical programming exercises.",
+                        Price = 120,
+                        Category = "Programming",
+                        ProgramId = 1,
+                        Duration = "5 weeks",
+                        Level = "Beginner",
+                        Prerequisites = ["Basic computer skills"],
+                        LearningOutcomes =
+                        [
+                            "Work with variables, functions, and objects",
+                            "Control page behavior with events",
+                            "Use modern JavaScript syntax"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 6,
+                        Name = "React Foundations",
+                        Description = "Create interactive interfaces with reusable React components.",
+                        Price = 180,
+                        Category = "Frontend Development",
+                        ProgramId = 1,
+                        Duration = "6 weeks",
+                        Level = "Intermediate",
+                        Prerequisites = ["Basic HTML, CSS, and JavaScript"],
+                        LearningOutcomes =
+                        [
+                            "Build interfaces with components and props",
+                            "Manage state and user events",
+                            "Create multi-page React applications"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 7,
+                        Name = "Node.js API Development",
+                        Description = "Design and build REST APIs using Node.js and Express.",
+                        Price = 190,
+                        Category = "Backend Development",
+                        ProgramId = 2,
+                        Duration = "7 weeks",
+                        Level = "Intermediate",
+                        Prerequisites = ["JavaScript fundamentals"],
+                        LearningOutcomes =
+                        [
+                            "Create REST endpoints with Express",
+                            "Validate requests and handle errors",
+                            "Connect an API to a database"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 8,
+                        Name = "SQL for Data Analysis",
+                        Description = "Query and summarize relational data to answer practical business questions.",
+                        Price = 130,
+                        Category = "Data",
+                        ProgramId = 3,
+                        Duration = "5 weeks",
+                        Level = "Beginner",
+                        Prerequisites = ["No prior SQL experience required"],
+                        LearningOutcomes =
+                        [
+                            "Filter, sort, and join datasets",
+                            "Summarize data with aggregate functions",
+                            "Write queries for common analysis tasks"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 9,
+                        Name = "Power BI Dashboards",
+                        Description = "Turn business data into clear, interactive reports and dashboards.",
+                        Price = 160,
+                        Category = "Data",
+                        ProgramId = 3,
+                        Duration = "6 weeks",
+                        Level = "Intermediate",
+                        Prerequisites = ["Basic spreadsheet skills"],
+                        LearningOutcomes =
+                        [
+                            "Prepare and transform data",
+                            "Build interactive Power BI reports",
+                            "Choose visualizations that communicate insights"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 10,
+                        Name = "Cloud Computing Essentials",
+                        Description = "Understand cloud concepts, deployment models, and core services.",
+                        Price = 140,
+                        Category = "Backend Development",
+                        ProgramId = 2,
+                        Duration = "4 weeks",
+                        Level = "Beginner",
+                        Prerequisites = ["Basic computer skills"],
+                        LearningOutcomes =
+                        [
+                            "Compare cloud service and deployment models",
+                            "Understand compute, storage, and networking basics",
+                            "Recognize cloud security fundamentals"
+                        ]
+                    },
+                    new Course
+                    {
+                        Id = 11,
+                        Name = "Web Accessibility Basics",
+                        Description = "Make websites more usable with accessible markup and inclusive design practices.",
+                        Price = 90,
+                        Category = "Web Development",
+                        ProgramId = 1,
+                        Duration = "3 weeks",
+                        Level = "Beginner",
+                        Prerequisites = ["Basic HTML knowledge"],
+                        LearningOutcomes =
+                        [
+                            "Use semantic HTML and accessible labels",
+                            "Navigate and test interfaces with a keyboard",
+                            "Apply color contrast and inclusive content practices"
+                        ]
                     });
-
-            modelBuilder.Entity<CourseApplication>()
-                .Property(application => application.Status)
-                .HasConversion<string>()
-                .HasMaxLength(32);
-
-            modelBuilder.Entity<CourseApplication>()
-                .Property(application => application.Amount)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<CourseApplication>()
-                .HasIndex(application => new
-                {
-                    application.LearnerId,
-                    application.CourseId
-                })
-                .IsUnique();
-
-            modelBuilder.Entity<CourseApplication>()
-                .HasOne(application => application.Course)
-                .WithMany()
-                .HasForeignKey(application => application.CourseId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Payment>()
-                .Property(payment => payment.Status)
-                .HasConversion<string>()
-                .HasMaxLength(32);
-
-            modelBuilder.Entity<Payment>()
-                .Property(payment => payment.Amount)
-                .HasPrecision(18, 2);
-
-            modelBuilder.Entity<Payment>()
-                .HasIndex(payment => payment.CourseApplicationId)
-                .IsUnique();
-
-            modelBuilder.Entity<Payment>()
-                .HasIndex(payment => payment.StripeCheckoutSessionId)
-                .IsUnique()
-                .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
-
-            modelBuilder.Entity<Payment>()
-                .HasOne(payment => payment.CourseApplication)
-                .WithOne(application => application.Payment)
-                .HasForeignKey<Payment>(payment => payment.CourseApplicationId)
-                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

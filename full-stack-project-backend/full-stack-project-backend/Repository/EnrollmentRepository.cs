@@ -8,7 +8,7 @@ public sealed class EnrollmentRepository(AppDbcontext dbContext)
     : IEnrollmentRepository
 {
     public async Task<IReadOnlyList<CourseApplication>> GetApplicationsAsync(
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken) =>
         await dbContext.CourseApplications
             .AsNoTracking()
@@ -18,8 +18,8 @@ public sealed class EnrollmentRepository(AppDbcontext dbContext)
             .ToListAsync(cancellationToken);
 
     public Task<CourseApplication?> GetApplicationAsync(
-        Guid applicationId,
-        string learnerId,
+        int applicationId,
+        int learnerId,
         CancellationToken cancellationToken) =>
         dbContext.CourseApplications
             .Include(application => application.Payment)
@@ -30,7 +30,7 @@ public sealed class EnrollmentRepository(AppDbcontext dbContext)
                 cancellationToken);
 
     public Task<CourseApplication?> GetApplicationForCourseAsync(
-        string learnerId,
+        int learnerId,
         int courseId,
         CancellationToken cancellationToken) =>
         dbContext.CourseApplications
@@ -47,20 +47,6 @@ public sealed class EnrollmentRepository(AppDbcontext dbContext)
         dbContext.Courses
             .AsNoTracking()
             .FirstOrDefaultAsync(course => course.Id == courseId, cancellationToken);
-
-    public Task<Payment?> GetPaymentAsync(
-        string sessionId,
-        string? learnerId,
-        CancellationToken cancellationToken) =>
-        dbContext.Payments
-            .Include(payment => payment.CourseApplication)
-            .ThenInclude(application => application.Payment)
-            .FirstOrDefaultAsync(
-                payment =>
-                    payment.StripeCheckoutSessionId == sessionId &&
-                    (learnerId == null ||
-                     payment.CourseApplication.LearnerId == learnerId),
-                cancellationToken);
 
     public async Task AddApplicationAsync(
         CourseApplication application,

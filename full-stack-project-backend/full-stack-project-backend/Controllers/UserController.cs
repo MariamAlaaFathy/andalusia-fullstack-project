@@ -5,11 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using full_stack_project_backend.Repository;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.Extensions.Configuration;
 
 namespace full_stack_project_backend.Controllers
 {
@@ -20,15 +16,13 @@ namespace full_stack_project_backend.Controllers
     {
         private readonly IUserServices _userservices;
         private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher<User> _passwordHasher;
 
-        public UserController(IUserServices userservices, IUserRepository userRepository, IConfiguration configuration, ITokenService tokenService, IPasswordHasher<User> passwordHasher)
+        public UserController(IUserServices userservices, IUserRepository userRepository, ITokenService tokenService, IPasswordHasher<User> passwordHasher)
         {
             _userservices = userservices;
             _userRepository = userRepository;
-            _configuration = configuration;
             _tokenService = tokenService;
             _passwordHasher = passwordHasher;
         }
@@ -37,14 +31,20 @@ namespace full_stack_project_backend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] UserDto dto)
         {
+            if (await _userRepository.GetByEmail(dto.Email) != null)
+                return Conflict(new { message = "An account with this email already exists." });
+
             var user = await _userservices.CreateUser(dto);
 
-            return Ok(new { user.UserId, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email });
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(int id)
         {
+            if (!IsCurrentUser(id))
+                return Forbid();
+
             var user = await _userservices.GetUserById(id);
 
             if (user == null)
@@ -56,6 +56,9 @@ namespace full_stack_project_backend.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, User updatedUser)
         {
+            if (!IsCurrentUser(id))
+                return Forbid();
+
             var user = await _userservices.UpdateUser(id, updatedUser);
 
             if (user == null)
@@ -67,6 +70,9 @@ namespace full_stack_project_backend.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            if (!IsCurrentUser(id))
+                return Forbid();
+
             var deleted = await _userservices.DeleteUser(id);
 
             if (!deleted)
@@ -99,7 +105,13 @@ namespace full_stack_project_backend.Controllers
 
             await _userRepository.UpdateUser(user.UserId, updated);
 
-            return Ok(new { accessToken, refreshToken, expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes() });
+            return Ok(new
+            {
+                accessToken,
+                refreshToken,
+                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
+                user = new { user.UserId, user.Username, user.Email }
+            });
         }
 
         [AllowAnonymous]
@@ -124,7 +136,13 @@ namespace full_stack_project_backend.Controllers
 
             await _userRepository.UpdateUser(existing.UserId, updated);
 
-            return Ok(new { accessToken, refreshToken = newRefresh, expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes() });
+            return Ok(new
+            {
+                accessToken,
+                refreshToken = newRefresh,
+                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
+                user = new { existing.UserId, existing.Username, existing.Email }
+            });
         }
 
         [HttpPost("logout")]
@@ -138,15 +156,13 @@ namespace full_stack_project_backend.Controllers
             if (user == null)
                 return NotFound();
 
-            var updated = new User
-            {
-                RefreshToken = null,
-                RefreshTokenExpiry = null
-            };
-
-            await _userRepository.UpdateUser(userId, updated);
+            await _userRepository.RevokeRefreshToken(userId);
 
             return NoContent();
         }
+
+        private bool IsCurrentUser(int id) =>
+            int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var userId)
+            && userId == id;
     }
 }

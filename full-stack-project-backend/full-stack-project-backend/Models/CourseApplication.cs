@@ -8,8 +8,8 @@ public enum CourseApplicationStatus
 
 public class CourseApplication
 {
-    public Guid Id { get; set; }
-    public string LearnerId { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public int LearnerId { get; set; }
     public int CourseId { get; set; }
     public Course Course { get; set; } = null!;
     public string CourseName { get; set; } = string.Empty;

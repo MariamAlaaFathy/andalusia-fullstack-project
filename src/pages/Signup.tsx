@@ -1,18 +1,58 @@
+import { useContext } from "react";
 import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { userContext } from "../types/UserContextType";
 import type { formtype } from "../types/formtype";
-import { NavLink } from "react-router-dom";
 
 function Signup() {
+  const context = useContext(userContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const requestedDestination = (
+    location.state as { from?: unknown } | null
+  )?.from;
+  const destination =
+    typeof requestedDestination === "string" &&
+    requestedDestination.startsWith("/") &&
+    !requestedDestination.startsWith("//")
+      ? requestedDestination
+      : "/";
   const {
-    register,
+    register: registerField,
     handleSubmit,
-    formState: { errors },
+    clearErrors,
+    setError,
+    formState: { errors, isSubmitting },
     control,
-  } = useForm<formtype>({ criteriaMode: "all", mode: "onChange" });
-  const onSubmit: SubmitHandler<formtype> = (data) => {
-    console.log(data);
-  };
+  } = useForm<formtype>({ mode: "onChange" });
+
   const password = useWatch({ control, name: "password" });
+
+  const onSubmit: SubmitHandler<formtype> = async ({
+    username,
+    email,
+    password: submittedPassword,
+  }) => {
+    if (!context) return;
+
+    clearErrors("root.server");
+    try {
+      await context.register({
+        username,
+        email,
+        password: submittedPassword,
+      });
+      navigate(destination, { replace: true });
+    } catch (error) {
+      setError("root.server", {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Registration failed. Please try again.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 h-48 sm:h-64 md:h-screen">
@@ -31,106 +71,109 @@ function Signup() {
           <NavLink className="hover:text-red-500" to="/">
             Go back to Homepage
           </NavLink>
+
           <label htmlFor="username">Username</label>
           <input
             id="username"
             type="text"
+            autoComplete="username"
             className={
               errors.username
                 ? "w-full rounded-md border-2 border-red-500 text-red-600"
                 : "w-full rounded-md border-2"
             }
-            placeholder="enter username"
-            {...register("username", {
-              required: "username is required",
+            placeholder="Enter a username"
+            {...registerField("username", {
+              required: "Username is required.",
               minLength: {
                 value: 8,
-                message: "username should atleast be 8 characters long",
+                message: "Username must be at least 8 characters long.",
               },
             })}
-          ></input>
-          {errors.username &&
-            Object.values(errors.username.types ?? {}).map((error, index) => (
-              <p className="text-red-600" key={index}>
-                {error}
-              </p>
-            ))}
+          />
+          {errors.username && (
+            <p className="text-red-600">{errors.username.message}</p>
+          )}
+
           <label htmlFor="email">Email</label>
           <input
             id="email"
             type="email"
+            autoComplete="email"
             className={
               errors.email
                 ? "w-full rounded-md border-2 border-red-500 text-red-600"
                 : "w-full rounded-md border-2"
             }
             placeholder="example@email.com"
-            {...register("email", {
-              required: "email is required",
+            {...registerField("email", {
+              required: "Email is required.",
               pattern: {
                 value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "email is invalid",
+                message: "Enter a valid email address.",
               },
             })}
-          ></input>
-          {errors.email &&
-            Object.values(errors.email.types ?? {}).map((error, index) => (
-              <p className="text-red-600" key={index}>
-                {error}
-              </p>
-            ))}
+          />
+          {errors.email && (
+            <p className="text-red-600">{errors.email.message}</p>
+          )}
+
           <label htmlFor="password">Password</label>
           <input
             id="password"
+            type="password"
+            autoComplete="new-password"
             className={
               errors.password
                 ? "w-full rounded-md border-2 border-red-500 text-red-600"
                 : "w-full rounded-md border-2"
             }
-            type="password"
-            placeholder="enter password here"
-            {...register("password", {
-              required: "password is required",
+            placeholder="Enter a password"
+            {...registerField("password", {
+              required: "Password is required.",
               minLength: {
                 value: 8,
-                message: "password should be 8 characters long",
+                message: "Password must be at least 8 characters long.",
               },
             })}
-          ></input>
-          {errors.password &&
-            Object.values(errors.password.types ?? {}).map((error, index) => (
-              <p className="text-red-600" key={index}>
-                {error}
-              </p>
-            ))}
-          <label htmlFor="confirm">Confirm Password</label>
+          />
+          {errors.password && (
+            <p className="text-red-600">{errors.password.message}</p>
+          )}
+
+          <label htmlFor="confirm">Confirm password</label>
           <input
             id="confirm"
+            type="password"
+            autoComplete="new-password"
             className={
               errors.confirm
                 ? "w-full rounded-md border-2 border-red-500 text-red-600"
                 : "w-full rounded-md border-2"
             }
-            type="password"
-            placeholder="type password again"
-            {...register("confirm", {
-              required: "field is required",
-              minLength: {
-                value: 8,
-                message: "password should be 8 characters long",
-              },
-              validate: (value) => value === password || "Passwords do not match",
+            placeholder="Enter the password again"
+            {...registerField("confirm", {
+              required: "Please confirm your password.",
+              validate: (value) =>
+                value === password || "Passwords do not match.",
             })}
-          ></input>
+          />
           {errors.confirm && (
             <p className="text-red-600">{errors.confirm.message}</p>
           )}
 
+          {errors.root?.server && (
+            <p role="alert" className="text-red-600">
+              {errors.root.server.message}
+            </p>
+          )}
+
           <input
-            className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md"
+            className="bg-[#A16F5E] hover:bg-[#8d5e4f] text-white font-bold px-10 py-4 rounded-md text-base transition-colors cursor-pointer shadow-md disabled:opacity-60"
             type="submit"
-            value="Sign up"
-          ></input>
+            value={isSubmitting ? "Creating account..." : "Sign up"}
+            disabled={isSubmitting}
+          />
         </form>
       </div>
     </div>

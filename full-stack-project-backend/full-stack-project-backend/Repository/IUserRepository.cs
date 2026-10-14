@@ -6,12 +6,13 @@ namespace full_stack_project_backend.Repository
     {
         public Task<User> CreateUser(User user);
 
-        public Task<User> GetByEmail(string email);
-        public Task<User> GetByRefreshToken(string refreshToken);
+        public Task<User?> GetByEmail(string email);
+        public Task<User?> GetByRefreshToken(string refreshToken);
 
         public Task<bool> DeleteUser(int userId);
-        public Task<User> UpdateUser(int id, User user);
+        public Task<User?> UpdateUser(int id, User user);
 
-        public Task<User> GetUserById(int userId);
+        public Task<User?> GetUserById(int userId);
+        public Task RevokeRefreshToken(int userId);
     }
 }
