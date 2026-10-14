@@ -5,11 +5,13 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Forgorpassword from "./pages/forgorpassword";
+import Forgorpassword from "./pages/Forgorpassword";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import Programs from "./pages/Programs";
 import Careerpath from "./pages/Careerpath";
+import Application from "./pages/Application";
+import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -33,8 +35,10 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-    path:"/forgot",
-    element:<Forgorpassword/>
+    path: "/forgot",
+    element: <Forgorpassword />,
+  },
+  {
     path: "/Courses",
     element: <Courses />,
   },
@@ -57,7 +61,15 @@ const router = createBrowserRouter([
   {
     path: "/Careerpath/:careerPathId",
     element: <Careerpath />,
-  }
+  },
+  {
+    path: "/Apply/:courseId",
+    element: <Application />,
+  },
+  {
+    path: "/Dashboard",
+    element: <Dashboard />,
+  },
 ]);
 
 export default router;

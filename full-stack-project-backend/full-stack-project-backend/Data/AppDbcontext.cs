@@ -20,6 +20,8 @@ namespace full_stack_project_backend.Data
 <<<<<<< HEAD
         public DbSet<User> Users { get; set; }
 =======
+        public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
+        public DbSet<Payment> Payments => Set<Payment>();
 
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -170,6 +172,53 @@ namespace full_stack_project_backend.Data
                             "Manage database schema changes with migrations"
                         ]
                     });
+
+            modelBuilder.Entity<CourseApplication>()
+                .Property(application => application.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<CourseApplication>()
+                .Property(application => application.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CourseApplication>()
+                .HasIndex(application => new
+                {
+                    application.LearnerId,
+                    application.CourseId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<CourseApplication>()
+                .HasOne(application => application.Course)
+                .WithMany()
+                .HasForeignKey(application => application.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .Property(payment => payment.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<Payment>()
+                .Property(payment => payment.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .HasIndex(payment => payment.CourseApplicationId)
+                .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .HasIndex(payment => payment.StripeCheckoutSessionId)
+                .IsUnique()
+                .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(payment => payment.CourseApplication)
+                .WithOne(application => application.Payment)
+                .HasForeignKey<Payment>(payment => payment.CourseApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

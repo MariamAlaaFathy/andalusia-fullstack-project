@@ -22,6 +22,12 @@ Courses, programs, and career paths are stored in the same SQL Server database.
 - `GET /api/Programs/{id}`
 - `GET /api/CareerPaths?search=&page=1&pageSize=9`
 - `GET /api/CareerPaths/{id}`
+- `POST /api/applications` (JWT required; body: `{ "courseId": 1 }`)
+- `GET /api/applications/me` (JWT required)
+- `GET /api/applications/{id}` (JWT required; learner-owned records only)
+- `POST /api/payments/application/{applicationId}/checkout` (JWT required)
+- `POST /api/payments/confirm` (JWT required; verifies the Checkout session with Stripe)
+- `POST /api/payments/webhook` (Stripe signature required)
 
 List endpoints return a paged object with `data`, `page`, `pageSize`,
 `totalCount`, `totalPages`, and next/previous-page flags. Program records
@@ -48,6 +54,47 @@ career path, while program and career-path details list their related courses.
 In other environments, provide the database connection using the
 `ConnectionStrings__DefaultConnection` environment variable before starting
 the API.
+
+### Applications and Stripe payments
+
+Applications and payment records are stored in SQL Server. Application and
+payment endpoints require a signed JWT with the learner's stable identifier in
+the `sub` claim. The login flow should place the access token in
+`userContext.user.accessToken`; the app keeps that short-lived token in
+`sessionStorage` so it survives the Stripe redirect, and the enrollment client
+sends it in the `Authorization: Bearer <token>` header. Records are always
+scoped to that authenticated subject—never to a learner ID supplied by the
+browser.
+
+Set these backend environment variables or .NET user secrets before using
+authenticated enrollment and Stripe Checkout:
+
+- `Authentication__Jwt__SigningKey`: at least 32 UTF-8 bytes; use the same key
+  and issuer/audience values as the login/token issuer.
+- `Authentication__Jwt__Issuer` and `Authentication__Jwt__Audience`: match the
+  values used when issuing the JWT.
+- `Stripe__SecretKey`: a Stripe test secret key for local development.
+- `Stripe__WebhookSecret`: the signing secret for the configured webhook.
+- `Stripe__Currency`: lowercase ISO currency code (defaults to `usd`).
+- `Stripe__FrontendBaseUrl`: frontend origin (defaults to
+  `http://localhost:5173`; production must use HTTPS).
+
+For local testing, forward Stripe test webhooks to
+`http://localhost:5075/api/payments/webhook` and listen for
+`checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+`checkout.session.async_payment_failed`, and `checkout.session.expired`.
+Apply the database migration before running the new endpoints. The learner is
+redirected to Stripe's hosted checkout to enter card details; the application
+does not receive or store card numbers or security codes. Payment records store
+only the amount, currency, status, timestamps, and Stripe transaction/session
+references. Do not use real payment credentials for local testing.
+
+The application/payment API follows the existing repository and service
+patterns, maps database entities to response DTOs with AutoMapper, and uses
+`MiddlewareGlobal` for consistent problem responses. To inspect the learner
+dashboard before the partner's sign-in flow is connected, open
+`http://localhost:5173/Dashboard?preview=true`. The preview uses sample data
+only; applications and payments still require a real authenticated learner.
 
 In another terminal, run the frontend:
 
