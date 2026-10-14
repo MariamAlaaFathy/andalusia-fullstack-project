@@ -1,7 +1,8 @@
 type User={
     username: string,
     email:string,
-    password: number
+    password: number,
+    accessToken?: string
 }
 
 export type {User};

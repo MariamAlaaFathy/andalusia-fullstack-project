@@ -17,6 +17,8 @@ namespace full_stack_project_backend.Data
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
+        public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
+        public DbSet<Payment> Payments => Set<Payment>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -166,6 +168,53 @@ namespace full_stack_project_backend.Data
                             "Manage database schema changes with migrations"
                         ]
                     });
+
+            modelBuilder.Entity<CourseApplication>()
+                .Property(application => application.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<CourseApplication>()
+                .Property(application => application.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CourseApplication>()
+                .HasIndex(application => new
+                {
+                    application.LearnerId,
+                    application.CourseId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<CourseApplication>()
+                .HasOne(application => application.Course)
+                .WithMany()
+                .HasForeignKey(application => application.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .Property(payment => payment.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            modelBuilder.Entity<Payment>()
+                .Property(payment => payment.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .HasIndex(payment => payment.CourseApplicationId)
+                .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .HasIndex(payment => payment.StripeCheckoutSessionId)
+                .IsUnique()
+                .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(payment => payment.CourseApplication)
+                .WithOne(application => application.Payment)
+                .HasForeignKey<Payment>(payment => payment.CourseApplicationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -35,6 +35,13 @@ function NavBar() {
         </NavLink>
 
         <NavLink
+          to="/Dashboard"
+          className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
+        >
+          My dashboard
+        </NavLink>
+
+        <NavLink
           to="/Programs"
           className="text-sm transition-colors hover:text-[#A16F5E] sm:text-base"
         >

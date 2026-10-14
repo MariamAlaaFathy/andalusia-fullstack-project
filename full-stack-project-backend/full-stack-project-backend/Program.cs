@@ -1,10 +1,15 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Assignment_3.Middleware;
 using full_stack_project_backend.Data;
 using full_stack_project_backend.Mapping;
 using full_stack_project_backend.Repository;
 using full_stack_project_backend.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +22,44 @@ builder.Services.AddScoped<IProgramRepository, ProgramRepository>();
 builder.Services.AddScoped<IProgramServices, ProgramServices>();
 builder.Services.AddScoped<ICareerPathRepository, CareerPathRepository>();
 builder.Services.AddScoped<ICareerPathServices, CareerPathServices>();
+builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
+builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddHttpClient<StripeCheckoutService>();
+builder.Services.Configure<StripeOptions>(
+    builder.Configuration.GetSection(StripeOptions.SectionName));
 
 builder.Services.AddControllers();
+var jwtSigningKey = builder.Configuration["Authentication:Jwt:SigningKey"];
+var signingKeyBytes = string.IsNullOrWhiteSpace(jwtSigningKey)
+    ? RandomNumberGenerator.GetBytes(32)
+    : Encoding.UTF8.GetBytes(jwtSigningKey);
+if (signingKeyBytes.Length < 32)
+{
+    throw new InvalidOperationException(
+        "Authentication:Jwt:SigningKey must contain at least 32 UTF-8 bytes.");
+}
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(signingKeyBytes),
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Authentication:Jwt:Issuer"]
+                ?? "andalusia-academy",
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Authentication:Jwt:Audience"]
+                ?? "andalusia-academy-api",
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+builder.Services.AddAuthorization();
 builder.Services.AddAutoMapper(configuration =>
     configuration.AddProfile<MappingProfile>());
 builder.Services.AddDbContext<AppDbcontext>(options =>
@@ -40,7 +81,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
+if (string.IsNullOrWhiteSpace(jwtSigningKey))
+{
+    app.Logger.LogWarning(
+        "Authentication:Jwt:SigningKey is not configured. A temporary key is being used, so authentication tokens will not survive an API restart.");
+}
+
 // Configure the HTTP request pipeline.
+app.UseMiddleware<MiddlewareGlobal>();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -52,6 +101,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
