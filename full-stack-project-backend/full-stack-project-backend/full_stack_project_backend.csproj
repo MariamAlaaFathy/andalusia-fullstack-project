@@ -12,6 +12,10 @@
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
     <PackageReference Include="AutoMapper" Version="16.2.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+<<<<<<< HEAD
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.11">
@@ -22,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
+=======
     <Folder Include="DTOs\" />
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     <Folder Include="Mapping\" />
     <Folder Include="Migrations\" />
     <Folder Include="Validators\" />

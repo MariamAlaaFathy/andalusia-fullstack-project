@@ -1,0 +1,60 @@
+﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
+using full_stack_project_backend.Services;
+using Microsoft.AspNetCore.Mvc;
+
+namespace full_stack_project_backend.Controllers
+{
+    [ApiController]
+    [Route("api/users")]
+    public class UserController : ControllerBase
+    {
+        private readonly IUserServices _userservices;
+
+        public UserController(IUserServices userservices)
+        {
+            _userservices = userservices;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] UserDto dto)
+        {
+            var user = await _userservices.CreateUser(dto);
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var user = await _userservices.GetUserById(id);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, User updatedUser)
+        {
+            var user = await _userservices.UpdateUser(id, updatedUser);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var deleted = await _userservices.DeleteUser(id);
+
+            if (!deleted)
+                return NotFound();
+
+            return NoContent();
+        }
+    }
+}

@@ -17,9 +17,13 @@ namespace full_stack_project_backend.Data
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
+<<<<<<< HEAD
+        public DbSet<User> Users { get; set; }
+=======
         public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
         public DbSet<Payment> Payments => Set<Payment>();
 
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

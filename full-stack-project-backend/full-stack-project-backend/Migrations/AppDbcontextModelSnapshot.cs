@@ -398,6 +398,34 @@ namespace full_stack_project_backend.Migrations
                         });
                 });
 
+<<<<<<< HEAD
+            modelBuilder.Entity("full_stack_project_backend.Models.User", b =>
+                {
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("Users");
+                });
+
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPathSkill", b =>
                 {
                     b.HasOne("full_stack_project_backend.Models.CareerPath", "CareerPath")
