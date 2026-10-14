@@ -5,6 +5,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Forgorpassword from "./pages/forgorpassword";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
 import Programs from "./pages/Programs";
@@ -32,6 +33,8 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
+    path:"/forgot",
+    element:<Forgorpassword/>
     path: "/Courses",
     element: <Courses />,
   },
