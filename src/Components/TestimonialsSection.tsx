@@ -21,7 +21,7 @@ export default function TestimonialsSection() {
   ];
 
   return (
-    <div className="max-w-[1180px] mx-auto my-16 px-4 md:px-0">
+    <div className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0">
       <h2 className="text-3xl font-bold text-[#333333] mb-10 font-['El_Messiri',_serif] text-center md:text-left">
         What learners say
       </h2>
