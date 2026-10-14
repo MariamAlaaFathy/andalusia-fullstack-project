@@ -1,0 +1,102 @@
+﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
+using full_stack_project_backend.Services;
+using Microsoft.AspNetCore.Mvc;
+using full_stack_project_backend.Repository;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+
+namespace full_stack_project_backend.Controllers
+{
+    [ApiController]
+    [Route("api/users")]
+    public class UserController : ControllerBase
+    {
+        private readonly IUserServices _userservices;
+        private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _configuration;
+
+        public UserController(IUserServices userservices, IUserRepository userRepository, IConfiguration configuration)
+        {
+            _userservices = userservices;
+            _userRepository = userRepository;
+            _configuration = configuration;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] UserDto dto)
+        {
+            var user = await _userservices.CreateUser(dto);
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(int id)
+        {
+            var user = await _userservices.GetUserById(id);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, User updatedUser)
+        {
+            var user = await _userservices.UpdateUser(id, updatedUser);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(new { user.UserId, user.Email });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var deleted = await _userservices.DeleteUser(id);
+
+            if (!deleted)
+                return NotFound();
+
+            return NoContent();
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var user = await _userRepository.GetByEmailAndPassword(dto.Email, dto.Password);
+
+            if (user == null)
+                return Unauthorized(new { message = "Invalid credentials" });
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expires = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:ExpireMinutes"]));
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return Ok(new { token = tokenString, expires });
+        }
+    }
+}
