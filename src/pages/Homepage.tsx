@@ -7,6 +7,7 @@ import TestimonialsSection from "./../Components/TestimonialsSection";
 import CTASection from "../Components/CTASection";
 import Footer from "../Components/Footer";
 import Opening from "../Components/Opening"
+
 function Homepage() {
   const context = useContext(userContext);
   if (!context) {

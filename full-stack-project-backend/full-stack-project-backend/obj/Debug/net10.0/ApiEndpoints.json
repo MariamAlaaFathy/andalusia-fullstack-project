@@ -1,5 +1,6 @@
 [
   {
+<<<<<<< HEAD
     "ContainingType": "full_stack_project_backend.Controllers.CareerPathsController",
     "Method": "GetCareerPaths",
     "RelativePath": "api/CareerPaths",
@@ -47,6 +48,8 @@
     "ReturnTypes": []
   },
   {
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
     "Method": "GetCourses",
     "RelativePath": "api/Courses",
@@ -76,6 +79,7 @@
       }
     ],
     "ReturnTypes": []
+<<<<<<< HEAD
   },
   {
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
@@ -208,5 +212,7 @@
       }
     ],
     "ReturnTypes": []
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
   }
 ]

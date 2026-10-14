@@ -5,7 +5,7 @@ export default function ForBusinessSection() {
   return (
     <div
       id="for-business"
-      className="max-w-[1180px] mx-auto my-16 px-4 md:px-0 flex flex-col md:flex-row items-center justify-between gap-12"
+      className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0 flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-12"
     >
       <div className="flex-1 text-center md:text-left">
         <h2 className="text-3xl font-bold text-[#333333] mb-5 font-['El_Messiri',_serif]">

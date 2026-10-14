@@ -6,6 +6,10 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Forgorpassword from "./pages/forgorpassword";
+import Courses from "./pages/Courses";
+import CourseDetail from "./pages/CourseDetail";
+import Programs from "./pages/Programs";
+import Careerpath from "./pages/Careerpath";
 
 const router = createBrowserRouter([
   {
@@ -31,6 +35,28 @@ const router = createBrowserRouter([
   {
     path:"/forgot",
     element:<Forgorpassword/>
+    path: "/Courses",
+    element: <Courses />,
+  },
+  {
+    path: "/Courses/:courseId",
+    element: <CourseDetail />,
+  },
+  {
+    path: "/Programs",
+    element: <Programs />,
+  },
+  {
+    path: "/Programs/:programId",
+    element: <Programs />,
+  },
+  {
+    path: "/Careerpath",
+    element: <Careerpath />,
+  },
+  {
+    path: "/Careerpath/:careerPathId",
+    element: <Careerpath />,
   }
 ]);
 

@@ -5,6 +5,7 @@
     "version": "1.0"
   },
   "paths": {
+<<<<<<< HEAD
     "/api/CareerPaths": {
       "get": {
         "tags": [
@@ -72,6 +73,8 @@
         }
       }
     },
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     "/api/Courses": {
       "get": {
         "tags": [
@@ -115,6 +118,7 @@
           }
         }
       }
+<<<<<<< HEAD
     },
     "/api/Courses/{id}": {
       "get": {
@@ -378,6 +382,14 @@
     },
     {
       "name": "User"
+=======
+    }
+  },
+  "components": { },
+  "tags": [
+    {
+      "name": "Courses"
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     }
   ]
 }

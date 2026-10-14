@@ -4,9 +4,12 @@ using full_stack_project_backend.Data;
 using full_stack_project_backend.Mapping;
 using full_stack_project_backend.Repository;
 using full_stack_project_backend.Services;
+<<<<<<< HEAD
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,10 +23,13 @@ builder.Services.AddScoped<IProgramRepository, ProgramRepository>();
 builder.Services.AddScoped<IProgramServices, ProgramServices>();
 builder.Services.AddScoped<ICareerPathRepository, CareerPathRepository>();
 builder.Services.AddScoped<ICareerPathServices, CareerPathServices>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<full_stack_project_backend.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<full_stack_project_backend.Models.User>>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 
 builder.Services.AddControllers();
 builder.Services.AddAutoMapper(configuration =>
@@ -43,6 +49,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+<<<<<<< HEAD
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -61,6 +68,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var app = builder.Build();
@@ -77,8 +86,11 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
+<<<<<<< HEAD
 app.UseAuthentication();
 
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 app.UseAuthorization();
 
 app.MapControllers();

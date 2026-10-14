@@ -352,6 +352,7 @@ D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\full_stack_project_backend.pdb
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\full_stack_project_backend.genruntimeconfig.cache
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\ref\full_stack_project_backend.dll
+<<<<<<< HEAD
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.json
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.Development.json
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\full_stack_project_backend.staticwebassets.endpoints.json
@@ -532,3 +533,5 @@ C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-pr
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+=======
+>>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e

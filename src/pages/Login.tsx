@@ -2,7 +2,6 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 
 import type { formtype } from "../types/formtype";
 
-
 import { NavLink } from "react-router-dom";
 
 function Login(){

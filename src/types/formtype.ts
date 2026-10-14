@@ -1,8 +1,8 @@
-type formtype={
-    username: string,
-    email:string,
-    password: number,
-    confirm: number
-}
+type formtype = {
+  username: string;
+  email: string;
+  password: string;
+  confirm: string;
+};
 
-export type {formtype}
+export type { formtype };
