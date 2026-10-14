@@ -162,9 +162,9 @@ function CourseDetail() {
                 </dl>
                 <Link
                   to={`/Apply/${course.id}`}
-                  className="mt-5 flex min-h-12 items-center justify-center rounded-lg bg-[#a9694f] px-5 py-3 text-center font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+                  className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#a9694f] px-5 py-2.5 text-center font-semibold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
                 >
-                  Apply to this course
+                  Apply / Enroll
                 </Link>
                 <div className="mt-5 border-t border-[#eee2d5] pt-4">
                   <h3 className="text-sm font-semibold">Part of this program</h3>

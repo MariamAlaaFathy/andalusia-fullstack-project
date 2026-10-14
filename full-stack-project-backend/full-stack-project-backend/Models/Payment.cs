@@ -9,8 +9,8 @@ public enum PaymentStatus
 
 public class Payment
 {
-    public Guid Id { get; set; }
-    public Guid CourseApplicationId { get; set; }
+    public int Id { get; set; }
+    public int CourseApplicationId { get; set; }
     public CourseApplication CourseApplication { get; set; } = null!;
     public decimal Amount { get; set; }
     public string Currency { get; set; } = "usd";

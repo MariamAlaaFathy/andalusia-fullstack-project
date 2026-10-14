@@ -5,16 +5,16 @@ namespace full_stack_project_backend.Services;
 public interface IEnrollmentService
 {
     Task<IReadOnlyList<CourseApplicationResponse>> GetMineAsync(
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken);
 
     Task<CourseApplicationResponse> GetByIdAsync(
-        Guid applicationId,
-        string learnerId,
+        int applicationId,
+        int learnerId,
         CancellationToken cancellationToken);
 
     Task<(CourseApplicationResponse Application, bool Created)> CreateAsync(
         int courseId,
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken);
 }

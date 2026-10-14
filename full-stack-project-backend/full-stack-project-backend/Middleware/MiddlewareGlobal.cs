@@ -38,14 +38,6 @@ namespace Assignment_3.Middleware
             {
                 await WriteProblemAsync(context, StatusCodes.Status401Unauthorized, "Unauthorized", ex.Message);
             }
-            catch (PaymentGatewayException ex)
-            {
-                await WriteProblemAsync(context, StatusCodes.Status502BadGateway, "Payment provider error", ex.Message);
-            }
-            catch (ServiceUnavailableException ex)
-            {
-                await WriteProblemAsync(context, StatusCodes.Status503ServiceUnavailable, "Service unavailable", ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(

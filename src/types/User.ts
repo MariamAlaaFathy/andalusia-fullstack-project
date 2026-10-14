@@ -1,8 +1,7 @@
-type User={
-    username: string,
-    email:string,
-    password: number,
-    accessToken?: string
-}
+type User = {
+  userId: number;
+  username: string;
+  email: string;
+};
 
-export type {User};
+export type { User };

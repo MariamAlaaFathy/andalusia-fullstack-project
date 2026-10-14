@@ -5,25 +5,20 @@ namespace full_stack_project_backend.Repository;
 public interface IEnrollmentRepository
 {
     Task<IReadOnlyList<CourseApplication>> GetApplicationsAsync(
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken);
 
     Task<CourseApplication?> GetApplicationAsync(
-        Guid applicationId,
-        string learnerId,
+        int applicationId,
+        int learnerId,
         CancellationToken cancellationToken);
 
     Task<CourseApplication?> GetApplicationForCourseAsync(
-        string learnerId,
+        int learnerId,
         int courseId,
         CancellationToken cancellationToken);
 
     Task<Course?> GetCourseAsync(int courseId, CancellationToken cancellationToken);
-
-    Task<Payment?> GetPaymentAsync(
-        string sessionId,
-        string? learnerId,
-        CancellationToken cancellationToken);
 
     Task AddApplicationAsync(
         CourseApplication application,

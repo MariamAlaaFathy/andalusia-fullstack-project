@@ -6,7 +6,7 @@ namespace full_stack_project_backend.Services
 {
     public class UserServices : IUserServices
     {
-        private IUserRepository _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
 
         public UserServices(IUserRepository userRepository, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
@@ -28,7 +28,7 @@ namespace full_stack_project_backend.Services
             return await _userRepository.CreateUser(user);
         }
 
-        public async Task<User> UpdateUser(int id, User updatedUser)
+        public async Task<User?> UpdateUser(int id, User updatedUser)
         {
             if (!string.IsNullOrEmpty(updatedUser.Password))
             {
@@ -44,7 +44,7 @@ namespace full_stack_project_backend.Services
         }
 
 
-        public async Task<User> GetUserById(int id)
+        public async Task<User?> GetUserById(int id)
         {
             return await _userRepository.GetUserById(id);
         }

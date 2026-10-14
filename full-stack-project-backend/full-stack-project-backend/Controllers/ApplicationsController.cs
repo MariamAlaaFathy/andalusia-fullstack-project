@@ -2,14 +2,15 @@ using full_stack_project_backend.DTOs;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace full_stack_project_backend.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "Learner")]
 [Route("api/applications")]
 public sealed class ApplicationsController(IEnrollmentService enrollmentService)
-    : LearnerControllerBase
+    : ControllerBase
 {
     [HttpGet("me")]
     public async Task<ActionResult<IReadOnlyList<CourseApplicationResponse>>> GetMine(
@@ -19,9 +20,9 @@ public sealed class ApplicationsController(IEnrollmentService enrollmentService)
         return Ok(await enrollmentService.GetMineAsync(learnerId, cancellationToken));
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:int}")]
     public async Task<ActionResult<CourseApplicationResponse>> GetById(
-        Guid id,
+        int id,
         CancellationToken cancellationToken)
     {
         if (!TryGetLearnerId(out var learnerId)) return Unauthorized();
@@ -48,4 +49,9 @@ public sealed class ApplicationsController(IEnrollmentService enrollmentService)
             new { id = result.Application.Id },
             result.Application);
     }
+
+    private bool TryGetLearnerId(out int learnerId) =>
+        int.TryParse(
+            User.FindFirstValue(ClaimTypes.NameIdentifier),
+            out learnerId) && learnerId > 0;
 }

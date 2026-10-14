@@ -13,7 +13,7 @@ public sealed class EnrollmentService(
     ILogger<EnrollmentService> logger) : IEnrollmentService
 {
     public async Task<IReadOnlyList<CourseApplicationResponse>> GetMineAsync(
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken)
     {
         var applications = await repository.GetApplicationsAsync(
@@ -23,8 +23,8 @@ public sealed class EnrollmentService(
     }
 
     public async Task<CourseApplicationResponse> GetByIdAsync(
-        Guid applicationId,
-        string learnerId,
+        int applicationId,
+        int learnerId,
         CancellationToken cancellationToken)
     {
         var application = await repository.GetApplicationAsync(
@@ -38,7 +38,7 @@ public sealed class EnrollmentService(
 
     public async Task<(CourseApplicationResponse Application, bool Created)> CreateAsync(
         int courseId,
-        string learnerId,
+        int learnerId,
         CancellationToken cancellationToken)
     {
         if (courseId <= 0)
@@ -66,7 +66,6 @@ public sealed class EnrollmentService(
 
         var application = new CourseApplication
         {
-            Id = Guid.NewGuid(),
             LearnerId = learnerId,
             CourseId = course.Id,
             CourseName = course.Name,

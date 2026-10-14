@@ -2,10 +2,8 @@ import type { CareerPath } from "../types/CareerPath";
 import type { Coursetype } from "../types/Coursetype";
 import type { PagedResult } from "../types/PagedResult";
 import type { Program } from "../types/Program";
-
-const apiBaseUrl = (
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5075"
-).replace(/\/$/, "");
+import { apiBaseUrl } from "./apiConfig";
+import { authenticatedFetch } from "./authApi";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -106,7 +104,7 @@ async function get<T>(
 ): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${apiBaseUrl}${path}`, {
+    response = await authenticatedFetch(`${apiBaseUrl}${path}`, {
       headers: { Accept: "application/json" },
       signal,
     });

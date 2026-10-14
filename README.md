@@ -12,7 +12,8 @@ The Programs and Career Paths pages use the ASP.NET Core API backed by SQL
 Server. The development API runs at `http://localhost:5075`; configure
 `VITE_API_BASE_URL` in `.env.local` when the API is hosted elsewhere (see
 `.env.example`).
-Courses, programs, and career paths are stored in the same SQL Server database.
+Courses, programs, career paths, and users are stored in the
+`AndalusiaFullStackProject` SQL Server database.
 
 ### API endpoints
 
@@ -22,12 +23,10 @@ Courses, programs, and career paths are stored in the same SQL Server database.
 - `GET /api/Programs/{id}`
 - `GET /api/CareerPaths?search=&page=1&pageSize=9`
 - `GET /api/CareerPaths/{id}`
-- `POST /api/applications` (JWT required; body: `{ "courseId": 1 }`)
-- `GET /api/applications/me` (JWT required)
-- `GET /api/applications/{id}` (JWT required; learner-owned records only)
-- `POST /api/payments/application/{applicationId}/checkout` (JWT required)
-- `POST /api/payments/confirm` (JWT required; verifies the Checkout session with Stripe)
-- `POST /api/payments/webhook` (Stripe signature required)
+- `POST /api/users` (register)
+- `POST /api/users/login`
+- `POST /api/users/refresh`
+- `POST /api/users/logout` (JWT required)
 
 List endpoints return a paged object with `data`, `page`, `pageSize`,
 `totalCount`, `totalPages`, and next/previous-page flags. Program records
@@ -35,18 +34,28 @@ include their related career path name. Career path records include `skills`
 and related `programs`. The frontend validates the response shape and shows loading and empty states
 when catalog data is unavailable.
 
+Registration creates the account and signs the user in. The access JWT is kept
+in memory and attached as a Bearer token to API calls; the rotating refresh
+token is kept in session storage and used to restore a session after a page
+reload or renew an expired access token. Logging out revokes the refresh token.
+
 ### Start locally
 
 The backend's Development settings use SQL Server LocalDB. From the repository
 root, apply all migrations and start the API:
 
 ```powershell
+$env:ASPNETCORE_ENVIRONMENT = "Development"
 dotnet ef database update --project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --startup-project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --configuration Release
 dotnet run --project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --launch-profile http
 ```
 
-The migrations create the Courses, Programs, CareerPaths, and CareerPathSkills
-tables, add course detail fields, and seed the sample catalog. The
+Local development uses a development-only JWT signing key in
+`appsettings.Development.json`. Never use that key outside local development;
+set `Jwt__Key` to a unique secret of at least 32 bytes in other environments.
+
+The migrations create the Courses, Programs, CareerPaths, CareerPathSkills,
+CourseApplications, and Payments tables, add course detail fields, and seed the sample catalog. The
 `AddCourseDetailsAndSeedCourses` migration adds duration, level, prerequisites,
 and learning outcomes to Courses. The `LinkCoursesToPrograms` migration links
 each course to one program; the course response includes that program and its
@@ -55,46 +64,14 @@ In other environments, provide the database connection using the
 `ConnectionStrings__DefaultConnection` environment variable before starting
 the API.
 
-### Applications and Stripe payments
-
-Applications and payment records are stored in SQL Server. Application and
-payment endpoints require a signed JWT with the learner's stable identifier in
-the `sub` claim. The login flow should place the access token in
-`userContext.user.accessToken`; the app keeps that short-lived token in
-`sessionStorage` so it survives the Stripe redirect, and the enrollment client
-sends it in the `Authorization: Bearer <token>` header. Records are always
-scoped to that authenticated subject—never to a learner ID supplied by the
-browser.
-
-Set these backend environment variables or .NET user secrets before using
-authenticated enrollment and Stripe Checkout:
-
-- `Authentication__Jwt__SigningKey`: at least 32 UTF-8 bytes; use the same key
-  and issuer/audience values as the login/token issuer.
-- `Authentication__Jwt__Issuer` and `Authentication__Jwt__Audience`: match the
-  values used when issuing the JWT.
-- `Stripe__SecretKey`: a Stripe test secret key for local development.
-- `Stripe__WebhookSecret`: the signing secret for the configured webhook.
-- `Stripe__Currency`: lowercase ISO currency code (defaults to `usd`).
-- `Stripe__FrontendBaseUrl`: frontend origin (defaults to
-  `http://localhost:5173`; production must use HTTPS).
-
-For local testing, forward Stripe test webhooks to
-`http://localhost:5075/api/payments/webhook` and listen for
-`checkout.session.completed`, `checkout.session.async_payment_succeeded`,
-`checkout.session.async_payment_failed`, and `checkout.session.expired`.
-Apply the database migration before running the new endpoints. The learner is
-redirected to Stripe's hosted checkout to enter card details; the application
-does not receive or store card numbers or security codes. Payment records store
-only the amount, currency, status, timestamps, and Stripe transaction/session
-references. Do not use real payment credentials for local testing.
-
-The application/payment API follows the existing repository and service
-patterns, maps database entities to response DTOs with AutoMapper, and uses
-`MiddlewareGlobal` for consistent problem responses. To inspect the learner
-dashboard before the partner's sign-in flow is connected, open
-`http://localhost:5173/Dashboard?preview=true`. The preview uses sample data
-only; applications and payments still require a real authenticated learner.
+Signed-in learners have the `Learner` role and can apply to courses and review
+their enrollment and payment status on `/Dashboard`. Free courses enroll
+directly. In Development, paid courses offer a clearly labeled demo payment
+with card-detail inputs; the browser only checks that they are filled in, and
+the app does not read, transmit, or store their values. No real charge is made,
+and the API is disabled outside Development. Do not enter real payment-card
+details. This is for exercising the enrollment flow only, not a production
+payment integration.
 
 In another terminal, run the frontend:
 
