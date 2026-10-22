@@ -14,6 +14,7 @@ import Application from "./pages/Application";
 import Dashboard from "./pages/Dashboard";
 import LearnerLMS from "./pages/LearnerLMS";
 import InstructorDashboard from "./pages/InstructorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
   {
     path: "/InstructorDashboard",
     element: <InstructorDashboard />,
+  },
+  {
+    path: "/AdminDashboard",
+    element: <AdminDashboard />,
   },
   {
     path: "/Programs",

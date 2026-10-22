@@ -1,5 +1,5 @@
-import { authenticatedFetch } from "../types/Authapi";
-import { apiBaseUrl } from "../types/Apiconfig";
+import { authenticatedFetch } from "./authApi";
+import { apiBaseUrl } from "./apiConfig";
 
 export type AdminUser = {
   userId: number;

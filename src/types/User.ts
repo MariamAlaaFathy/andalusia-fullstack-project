@@ -2,7 +2,7 @@ type User = {
   userId: number;
   username: string;
   email: string;
-  role: "Learner" | "Instructor";
+  role: string;
 };
 
 export type { User };

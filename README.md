@@ -101,6 +101,22 @@ Course API responses include assigned instructor name, email, and bio.
 Instructor APIs are restricted to assigned courses and support rosters,
 progress updates, sessions, attendance, assignments, and submission grading.
 
+### Admin workspace
+
+Apply all migrations before opening `/AdminDashboard`. The
+`SeedDemoAdmin` migration creates `admin@example.com` with the shared local
+demo password `Password123!` when that email is not already in use; an
+existing account is left unchanged. Sign in with this account to open the admin
+dashboard. Admin user-management APIs require the Admin role. This shared demo
+credential is for local development only and must be replaced or removed
+before deploying outside local development.
+
+The `SeedDemoLearner` migration also creates `learner@example.com` with the
+same local demo password when that email is not already in use. Use this
+learner account to test applications and Stripe checkout; admin and instructor
+accounts cannot enroll as learners. Demo credentials are not suitable for
+staging or production.
+
 In another terminal, run the frontend:
 
 ```powershell

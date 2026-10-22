@@ -11,13 +11,17 @@ namespace full_stack_project_backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
+            migrationBuilder.AlterColumn<string>(
                 name: "Role",
                 table: "Users",
                 type: "nvarchar(32)",
                 maxLength: 32,
                 nullable: false,
-                defaultValue: "Learner");
+                defaultValue: "Learner",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(64)",
+                oldMaxLength: 64,
+                oldDefaultValue: "Learner");
 
             migrationBuilder.AddColumn<int>(
                 name: "Progress",
@@ -201,9 +205,17 @@ namespace full_stack_project_backend.Migrations
             migrationBuilder.DropTable(
                 name: "CourseSessions");
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.AlterColumn<string>(
                 name: "Role",
-                table: "Users");
+                table: "Users",
+                type: "nvarchar(64)",
+                maxLength: 64,
+                nullable: false,
+                defaultValue: "Learner",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(32)",
+                oldMaxLength: 32,
+                oldDefaultValue: "Learner");
 
             migrationBuilder.DropColumn(
                 name: "Progress",

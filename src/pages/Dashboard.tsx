@@ -14,16 +14,18 @@ type DashboardSection = "applications" | "payments";
 function Dashboard() {
   const context = useContext(userContext);
   const userId = context?.user?.userId;
-  const hasDashboard = Boolean(context?.user);
+  const isLearner = context?.user?.role === "Learner";
+  const hasDashboard = isLearner;
   const [applications, setApplications] = useState<CourseApplication[]>([]);
   const [loadedUserId, setLoadedUserId] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
   const [section, setSection] = useState<DashboardSection>("applications");
-  const isLoading = typeof userId === "number" && loadedUserId !== userId;
+  const isLoading =
+    isLearner && typeof userId === "number" && loadedUserId !== userId;
 
   useEffect(() => {
     if (context?.isLoading) return;
-    if (typeof userId !== "number") return;
+    if (!isLearner || typeof userId !== "number") return;
 
     const controller = new AbortController();
 
@@ -48,7 +50,7 @@ function Dashboard() {
 
     void loadApplications();
     return () => controller.abort();
-  }, [context?.isLoading, userId]);
+  }, [context?.isLoading, isLearner, userId]);
 
   const enrolledCount = applications.filter(
     (application) => application.status === "Enrolled",
@@ -118,6 +120,18 @@ function Dashboard() {
                 Create an account
               </Link>
             </div>
+          </section>
+        )}
+
+        {context?.user && !isLearner && (
+          <section className="mb-6 rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+            <h2 className="font-serif text-2xl font-bold">
+              Learner account required
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+              Applications and payments are only available to learner
+              accounts. Sign out and sign in with a learner account to continue.
+            </p>
           </section>
         )}
 

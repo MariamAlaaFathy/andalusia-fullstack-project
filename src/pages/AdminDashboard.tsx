@@ -28,7 +28,7 @@ type FormState =
 function AdminDashboard() {
   const context = useContext(userContext);
   const currentEmail = context?.user?.email?.trim().toLowerCase();
-  const hasAccess = Boolean(currentEmail);
+  const hasAccess = context?.user?.role === "Admin";
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,10 +41,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     if (context?.isLoading) return;
-    if (!currentEmail) {
-      setIsLoading(false);
-      return;
-    }
+    if (!hasAccess) return;
 
     const controller = new AbortController();
 
@@ -68,7 +65,7 @@ function AdminDashboard() {
 
     void loadUsers();
     return () => controller.abort();
-  }, [context?.isLoading, currentEmail]);
+  }, [context?.isLoading, currentEmail, hasAccess]);
 
   const adminCount = users.filter((user) => user.isAdmin).length;
   const learnerCount = users.length - adminCount;
@@ -182,23 +179,27 @@ function AdminDashboard() {
           </p>
         )}
 
-        {!context?.isLoading && !currentEmail && (
+        {!context?.isLoading && !hasAccess && (
           <section className="mb-6 rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
             <h2 className="font-serif text-2xl font-bold">
-              Sign in to manage users
+              {context?.user
+                ? "Administrator access required"
+                : "Sign in to manage users"}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
               This area is restricted to administrator accounts.
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                to="/Login"
-                state={{ from: "/Admin" }}
-                className="inline-flex min-h-11 items-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8]"
-              >
-                Go to login
-              </Link>
-            </div>
+            {!context?.user && (
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Link
+                  to="/Login"
+                  state={{ from: "/AdminDashboard" }}
+                  className="inline-flex min-h-11 items-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8]"
+                >
+                  Go to login
+                </Link>
+              </div>
+            )}
           </section>
         )}
 

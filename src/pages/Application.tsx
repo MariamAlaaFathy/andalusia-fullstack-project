@@ -155,21 +155,31 @@ function Application() {
           >
             Loading course details…
           </div>
-        ) : context?.user?.role === "Instructor" ? (
+        ) : context?.user && context.user.role !== "Learner" ? (
           <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
             <h2 className="font-serif text-2xl font-bold">
-              Enrollment is for learners
+              Learner account required
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
-              Instructor accounts can manage their assigned courses, but cannot
-              apply or enroll as students.
+              Only learner accounts can apply, enroll, or make course payments.
+              Sign out and sign in with a learner account to continue.
             </p>
-            <Link
-              to="/InstructorDashboard"
-              className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
-            >
-              Go to teaching dashboard
-            </Link>
+            {context.user.role === "Instructor" && (
+              <Link
+                to="/InstructorDashboard"
+                className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
+              >
+                Go to teaching dashboard
+              </Link>
+            )}
+            {context.user.role === "Admin" && (
+              <Link
+                to="/AdminDashboard"
+                className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
+              >
+                Go to admin dashboard
+              </Link>
+            )}
           </section>
         ) : !context?.user ? (
           <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">

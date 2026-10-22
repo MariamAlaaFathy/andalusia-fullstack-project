@@ -74,7 +74,14 @@ function NavBar() {
 
         {context?.user ? (
           <>
-            {context.user.role === "Instructor" ? (
+            {context.user.role === "Admin" ? (
+              <NavLink
+                to="/AdminDashboard"
+                className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+              >
+                Admin
+              </NavLink>
+            ) : context.user.role === "Instructor" ? (
               <NavLink
                 to="/InstructorDashboard"
                 className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"

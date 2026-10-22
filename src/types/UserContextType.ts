@@ -12,9 +12,8 @@ type Registration = Credentials & {
 
 type UserContextType = {
   user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User>>,
   isLoading: boolean;
-  login: (credentials: Credentials) => Promise<void>;
+  login: (credentials: Credentials) => Promise<User>;
   register: (registration: Registration) => Promise<void>;
   logout: () => Promise<void>;
 };

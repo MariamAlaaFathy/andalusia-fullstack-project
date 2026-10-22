@@ -86,6 +86,7 @@ namespace full_stack_project_backend.Repository
         {
             return new UserDto
             {
+                UserId = user.UserId,
                 Username = user.Username,
                 Email = user.Email,
                 Password = string.Empty,
