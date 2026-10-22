@@ -352,9 +352,16 @@ D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\full_stack_project_backend.pdb
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\full_stack_project_backend.genruntimeconfig.cache
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\ref\full_stack_project_backend.dll
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.json
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.Development.json
+=======
+D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\appsettings.json
+>>>>>>> Stashed changes
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\full_stack_project_backend.staticwebassets.endpoints.json
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\full_stack_project_backend.exe
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\full_stack_project_backend.deps.json
@@ -372,8 +379,15 @@ C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-pr
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\FluentValidation.AspNetCore.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\FluentValidation.DependencyInjectionExtensions.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Humanizer.dll
+<<<<<<< Updated upstream
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
+=======
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.OpenApi.dll
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.AsyncInterfaces.dll
+C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+>>>>>>> Stashed changes
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Build.Framework.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.CodeAnalysis.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.CodeAnalysis.CSharp.dll
@@ -531,7 +545,10 @@ C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-pr
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\full_stack_project_backend.genruntimeconfig.cache
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\ref\full_stack_project_backend.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+<<<<<<< Updated upstream
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\maram\Desktop\courses 2\andalosia\projects\final\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
 =======
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+>>>>>>> Stashed changes

@@ -20,7 +20,9 @@ namespace full_stack_project_backend.Services
             var user = new User
             {
                 Username = dto.Username,
-                Email = dto.Email
+                Email = dto.Email,
+                Role="Learner"
+
             };
 
             user.Password = _passwordHasher.HashPassword(user, dto.Password);

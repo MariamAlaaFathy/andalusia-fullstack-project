@@ -24,10 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< Updated upstream
 <<<<<<< HEAD
 =======
     <Folder Include="DTOs\" />
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+>>>>>>> Stashed changes
     <Folder Include="Mapping\" />
     <Folder Include="Migrations\" />
     <Folder Include="Validators\" />

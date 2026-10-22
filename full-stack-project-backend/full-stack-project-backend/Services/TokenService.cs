@@ -21,7 +21,13 @@ namespace full_stack_project_backend.Services
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+<<<<<<< Updated upstream
                 new Claim(ClaimTypes.Name, user.Username)
+=======
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("IsAdmin", user.IsAdmin.ToString().ToLowerInvariant())
+>>>>>>> Stashed changes
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

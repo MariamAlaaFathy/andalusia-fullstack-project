@@ -1,6 +1,77 @@
 [
   {
-<<<<<<< HEAD
+    "ContainingType": "full_stack_project_backend.Controllers.ApplicationsController",
+    "Method": "Create",
+    "RelativePath": "api/applications",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "full_stack_project_backend.DTOs.CreateCourseApplicationRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "full_stack_project_backend.DTOs.CourseApplicationResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.ApplicationsController",
+    "Method": "GetById",
+    "RelativePath": "api/applications/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "full_stack_project_backend.DTOs.CourseApplicationResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.ApplicationsController",
+    "Method": "GetMine",
+    "RelativePath": "api/applications/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IReadOnlyList\u00601[[full_stack_project_backend.DTOs.CourseApplicationResponse, full_stack_project_backend, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
     "ContainingType": "full_stack_project_backend.Controllers.CareerPathsController",
     "Method": "GetCareerPaths",
     "RelativePath": "api/CareerPaths",
@@ -48,8 +119,6 @@
     "ReturnTypes": []
   },
   {
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
     "Method": "GetCourses",
     "RelativePath": "api/Courses",
@@ -79,7 +148,6 @@
       }
     ],
     "ReturnTypes": []
-<<<<<<< HEAD
   },
   {
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
@@ -96,6 +164,32 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.PaymentsController",
+    "Method": "CompleteDemoPayment",
+    "RelativePath": "api/payments/application/{applicationId}/demo-payment",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "applicationId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "full_stack_project_backend.DTOs.CourseApplicationResponse",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   },
   {
     "ContainingType": "full_stack_project_backend.Controllers.ProgramsController",
@@ -212,7 +306,47 @@
       }
     ],
     "ReturnTypes": []
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Login",
+    "RelativePath": "api/users/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "full_stack_project_backend.DTOs.LoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Logout",
+    "RelativePath": "api/users/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Refresh",
+    "RelativePath": "api/users/refresh",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "full_stack_project_backend.DTOs.RefreshDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

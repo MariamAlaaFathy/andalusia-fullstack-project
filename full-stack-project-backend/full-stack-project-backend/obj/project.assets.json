@@ -4252,16 +4252,21 @@
     ]
   },
   "packageFolders": {
+<<<<<<< Updated upstream
 <<<<<<< HEAD
     "C:\\Users\\maram\\.nuget\\packages\\": {},
 =======
     "C:\\Users\\Mariam Alaa\\.nuget\\packages\\": {},
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+    "C:\\Users\\maram\\.nuget\\packages\\": {},
+>>>>>>> Stashed changes
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
+<<<<<<< Updated upstream
 <<<<<<< HEAD
       "projectUniqueName": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\final\\andalusia-fullstack-project\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj",
       "projectName": "full_stack_project_backend",
@@ -4275,16 +4280,27 @@
       "packagesPath": "C:\\Users\\Mariam Alaa\\.nuget\\packages\\",
       "outputPath": "D:\\Mariam\\Files\\College Files\\Andalusia Academy\\andalusia-fullstack-project\\full-stack-project-backend\\full-stack-project-backend\\obj\\",
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+      "projectUniqueName": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\final\\andalusia-fullstack-project\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj",
+      "projectName": "full_stack_project_backend",
+      "projectPath": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\final\\andalusia-fullstack-project\\full-stack-project-backend\\full-stack-project-backend\\full_stack_project_backend.csproj",
+      "packagesPath": "C:\\Users\\maram\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\maram\\Desktop\\courses 2\\andalosia\\projects\\final\\andalusia-fullstack-project\\full-stack-project-backend\\full-stack-project-backend\\obj\\",
+>>>>>>> Stashed changes
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
+<<<<<<< Updated upstream
 <<<<<<< HEAD
         "C:\\Users\\maram\\AppData\\Roaming\\NuGet\\NuGet.Config",
 =======
         "C:\\Users\\Mariam Alaa\\AppData\\Roaming\\NuGet\\NuGet.Config",
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+        "C:\\Users\\maram\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> Stashed changes
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -4377,11 +4393,15 @@
             "privateAssets": "all"
           }
         },
+<<<<<<< Updated upstream
 <<<<<<< HEAD
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
 =======
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+=======
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+>>>>>>> Stashed changes
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

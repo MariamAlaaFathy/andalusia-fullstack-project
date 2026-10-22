@@ -9,5 +9,8 @@
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiry { get; set; }
 
+        public string Role { get; set; } = "Learner"; 
+        public bool IsAdmin { get; set; }
+
     }
 }

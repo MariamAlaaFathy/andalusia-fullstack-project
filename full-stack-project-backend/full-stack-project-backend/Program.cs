@@ -1,3 +1,7 @@
+<<<<<<< Updated upstream
+=======
+using Assignment_3.Middleware;
+>>>>>>> Stashed changes
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using full_stack_project_backend.Data;
@@ -7,10 +11,15 @@ using full_stack_project_backend.Services;
 <<<<<<< HEAD
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+<<<<<<< Updated upstream
 using System.Text;
 =======
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 using Microsoft.EntityFrameworkCore;
+=======
+using System.Security.Claims;
+using System.Text;
+>>>>>>> Stashed changes
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +35,13 @@ builder.Services.AddScoped<ICareerPathServices, CareerPathServices>();
 <<<<<<< HEAD
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserServices, UserServices>();
+<<<<<<< Updated upstream
 builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<full_stack_project_backend.Models.User>, Microsoft.AspNetCore.Identity.PasswordHasher<full_stack_project_backend.Models.User>>();
+=======
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+builder.Services.AddScoped<IAdminServices, AdminServices>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+>>>>>>> Stashed changes
 builder.Services.AddScoped<ITokenService, TokenService>();
 =======
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
@@ -62,11 +77,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = ClaimTypes.Role
+
         };
     });
+<<<<<<< Updated upstream
 
 builder.Services.AddAuthorization();
+=======
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireAuthenticatedUser()
+              .RequireClaim("IsAdmin", "true"));
+});
+>>>>>>> Stashed changes
 
 =======
 >>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
