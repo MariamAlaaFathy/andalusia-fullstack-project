@@ -41,6 +41,15 @@ public sealed class EnrollmentRepository(AppDbcontext dbContext)
                     application.CourseId == courseId,
                 cancellationToken);
 
+    public Task<Payment?> GetPaymentByCheckoutSessionIdAsync(
+        string checkoutSessionId,
+        CancellationToken cancellationToken) =>
+        dbContext.Payments
+            .Include(payment => payment.CourseApplication)
+            .FirstOrDefaultAsync(
+                payment => payment.StripeCheckoutSessionId == checkoutSessionId,
+                cancellationToken);
+
     public Task<Course?> GetCourseAsync(
         int courseId,
         CancellationToken cancellationToken) =>

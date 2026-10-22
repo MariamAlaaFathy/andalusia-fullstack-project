@@ -18,6 +18,10 @@ public interface IEnrollmentRepository
         int courseId,
         CancellationToken cancellationToken);
 
+    Task<Payment?> GetPaymentByCheckoutSessionIdAsync(
+        string checkoutSessionId,
+        CancellationToken cancellationToken);
+
     Task<Course?> GetCourseAsync(int courseId, CancellationToken cancellationToken);
 
     Task AddApplicationAsync(

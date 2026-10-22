@@ -19,6 +19,10 @@ export type CourseApplication = {
   payment: EnrollmentPayment | null;
 };
 
+export type CheckoutSession = {
+  url: string;
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -47,6 +51,10 @@ function isApplication(value: unknown): value is CourseApplication {
     typeof value.createdAt === "string" &&
     (value.payment === null || isPayment(value.payment))
   );
+}
+
+function isCheckoutSession(value: unknown): value is CheckoutSession {
+  return isRecord(value) && typeof value.url === "string";
 }
 
 async function request<T>(
@@ -118,11 +126,10 @@ export const enrollmentApi = {
     });
   },
 
-  completeDemoPayment(applicationId: number) {
-    return request(
-      `/api/payments/application/${encodeURIComponent(applicationId)}/demo-payment`,
-      isApplication,
-      { method: "POST" },
-    );
+  createCheckoutSession(applicationId: number) {
+    return request("/api/payments/create-checkout-session", isCheckoutSession, {
+      method: "POST",
+      body: JSON.stringify({ applicationId }),
+    });
   },
 };
