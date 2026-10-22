@@ -1,0 +1,10 @@
+﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
+
+namespace full_stack_project_backend.Services
+{
+    public class AdminServices
+    {
+        
+    }
+}
