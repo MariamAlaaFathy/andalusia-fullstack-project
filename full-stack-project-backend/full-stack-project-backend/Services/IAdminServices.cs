@@ -8,7 +8,7 @@ namespace full_stack_project_backend.Services
         Task<UserDto?> GetUserById(int userId);
         Task<UserDto> CreateUser(UserDto user);
         Task<UserDto?> UpdateUser(int userId, UserDto user);
-        Task<UserDto?> AssignRole(int userId, string role, bool isAdmin);
+        Task<UserDto?> AssignRole(int userId, string role);
         Task<bool> DeleteUser(int userId);
     }
 }

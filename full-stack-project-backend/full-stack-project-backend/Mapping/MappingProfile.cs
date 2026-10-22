@@ -22,10 +22,7 @@ public sealed class MappingProfile : Profile
 
         CreateMap<Course, ProgramCourseDto>();
         CreateMap<Course, CareerPathCourseDto>();
-<<<<<<< HEAD
         CreateMap<User, UserDto>();
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
 
         CreateMap<ProgramEntity, ProgramDto>()
             .ForCtorParam(

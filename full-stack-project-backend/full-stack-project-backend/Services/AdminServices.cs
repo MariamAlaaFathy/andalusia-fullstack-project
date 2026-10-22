@@ -34,14 +34,13 @@ namespace full_stack_project_backend.Services
             return await _adminRepository.UpdateUser(userId, user);
         }
 
-        public async Task<UserDto?> AssignRole(int userId, string role, bool isAdmin)
+        public async Task<UserDto?> AssignRole(int userId, string role)
         {
             var user = await _adminRepository.GetUserById(userId);
             if (user is null)
                 return null;
 
             user.Role = role;
-            user.IsAdmin = isAdmin;
             return await _adminRepository.UpdateUser(userId, user);
         }
 

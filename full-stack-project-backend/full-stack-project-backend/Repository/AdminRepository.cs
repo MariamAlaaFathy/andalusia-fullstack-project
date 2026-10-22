@@ -40,8 +40,8 @@ namespace full_stack_project_backend.Repository
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
-                Role = user.Role,
-                IsAdmin = user.IsAdmin
+                Role = user.Role
+            
             };
 
             _context.Users.Add(entity);
@@ -63,7 +63,7 @@ namespace full_stack_project_backend.Repository
             if (!string.IsNullOrWhiteSpace(user.Password))
                 entity.Password = user.Password;
             entity.Role = user.Role;
-            entity.IsAdmin = user.IsAdmin;
+        
 
             await _context.SaveChangesAsync();
             return ToDto(entity);
@@ -89,8 +89,8 @@ namespace full_stack_project_backend.Repository
                 Username = user.Username,
                 Email = user.Email,
                 Password = string.Empty,
-                Role = user.Role,
-                IsAdmin = user.IsAdmin
+                Role = user.Role
+            
             };
         }
     }

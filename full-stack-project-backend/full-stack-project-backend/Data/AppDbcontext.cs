@@ -17,59 +17,20 @@ namespace full_stack_project_backend.Data
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
-<<<<<<< HEAD
         public DbSet<User> Users { get; set; }
-=======
-
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-<<<<<<< Updated upstream
-=======
             modelBuilder.Entity<User>(user =>
             {
                 user.Property(item => item.Role)
                     .HasMaxLength(64)
                     .HasDefaultValue("Learner");
-                user.Property(item => item.IsAdmin)
-                    .HasDefaultValue(false);
                 user.HasIndex(item => item.Email)
                     .IsUnique();
             });
 
-            modelBuilder.Entity<CourseApplication>(application =>
-            {
-                application.Property(item => item.CourseName).IsRequired();
-                application.Property(item => item.Amount).HasPrecision(18, 2);
-                application.Property(item => item.Status)
-                    .HasConversion<string>()
-                    .HasMaxLength(32);
-                application.HasIndex(item => new { item.LearnerId, item.CourseId })
-                    .IsUnique();
-                application.HasOne(item => item.Course)
-                    .WithMany()
-                    .HasForeignKey(item => item.CourseId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                application.HasOne(item => item.Payment)
-                    .WithOne(payment => payment.CourseApplication)
-                    .HasForeignKey<Payment>(payment => payment.CourseApplicationId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<Payment>(payment =>
-            {
-                payment.Property(item => item.Amount).HasPrecision(18, 2);
-                payment.Property(item => item.Status)
-                    .HasConversion<string>()
-                    .HasMaxLength(32);
-                payment.HasIndex(item => item.StripeCheckoutSessionId)
-                    .IsUnique()
-                    .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
-            });
-
->>>>>>> Stashed changes
             modelBuilder.Entity<ProgramEntity>()
                 .HasOne(program => program.CareerPath)
                 .WithMany(careerPath => careerPath.Programs)
