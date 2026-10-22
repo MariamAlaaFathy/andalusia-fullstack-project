@@ -521,12 +521,6 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("RefreshTokenExpiry")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -534,6 +528,22 @@ namespace full_stack_project_backend.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.UserToken", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserTokens");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPathSkill", b =>
@@ -591,6 +601,17 @@ namespace full_stack_project_backend.Migrations
                     b.Navigation("CareerPath");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.UserToken", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.User", "User")
+                        .WithOne("UserToken")
+                        .HasForeignKey("full_stack_project_backend.Models.UserToken", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPath", b =>
                 {
                     b.Navigation("Programs");
@@ -606,6 +627,11 @@ namespace full_stack_project_backend.Migrations
             modelBuilder.Entity("full_stack_project_backend.Models.Program", b =>
                 {
                     b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.User", b =>
+                {
+                    b.Navigation("UserToken");
                 });
 #pragma warning restore 612, 618
         }

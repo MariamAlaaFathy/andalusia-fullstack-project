@@ -97,13 +97,10 @@ namespace full_stack_project_backend.Controllers
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
 
-            var updated = new User
-            {
-                RefreshToken = refreshToken,
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
-            };
-
-            await _userRepository.UpdateUser(user.UserId, updated);
+            await _userRepository.SetRefreshToken(
+                user.UserId,
+                refreshToken,
+                DateTime.UtcNow.AddDays(7));
 
             return Ok(new
             {
@@ -122,19 +119,16 @@ namespace full_stack_project_backend.Controllers
             if (existing == null)
                 return Unauthorized(new { message = "Invalid refresh token" });
 
-            if (!existing.RefreshTokenExpiry.HasValue || existing.RefreshTokenExpiry.Value < DateTime.UtcNow)
+            if (existing.UserToken?.RefreshTokenExpiry is not DateTime expiry || expiry < DateTime.UtcNow)
                 return Unauthorized(new { message = "Refresh token expired" });
 
             var accessToken = _tokenService.GenerateAccessToken(existing);
             var newRefresh = _tokenService.GenerateRefreshToken();
 
-            var updated = new User
-            {
-                RefreshToken = newRefresh,
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
-            };
-
-            await _userRepository.UpdateUser(existing.UserId, updated);
+            await _userRepository.SetRefreshToken(
+                existing.UserId,
+                newRefresh,
+                DateTime.UtcNow.AddDays(7));
 
             return Ok(new
             {

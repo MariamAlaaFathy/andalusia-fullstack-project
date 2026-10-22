@@ -18,11 +18,21 @@ namespace full_stack_project_backend.Data
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
         public DbSet<User> Users { get; set; }
+        public DbSet<UserToken> UserTokens => Set<UserToken>();
         public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
         public DbSet<Payment> Payments => Set<Payment>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<UserToken>()
+                .HasKey(userToken => userToken.UserId);
+
+            modelBuilder.Entity<UserToken>()
+                .HasOne(userToken => userToken.User)
+                .WithOne(user => user.UserToken)
+                .HasForeignKey<UserToken>(userToken => userToken.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<CourseApplication>(application =>
             {
