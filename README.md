@@ -12,7 +12,8 @@ The Programs and Career Paths pages use the ASP.NET Core API backed by SQL
 Server. The development API runs at `http://localhost:5075`; configure
 `VITE_API_BASE_URL` in `.env.local` when the API is hosted elsewhere (see
 `.env.example`).
-Courses, programs, and career paths are stored in the same SQL Server database.
+Courses, programs, career paths, and users are stored in the
+`AndalusiaFullStackProject` SQL Server database.
 
 ### API endpoints
 
@@ -22,6 +23,10 @@ Courses, programs, and career paths are stored in the same SQL Server database.
 - `GET /api/Programs/{id}`
 - `GET /api/CareerPaths?search=&page=1&pageSize=9`
 - `GET /api/CareerPaths/{id}`
+- `POST /api/users` (register)
+- `POST /api/users/login`
+- `POST /api/users/refresh`
+- `POST /api/users/logout` (JWT required)
 
 List endpoints return a paged object with `data`, `page`, `pageSize`,
 `totalCount`, `totalPages`, and next/previous-page flags. Program records
@@ -29,18 +34,28 @@ include their related career path name. Career path records include `skills`
 and related `programs`. The frontend validates the response shape and shows loading and empty states
 when catalog data is unavailable.
 
+Registration creates the account and signs the user in. The access JWT is kept
+in memory and attached as a Bearer token to API calls; the rotating refresh
+token is kept in session storage and used to restore a session after a page
+reload or renew an expired access token. Logging out revokes the refresh token.
+
 ### Start locally
 
 The backend's Development settings use SQL Server LocalDB. From the repository
 root, apply all migrations and start the API:
 
 ```powershell
+$env:ASPNETCORE_ENVIRONMENT = "Development"
 dotnet ef database update --project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --startup-project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --configuration Release
 dotnet run --project .\full-stack-project-backend\full-stack-project-backend\full_stack_project_backend.csproj --launch-profile http
 ```
 
-The migrations create the Courses, Programs, CareerPaths, and CareerPathSkills
-tables, add course detail fields, and seed the sample catalog. The
+Local development uses a development-only JWT signing key in
+`appsettings.Development.json`. Never use that key outside local development;
+set `Jwt__Key` to a unique secret of at least 32 bytes in other environments.
+
+The migrations create the Courses, Programs, CareerPaths, CareerPathSkills,
+CourseApplications, and Payments tables, add course detail fields, and seed the sample catalog. The
 `AddCourseDetailsAndSeedCourses` migration adds duration, level, prerequisites,
 and learning outcomes to Courses. The `LinkCoursesToPrograms` migration links
 each course to one program; the course response includes that program and its
@@ -48,6 +63,15 @@ career path, while program and career-path details list their related courses.
 In other environments, provide the database connection using the
 `ConnectionStrings__DefaultConnection` environment variable before starting
 the API.
+
+Signed-in learners have the `Learner` role and can apply to courses and review
+their enrollment and payment status on `/Dashboard`. Free courses enroll
+directly. In Development, paid courses offer a clearly labeled demo payment
+with card-detail inputs; the browser only checks that they are filled in, and
+the app does not read, transmit, or store their values. No real charge is made,
+and the API is disabled outside Development. Do not enter real payment-card
+details. This is for exercising the enrollment flow only, not a production
+payment integration.
 
 In another terminal, run the frontend:
 

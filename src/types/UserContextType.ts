@@ -1,13 +1,24 @@
 import { createContext } from "react";
 import type { User } from "./User";
 
-type UserContextType={
+type Credentials = {
+  email: string;
+  password: string;
+};
 
-    user: User,
-    setUser: React.Dispatch<React.SetStateAction<User>>,
-    isLoading?: boolean;
-}
+type Registration = Credentials & {
+  username: string;
+};
 
-export const userContext = createContext<UserContextType |null>(null);
+type UserContextType = {
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User>>,
+  isLoading: boolean;
+  login: (credentials: Credentials) => Promise<void>;
+  register: (registration: Registration) => Promise<void>;
+  logout: () => Promise<void>;
+};
 
-export type {UserContextType};
+export const userContext = createContext<UserContextType | null>(null);
+
+export type { Credentials, Registration, UserContextType };

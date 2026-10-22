@@ -6,9 +6,14 @@ namespace Assignment_3.Middleware
     {
         private readonly RequestDelegate _next;
 
-        public MiddlewareGlobal(RequestDelegate next)
+        private readonly ILogger<MiddlewareGlobal> _logger;
+
+        public MiddlewareGlobal(
+            RequestDelegate next,
+            ILogger<MiddlewareGlobal> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -19,50 +24,51 @@ namespace Assignment_3.Middleware
             }
             catch (NotFoundException ex)
             {
-
-                var problem = new ProblemDetails
-                {
-                    Title = "Not found",
-                    Status = 404,
-                    Detail = ex.Message,
-                };
-
-                context.Response.StatusCode = 404;
-
-                context.Response.ContentType = "application/problem+json";
-                await context.Response.WriteAsJsonAsync(problem);
-
-
+                await WriteProblemAsync(context, StatusCodes.Status404NotFound, "Not found", ex.Message);
             }
             catch (ConflictException ex)
             {
-                var problem = new ProblemDetails
-                {
-                    Title = "conflict",
-                    Status = 409,
-                    Detail = ex.Message,
-                };
-                context.Response.StatusCode = 409;
-                context.Response.ContentType = "application/problem+json";
-
-                await context.Response.WriteAsJsonAsync(problem);
-
+                await WriteProblemAsync(context, StatusCodes.Status409Conflict, "Conflict", ex.Message);
+            }
+            catch (RequestValidationException ex)
+            {
+                await WriteProblemAsync(context, StatusCodes.Status400BadRequest, "Invalid request", ex.Message);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await WriteProblemAsync(context, StatusCodes.Status401Unauthorized, "Unauthorized", ex.Message);
             }
             catch (Exception ex)
             {
-                var problem = new ProblemDetails
-                {
-                    Title = "Internal error",
-                    Status = 500,
-                    Detail = "An unexpected error occured",
-                };
-                context.Response.StatusCode = 500;
-                context.Response.ContentType = "application/problem+json";
-
-                await context.Response.WriteAsJsonAsync(problem);
-
-
+                _logger.LogError(
+                    ex,
+                    "Unhandled exception while processing {Method} {Path}.",
+                    context.Request.Method,
+                    context.Request.Path);
+                await WriteProblemAsync(
+                    context,
+                    StatusCodes.Status500InternalServerError,
+                    "Internal server error",
+                    "An unexpected error occurred.");
             }
+        }
+
+        private static async Task WriteProblemAsync(
+            HttpContext context,
+            int statusCode,
+            string title,
+            string detail)
+        {
+            if (context.Response.HasStarted) return;
+            context.Response.Clear();
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/problem+json";
+            await context.Response.WriteAsJsonAsync(new ProblemDetails
+            {
+                Title = title,
+                Status = statusCode,
+                Detail = detail
+            });
         }
     }
 }
