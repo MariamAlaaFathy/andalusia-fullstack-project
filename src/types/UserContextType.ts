@@ -4,7 +4,8 @@ import type { User } from "./User";
 type UserContextType={
 
     user: User,
-    setUser: React.Dispatch<React.SetStateAction<User>>
+    setUser: React.Dispatch<React.SetStateAction<User>>,
+    isLoading?: boolean;
 }
 
 export const userContext = createContext<UserContextType |null>(null);
