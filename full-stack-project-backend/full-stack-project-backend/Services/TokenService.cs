@@ -22,7 +22,7 @@ namespace full_stack_project_backend.Services
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, "Learner")
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var signingKey = _configuration["Jwt:Key"]

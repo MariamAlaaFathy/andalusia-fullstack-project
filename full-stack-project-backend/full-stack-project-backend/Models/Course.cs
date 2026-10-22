@@ -13,5 +13,8 @@
         public string Level { get; set; } = string.Empty;
         public List<string> Prerequisites { get; set; } = [];
         public List<string> LearningOutcomes { get; set; } = [];
+        public ICollection<CourseInstructor> Instructors { get; set; } = [];
+        public ICollection<CourseSession> Sessions { get; set; } = [];
+        public ICollection<CourseAssignment> Assignments { get; set; } = [];
     }
 }

@@ -18,8 +18,14 @@ namespace full_stack_project_backend.Data
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
         public DbSet<CareerPathSkill> CareerPathSkills => Set<CareerPathSkill>();
         public DbSet<User> Users { get; set; }
+        public DbSet<UserToken> UserTokens => Set<UserToken>();
         public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<CourseInstructor> CourseInstructors => Set<CourseInstructor>();
+        public DbSet<CourseSession> CourseSessions => Set<CourseSession>();
+        public DbSet<SessionAttendance> SessionAttendances => Set<SessionAttendance>();
+        public DbSet<CourseAssignment> CourseAssignments => Set<CourseAssignment>();
+        public DbSet<AssignmentSubmission> AssignmentSubmissions => Set<AssignmentSubmission>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -33,10 +39,20 @@ namespace full_stack_project_backend.Data
                     .IsUnique();
             });
 
+            modelBuilder.Entity<UserToken>()
+                .HasKey(userToken => userToken.UserId);
+
+            modelBuilder.Entity<UserToken>()
+                .HasOne(userToken => userToken.User)
+                .WithOne(user => user.UserToken)
+                .HasForeignKey<UserToken>(userToken => userToken.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<CourseApplication>(application =>
             {
                 application.Property(item => item.CourseName).IsRequired();
                 application.Property(item => item.Amount).HasPrecision(18, 2);
+                application.Property(item => item.Progress).HasDefaultValue(0);
                 application.Property(item => item.Status)
                     .HasConversion<string>()
                     .HasMaxLength(32);
@@ -55,12 +71,95 @@ namespace full_stack_project_backend.Data
             modelBuilder.Entity<Payment>(payment =>
             {
                 payment.Property(item => item.Amount).HasPrecision(18, 2);
+                payment.Property(item => item.StripeCheckoutSessionId)
+                    .HasMaxLength(450);
                 payment.Property(item => item.Status)
                     .HasConversion<string>()
                     .HasMaxLength(32);
                 payment.HasIndex(item => item.StripeCheckoutSessionId)
                     .IsUnique()
                     .HasFilter("[StripeCheckoutSessionId] IS NOT NULL");
+            });
+
+            modelBuilder.Entity<User>()
+                .Property(user => user.Role)
+                .HasMaxLength(32)
+                .HasDefaultValue("Learner");
+
+            modelBuilder.Entity<User>()
+                .Property(user => user.Bio)
+                .HasMaxLength(1000);
+
+            modelBuilder.Entity<CourseInstructor>(assignment =>
+            {
+                assignment.HasKey(item => new { item.CourseId, item.InstructorId });
+                assignment.HasOne(item => item.Course)
+                    .WithMany(course => course.Instructors)
+                    .HasForeignKey(item => item.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                assignment.HasOne(item => item.Instructor)
+                    .WithMany()
+                    .HasForeignKey(item => item.InstructorId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<CourseSession>(session =>
+            {
+                session.Property(item => item.Title).HasMaxLength(200).IsRequired();
+                session.Property(item => item.Location).HasMaxLength(300).IsRequired();
+                session.HasOne(item => item.Course)
+                    .WithMany(course => course.Sessions)
+                    .HasForeignKey(item => item.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                session.HasIndex(item => new { item.CourseId, item.StartsAt });
+            });
+
+            modelBuilder.Entity<SessionAttendance>(attendance =>
+            {
+                attendance.HasKey(item => new
+                {
+                    item.CourseSessionId,
+                    item.LearnerId
+                });
+                attendance.HasOne(item => item.CourseSession)
+                    .WithMany(session => session.Attendance)
+                    .HasForeignKey(item => item.CourseSessionId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                attendance.HasOne(item => item.Learner)
+                    .WithMany()
+                    .HasForeignKey(item => item.LearnerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<CourseAssignment>(assignment =>
+            {
+                assignment.Property(item => item.Title).HasMaxLength(200).IsRequired();
+                assignment.Property(item => item.Description).HasMaxLength(4000).IsRequired();
+                assignment.HasOne(item => item.Course)
+                    .WithMany(course => course.Assignments)
+                    .HasForeignKey(item => item.CourseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                assignment.HasIndex(item => new { item.CourseId, item.DueAt });
+            });
+
+            modelBuilder.Entity<AssignmentSubmission>(submission =>
+            {
+                submission.Property(item => item.Content).HasMaxLength(8000).IsRequired();
+                submission.Property(item => item.Grade).HasPrecision(5, 2);
+                submission.Property(item => item.Feedback).HasMaxLength(2000);
+                submission.HasOne(item => item.CourseAssignment)
+                    .WithMany(assignment => assignment.Submissions)
+                    .HasForeignKey(item => item.CourseAssignmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                submission.HasOne(item => item.Learner)
+                    .WithMany()
+                    .HasForeignKey(item => item.LearnerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                submission.HasIndex(item => new
+                {
+                    item.CourseAssignmentId,
+                    item.LearnerId
+                }).IsUnique();
             });
 
             modelBuilder.Entity<ProgramEntity>()

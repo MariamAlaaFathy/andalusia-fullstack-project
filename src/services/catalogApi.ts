@@ -13,6 +13,15 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }
 
+function isCourseInstructor(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    typeof value.name === "string" &&
+    typeof value.email === "string" &&
+    typeof value.bio === "string"
+  );
+}
+
 function isCourse(value: unknown): value is Coursetype {
   return (
     isRecord(value) &&
@@ -28,7 +37,9 @@ function isCourse(value: unknown): value is Coursetype {
     typeof value.duration === "string" &&
     typeof value.level === "string" &&
     isStringArray(value.prerequisites) &&
-    isStringArray(value.learningOutcomes)
+    isStringArray(value.learningOutcomes) &&
+    Array.isArray(value.instructors) &&
+    value.instructors.every(isCourseInstructor)
   );
 }
 

@@ -17,6 +17,8 @@ namespace full_stack_project_backend.Repository
                 .AsNoTracking()
                 .Include(course => course.Program)
                 .ThenInclude(program => program.CareerPath)
+                .Include(course => course.Instructors)
+                .ThenInclude(assignment => assignment.Instructor)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -48,6 +50,8 @@ namespace full_stack_project_backend.Repository
                 .AsNoTracking()
                 .Include(course => course.Program)
                 .ThenInclude(program => program.CareerPath)
+                .Include(course => course.Instructors)
+                .ThenInclude(assignment => assignment.Instructor)
                 .SingleOrDefaultAsync(course => course.Id == id, cancellationToken);
     }
 }

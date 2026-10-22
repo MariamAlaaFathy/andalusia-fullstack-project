@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, type FormEvent } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CatalogEmpty } from "../Components/CatalogFeedback";
 import Footer from "../Components/Footer";
@@ -28,16 +28,7 @@ function Application() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  // New Credit Card Input and Validation States
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvc, setCardCvc] = useState("");
-  const [cardErrors, setCardErrors] = useState<{
-    number?: string;
-    expiry?: string;
-    cvc?: string;
-  }>({});
+  const [paymentNotice, setPaymentNotice] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,8 +36,13 @@ function Application() {
     async function loadCourse() {
       setIsLoading(true);
       setErrorMessage("");
+      setPaymentNotice("");
       if (context?.isLoading) return;
-      if (!validId || typeof userId !== "number") {
+      if (
+        !validId ||
+        typeof userId !== "number" ||
+        context?.user?.role === "Instructor"
+      ) {
         setIsLoading(false);
         return;
       }
@@ -64,6 +60,16 @@ function Application() {
         if (existing) {
           setApplication(existing);
           setStep(existing.status === "Enrolled" ? "complete" : "payment");
+          const checkoutResult = new URLSearchParams(
+            window.location.search,
+          ).get("checkout");
+          if (checkoutResult === "success" && existing.status !== "Enrolled") {
+            setPaymentNotice(
+              "Payment received. Your enrollment will update when Stripe confirms it.",
+            );
+          } else if (checkoutResult === "cancelled") {
+            setPaymentNotice("Checkout was cancelled. You can try again.");
+          }
         }
       } catch (error) {
         if (!controller.signal.aborted) {
@@ -81,7 +87,7 @@ function Application() {
 
     void loadCourse();
     return () => controller.abort();
-  }, [context?.isLoading, id, userId, validId]);
+  }, [context?.isLoading, context?.user?.role, id, userId, validId]);
 
   async function submitApplication() {
     if (!course || typeof userId !== "number") return;
@@ -103,54 +109,20 @@ function Application() {
     }
   }
 
-  // Credit Card Validation Logic
-  function validateCardFields() {
-    const errors: { number?: string; expiry?: string; cvc?: string } = {};
-
-    // Clean spaces and dashes from card number
-    const cleanNumber = cardNumber.replace(/[\s-]/g, "");
-    // Standard cards are between 13 and 19 digits (Visa/Mastercard/Amex)
-    if (!/^\d{13,19}$/.test(cleanNumber)) {
-      errors.number = "Enter a valid 13 to 19 digit card number.";
-    }
-
-    // Clean expiry and check MM/YY format (e.g., 12/28)
-    const cleanExpiry = cardExpiry.trim();
-    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(cleanExpiry)) {
-      errors.expiry = "Use MM/YY format (e.g. 12/28).";
-    }
-
-    // CVC check (3 or 4 digits)
-    const cleanCvc = cardCvc.trim();
-    if (!/^\d{3,4}$/.test(cleanCvc)) {
-      errors.cvc = "Invalid CVC (3-4 digits).";
-    }
-
-    setCardErrors(errors);
-    return Object.keys(errors).length === 0;
-  }
-
-  async function completePayment(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function acceptPayment() {
     if (!application || typeof userId !== "number") return;
-
-    // Run validation check before submitting payment
-    if (!validateCardFields()) {
-      return;
-    }
 
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      const paid = await enrollmentApi.completeDemoPayment(application.id);
-      setApplication(paid);
-      setStep("complete");
+      const session = await enrollmentApi.createCheckoutSession(application.id);
+      window.location.href = session.url;
     } catch (error) {
-      console.error("Demo payment could not be completed.", error);
+      console.error("Stripe checkout could not be started.", error);
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Demo payment could not be completed. Please try again.",
+          : "Checkout could not be started. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -183,6 +155,22 @@ function Application() {
           >
             Loading course details…
           </div>
+        ) : context?.user?.role === "Instructor" ? (
+          <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+            <h2 className="font-serif text-2xl font-bold">
+              Enrollment is for learners
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+              Instructor accounts can manage their assigned courses, but cannot
+              apply or enroll as students.
+            </p>
+            <Link
+              to="/InstructorDashboard"
+              className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-[#a9694f] px-5 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
+            >
+              Go to teaching dashboard
+            </Link>
+          </section>
         ) : !context?.user ? (
           <section className="max-w-xl rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
             <h2 className="font-serif text-2xl font-bold">Sign in to apply</h2>
@@ -279,122 +267,38 @@ function Application() {
                     <h2 className="mt-2 font-serif text-2xl font-bold">
                       Review your payment
                     </h2>
-                    {import.meta.env.DEV ? (
-                      <form
-                        onSubmit={(event) => void completePayment(event)}
-                        autoComplete="off"
-                      >
-                        <fieldset
-                          disabled={isSubmitting}
-                          className="mt-5 space-y-4"
-                        >
-                          <legend className="mb-3 text-sm font-semibold text-[#2b2420]">
-                            Card details
-                          </legend>
-
-                          <label className="block text-sm font-medium text-[#765f52]">
-                            Card number
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              autoComplete="off"
-                              maxLength={23}
-                              value={cardNumber}
-                              onChange={(e) => setCardNumber(e.target.value)}
-                              className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
-                                cardErrors.number
-                                  ? "border-red-500 focus:ring-red-200"
-                                  : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
-                              }`}
-                            />
-                            {cardErrors.number && (
-                              <span className="mt-1 text-xs text-red-600 block">
-                                {cardErrors.number}
-                              </span>
-                            )}
-                          </label>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <label className="block text-sm font-medium text-[#765f52]">
-                              Expiry
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                autoComplete="off"
-                                placeholder="MM/YY"
-                                maxLength={5}
-                                value={cardExpiry}
-                                onChange={(e) => setCardExpiry(e.target.value)}
-                                className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
-                                  cardErrors.expiry
-                                    ? "border-red-500 focus:ring-red-200"
-                                    : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
-                                }`}
-                              />
-                              {cardErrors.expiry && (
-                                <span className="mt-1 text-xs text-red-600 block">
-                                  {cardErrors.expiry}
-                                </span>
-                              )}
-                            </label>
-
-                            <label className="block text-sm font-medium text-[#765f52]">
-                              CVC
-                              <input
-                                type="password"
-                                inputMode="numeric"
-                                autoComplete="off"
-                                maxLength={4}
-                                value={cardCvc}
-                                onChange={(e) => setCardCvc(e.target.value)}
-                                className={`mt-1 min-h-11 w-full rounded-lg border px-3 text-[#2b2420] outline-none focus:ring-2 ${
-                                  cardErrors.cvc
-                                    ? "border-red-500 focus:ring-red-200"
-                                    : "border-[#dfd2c3] focus:border-[#a9694f] focus:ring-[#a9694f]/20"
-                                }`}
-                              />
-                              {cardErrors.cvc && (
-                                <span className="mt-1 text-xs text-red-600 block">
-                                  {cardErrors.cvc}
-                                </span>
-                              )}
-                            </label>
-                          </div>
-                        </fieldset>
-
-                        <div className="mt-6 rounded-xl bg-[#f7f1e8] p-5">
-                          <div className="flex justify-between gap-4 text-sm">
-                            <span className="text-[#765f52]">Course fee</span>
-                            <span className="font-semibold">
-                              {formatPrice(course.price)}
-                            </span>
-                          </div>
-                          <div className="mt-4 flex justify-between gap-4 border-t border-[#dfd2c3] pt-4">
-                            <span className="font-semibold">Total</span>
-                            <span className="font-bold text-[#8f5640]">
-                              {formatPrice(course.price)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="mt-6 min-h-12 w-full rounded-lg bg-[#a9694f] px-5 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f] disabled:cursor-wait disabled:opacity-60"
-                        >
-                          {isSubmitting
-                            ? "Recording demo payment…"
-                            : `Accept demo payment · ${formatPrice(course.price)}`}
-                        </button>
-                      </form>
-                    ) : (
+                    {paymentNotice && (
                       <p
                         role="status"
                         className="mt-5 rounded-xl border border-[#dfd2c3] bg-[#f7f1e8] p-4 text-sm text-[#765f52]"
                       >
-                        Checkout is not configured for this environment.
+                        {paymentNotice}
                       </p>
                     )}
+                    <div className="mt-6 rounded-xl bg-[#f7f1e8] p-5">
+                      <div className="flex justify-between gap-4 text-sm">
+                        <span className="text-[#765f52]">Course fee</span>
+                        <span className="font-semibold">
+                          {formatPrice(course.price)}
+                        </span>
+                      </div>
+                      <div className="mt-4 flex justify-between gap-4 border-t border-[#dfd2c3] pt-4">
+                        <span className="font-semibold">Total</span>
+                        <span className="font-bold text-[#8f5640]">
+                          {formatPrice(course.price)}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void acceptPayment()}
+                      disabled={isSubmitting}
+                      className="mt-6 min-h-12 w-full rounded-lg bg-[#a9694f] px-5 py-3 font-bold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f] disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {isSubmitting
+                        ? "Opening secure checkout…"
+                        : `Accept Payment · ${formatPrice(course.price)}`}
+                    </button>
                   </>
                 )}
 

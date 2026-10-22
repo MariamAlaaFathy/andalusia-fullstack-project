@@ -32,6 +32,7 @@ builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IPasswordHasher<full_st
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IEnrollmentRepository, EnrollmentRepository>();
 builder.Services.AddScoped<IEnrollmentService, EnrollmentService>();
+builder.Services.AddScoped<IInstructorService, InstructorService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddControllers();

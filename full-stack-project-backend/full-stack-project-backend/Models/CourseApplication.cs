@@ -14,6 +14,7 @@ public class CourseApplication
     public Course Course { get; set; } = null!;
     public string CourseName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
+    public int Progress { get; set; }
     public CourseApplicationStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
     public Payment? Payment { get; set; }
