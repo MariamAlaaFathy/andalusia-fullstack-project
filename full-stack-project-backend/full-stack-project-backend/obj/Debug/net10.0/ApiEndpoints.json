@@ -1,6 +1,105 @@
 [
   {
-<<<<<<< HEAD
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "GetUsers",
+    "RelativePath": "api/admin/users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "CreateUser",
+    "RelativePath": "api/admin/users",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "user",
+        "Type": "full_stack_project_backend.DTOs.UserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "GetUser",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "UpdateUser",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "user",
+        "Type": "full_stack_project_backend.DTOs.UserDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "DeleteUser",
+    "RelativePath": "api/admin/users/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.AdminController",
+    "Method": "AssignRole",
+    "RelativePath": "api/admin/users/{id}/role",
+    "HttpMethod": "PATCH",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "assignment",
+        "Type": "full_stack_project_backend.DTOs.RoleAssignmentDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "full_stack_project_backend.Controllers.CareerPathsController",
     "Method": "GetCareerPaths",
     "RelativePath": "api/CareerPaths",
@@ -48,8 +147,6 @@
     "ReturnTypes": []
   },
   {
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
     "Method": "GetCourses",
     "RelativePath": "api/Courses",
@@ -79,7 +176,6 @@
       }
     ],
     "ReturnTypes": []
-<<<<<<< HEAD
   },
   {
     "ContainingType": "full_stack_project_backend.Controllers.CoursesController",
@@ -212,7 +308,47 @@
       }
     ],
     "ReturnTypes": []
-=======
->>>>>>> 8e79a0b19b404d7fd483f8628b4c610b2474a23e
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Login",
+    "RelativePath": "api/users/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "full_stack_project_backend.DTOs.LoginDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Logout",
+    "RelativePath": "api/users/logout",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "full_stack_project_backend.Controllers.UserController",
+    "Method": "Refresh",
+    "RelativePath": "api/users/refresh",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "full_stack_project_backend.DTOs.RefreshDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]

@@ -24,6 +24,15 @@ namespace full_stack_project_backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>(user =>
+            {
+                user.Property(item => item.Role)
+                    .HasMaxLength(64)
+                    .HasDefaultValue("Learner");
+                user.HasIndex(item => item.Email)
+                    .IsUnique();
+            });
+
             modelBuilder.Entity<CourseApplication>(application =>
             {
                 application.Property(item => item.CourseName).IsRequired();

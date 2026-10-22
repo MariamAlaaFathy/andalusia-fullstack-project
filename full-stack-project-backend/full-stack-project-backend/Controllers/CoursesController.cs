@@ -1,13 +1,15 @@
 using full_stack_project_backend.Models;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace full_stack_project_backend.Controllers
 {
     [ApiController]
     [Route("api/Courses")]
+    [Authorize]
     public class CoursesController : ControllerBase
-    {
+{
         private readonly ICourseServices _courseServices;
 
         public CoursesController(ICourseServices courseServices)

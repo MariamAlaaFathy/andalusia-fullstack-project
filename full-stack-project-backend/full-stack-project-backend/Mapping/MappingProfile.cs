@@ -23,8 +23,6 @@ public sealed class MappingProfile : Profile
         CreateMap<Course, ProgramCourseDto>();
         CreateMap<Course, CareerPathCourseDto>();
         CreateMap<User, UserDto>();
-        CreateMap<CourseApplication, CourseApplicationResponse>();
-        CreateMap<Payment, PaymentResponse>();
 
         CreateMap<ProgramEntity, ProgramDto>()
             .ForCtorParam(

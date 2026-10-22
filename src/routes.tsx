@@ -35,8 +35,8 @@ const router = createBrowserRouter([
     element: <Signup />,
   },
   {
-    path:"/forgot",
-    element:<Forgorpassword/>
+    path: "/forgot",
+    element: <Forgorpassword />,
   },
   {
     path: "/Courses",
@@ -69,7 +69,11 @@ const router = createBrowserRouter([
   {
     path: "/Careerpath/:careerPathId",
     element: <Careerpath />,
-  }
+  },
+  {
+    path: "/Courses",
+    element: <Courses />,
+  },
 ]);
 
 export default router;

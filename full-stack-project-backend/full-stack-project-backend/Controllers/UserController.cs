@@ -11,7 +11,7 @@ namespace full_stack_project_backend.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize]
+    
     public class UserController : ControllerBase
     {
         private readonly IUserServices _userservices;
