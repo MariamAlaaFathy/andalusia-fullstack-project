@@ -175,3 +175,6 @@ D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Release\net10.0\full_stack_project_backend.pdb
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Release\net10.0\full_stack_project_backend.genruntimeconfig.cache
 D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\obj\Release\net10.0\ref\full_stack_project_backend.dll
+D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Release\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Release\net10.0\Microsoft.Bcl.Cryptography.dll
+D:\Mariam\Files\College Files\Andalusia Academy\andalusia-fullstack-project\full-stack-project-backend\full-stack-project-backend\bin\Release\net10.0\Stripe.net.dll

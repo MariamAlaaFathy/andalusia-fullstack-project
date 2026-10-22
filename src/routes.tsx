@@ -12,6 +12,8 @@ import Programs from "./pages/Programs";
 import Careerpath from "./pages/Careerpath";
 import Application from "./pages/Application";
 import Dashboard from "./pages/Dashboard";
+import LearnerLMS from "./pages/LearnerLMS";
+import InstructorDashboard from "./pages/InstructorDashboard";
 
 const router = createBrowserRouter([
   {
@@ -53,6 +55,14 @@ const router = createBrowserRouter([
   {
     path: "/Dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/LearnerLMS",
+    element: <LearnerLMS />,
+  },
+  {
+    path: "/InstructorDashboard",
+    element: <InstructorDashboard />,
   },
   {
     path: "/Programs",

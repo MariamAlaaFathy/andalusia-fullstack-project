@@ -22,6 +22,46 @@ namespace full_stack_project_backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("full_stack_project_backend.Models.AssignmentSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(8000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CourseAssignmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Feedback")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<decimal?>("Grade")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("LearnerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LearnerId");
+
+                    b.HasIndex("CourseAssignmentId", "LearnerId")
+                        .IsUnique();
+
+                    b.ToTable("AssignmentSubmissions");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPath", b =>
                 {
                     b.Property<int>("Id")
@@ -390,6 +430,11 @@ namespace full_stack_project_backend.Migrations
                     b.Property<int>("LearnerId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Progress")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -403,6 +448,86 @@ namespace full_stack_project_backend.Migrations
                         .IsUnique();
 
                     b.ToTable("CourseApplications");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseAssignment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime>("DueAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "DueAt");
+
+                    b.ToTable("CourseAssignments");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseInstructor", b =>
+                {
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CourseId", "InstructorId");
+
+                    b.HasIndex("InstructorId");
+
+                    b.ToTable("CourseInstructors");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("StartsAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId", "StartsAt");
+
+                    b.ToTable("CourseSessions");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Payment", b =>
@@ -439,6 +564,7 @@ namespace full_stack_project_backend.Migrations
                         .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("StripeCheckoutSessionId")
+                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("StripePaymentIntentId")
@@ -505,6 +631,27 @@ namespace full_stack_project_backend.Migrations
                         });
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.SessionAttendance", b =>
+                {
+                    b.Property<int>("CourseSessionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LearnerId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsPresent")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CourseSessionId", "LearnerId");
+
+                    b.HasIndex("LearnerId");
+
+                    b.ToTable("SessionAttendances");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -513,6 +660,11 @@ namespace full_stack_project_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<string>("Bio")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -520,6 +672,13 @@ namespace full_stack_project_backend.Migrations
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasDefaultValue("Learner");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -544,6 +703,25 @@ namespace full_stack_project_backend.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("UserTokens");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.AssignmentSubmission", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.CourseAssignment", "CourseAssignment")
+                        .WithMany("Submissions")
+                        .HasForeignKey("CourseAssignmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("full_stack_project_backend.Models.User", "Learner")
+                        .WithMany()
+                        .HasForeignKey("LearnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CourseAssignment");
+
+                    b.Navigation("Learner");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.CareerPathSkill", b =>
@@ -579,6 +757,47 @@ namespace full_stack_project_backend.Migrations
                     b.Navigation("Course");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseAssignment", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.Course", "Course")
+                        .WithMany("Assignments")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseInstructor", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.Course", "Course")
+                        .WithMany("Instructors")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("full_stack_project_backend.Models.User", "Instructor")
+                        .WithMany()
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("Instructor");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.Course", "Course")
+                        .WithMany("Sessions")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.Payment", b =>
                 {
                     b.HasOne("full_stack_project_backend.Models.CourseApplication", "CourseApplication")
@@ -601,6 +820,25 @@ namespace full_stack_project_backend.Migrations
                     b.Navigation("CareerPath");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.SessionAttendance", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.CourseSession", "CourseSession")
+                        .WithMany("Attendance")
+                        .HasForeignKey("CourseSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("full_stack_project_backend.Models.User", "Learner")
+                        .WithMany()
+                        .HasForeignKey("LearnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CourseSession");
+
+                    b.Navigation("Learner");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.UserToken", b =>
                 {
                     b.HasOne("full_stack_project_backend.Models.User", "User")
@@ -619,9 +857,28 @@ namespace full_stack_project_backend.Migrations
                     b.Navigation("Skills");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.Course", b =>
+                {
+                    b.Navigation("Assignments");
+
+                    b.Navigation("Instructors");
+
+                    b.Navigation("Sessions");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.CourseApplication", b =>
                 {
                     b.Navigation("Payment");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseAssignment", b =>
+                {
+                    b.Navigation("Submissions");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>
+                {
+                    b.Navigation("Attendance");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Program", b =>

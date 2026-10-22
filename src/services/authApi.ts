@@ -22,7 +22,8 @@ function isUser(value: unknown): value is User {
     isRecord(value) &&
     typeof value.userId === "number" &&
     typeof value.username === "string" &&
-    typeof value.email === "string"
+    typeof value.email === "string" &&
+    (value.role === "Learner" || value.role === "Instructor")
   );
 }
 

@@ -36,7 +36,7 @@ namespace full_stack_project_backend.Controllers
 
             var user = await _userservices.CreateUser(dto);
 
-            return Ok(new { user.UserId, user.Username, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Role });
         }
 
         [HttpGet("{id}")]
@@ -107,7 +107,7 @@ namespace full_stack_project_backend.Controllers
                 accessToken,
                 refreshToken,
                 expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { user.UserId, user.Username, user.Email }
+                user = new { user.UserId, user.Username, user.Email, user.Role }
             });
         }
 
@@ -135,7 +135,13 @@ namespace full_stack_project_backend.Controllers
                 accessToken,
                 refreshToken = newRefresh,
                 expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { existing.UserId, existing.Username, existing.Email }
+                user = new
+                {
+                    existing.UserId,
+                    existing.Username,
+                    existing.Email,
+                    existing.Role
+                }
             });
         }
 

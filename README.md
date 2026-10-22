@@ -27,6 +27,8 @@ Courses, programs, career paths, and users are stored in the
 - `POST /api/users/login`
 - `POST /api/users/refresh`
 - `POST /api/users/logout` (JWT required)
+- `POST /api/payments/create-checkout-session` (Learner JWT required)
+- `POST /api/payments/webhook` (Stripe signature required)
 
 List endpoints return a paged object with `data`, `page`, `pageSize`,
 `totalCount`, `totalPages`, and next/previous-page flags. Program records
@@ -66,12 +68,38 @@ the API.
 
 Signed-in learners have the `Learner` role and can apply to courses and review
 their enrollment and payment status on `/Dashboard`. Free courses enroll
-directly. In Development, paid courses offer a clearly labeled demo payment
-with card-detail inputs; the browser only checks that they are filled in, and
-the app does not read, transmit, or store their values. No real charge is made,
-and the API is disabled outside Development. Do not enter real payment-card
-details. This is for exercising the enrollment flow only, not a production
-payment integration.
+directly. Paid courses use Stripe Checkout; the browser redirects to Stripe and
+never handles card details. Configure `Stripe__SecretKey` and
+`Stripe__WebhookSecret` in the backend environment, and set
+`Stripe__FrontendBaseUrl` to the frontend origin. For local testing, use Stripe
+test keys and forward events to the backend:
+
+```powershell
+stripe listen --forward-to http://localhost:5075/api/payments/webhook
+```
+
+Use the webhook signing secret printed by Stripe CLI as `Stripe__WebhookSecret`.
+The `checkout.session.completed` webhook updates the payment and enrollment
+status after successful payment.
+
+### Instructor workspace
+
+Apply all migrations, including `AddInstructorLms` and `SeedDemoInstructor`,
+before using `/InstructorDashboard`; the instructor dashboard reads assigned
+courses, learners, sessions, attendance, and progress from the configured SQL
+Server database and does not show sample data when the API is unavailable.
+New accounts default to the `Learner` role. The `SeedDemoInstructor` migration
+creates the `instructor@example.com` account if that email is not already in
+use, then assigns the demo account to existing courses. A pre-existing account
+with that email is left unchanged. For local demonstration, sign in with
+`Password123!`. This shared demo credential is not suitable for staging or
+production; replace or remove the account before deploying outside local
+development.
+
+The instructor must sign in again to receive a token with the updated role.
+Course API responses include assigned instructor name, email, and bio.
+Instructor APIs are restricted to assigned courses and support rosters,
+progress updates, sessions, attendance, assignments, and submission grading.
 
 In another terminal, run the frontend:
 

@@ -74,12 +74,29 @@ function NavBar() {
 
         {context?.user ? (
           <>
-            <NavLink
-              to="/Dashboard"
-              className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
-            >
-              Dashboard
-            </NavLink>
+            {context.user.role === "Instructor" ? (
+              <NavLink
+                to="/InstructorDashboard"
+                className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+              >
+                Teaching
+              </NavLink>
+            ) : (
+              <>
+                <NavLink
+                  to="/Dashboard"
+                  className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+                >
+                  Dashboard
+                </NavLink>
+                <NavLink
+                  to="/LearnerLMS"
+                  className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+                >
+                  My learning
+                </NavLink>
+              </>
+            )}
             <span className="text-sm sm:text-base">
               Hi, {context.user.username}
             </span>
