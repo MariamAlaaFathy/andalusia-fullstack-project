@@ -13,6 +13,10 @@ namespace full_stack_project_backend.Data
         {
             get; set;
         }
+        public DbSet<CourseModule> CourseModules => Set<CourseModule>();
+        public DbSet<Lesson> Lessons => Set<Lesson>();
+        public DbSet<LandingPageContent> LandingPageContents => Set<LandingPageContent>();
+        public DbSet<FeaturedCourse> FeaturedCourses => Set<FeaturedCourse>();
 
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
@@ -37,6 +41,31 @@ namespace full_stack_project_backend.Data
                     .WithMany()
                     .HasForeignKey(item => item.CourseId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CourseModule>()
+                .HasOne(module => module.Course)
+                .WithMany()
+                .HasForeignKey(module => module.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Lesson>()
+                .HasOne(lesson => lesson.Module)
+                .WithMany(module => module.Lessons)
+                .HasForeignKey(lesson => lesson.ModuleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FeaturedCourse>()
+                .HasOne(featured => featured.Course)
+                .WithMany()
+                .HasForeignKey(featured => featured.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FeaturedCourse>()
+                .HasIndex(featured => new { featured.CourseId })
+                .IsUnique();
+
+            modelBuilder.Entity<LandingPageContent>()
+                .HasData(new LandingPageContent { Id = 1 });
                 application.HasOne(item => item.Payment)
                     .WithOne(payment => payment.CourseApplication)
                     .HasForeignKey<Payment>(payment => payment.CourseApplicationId)

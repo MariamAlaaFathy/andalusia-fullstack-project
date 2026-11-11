@@ -46,4 +46,14 @@ public sealed class ProgramRepository(AppDbcontext dbContext) : IProgramReposito
             .Include(program => program.CareerPath)
             .Include(program => program.Courses)
             .SingleOrDefaultAsync(program => program.Id == id, cancellationToken);
+
+
+    public async Task<bool> ProgramExistsAsync(
+        int programId,
+        CancellationToken cancellationToken)
+    {
+        return await dbContext.Programs
+            .AsNoTracking()
+            .AnyAsync(program => program.Id == programId, cancellationToken);
+    }
 }

@@ -59,6 +59,8 @@ namespace full_stack_project_backend.Controllers
             if (!IsCurrentUser(id))
                 return Forbid();
 
+            updatedUser.Role = string.Empty;
+
             var user = await _userservices.UpdateUser(id, updatedUser);
 
             if (user == null)
@@ -79,6 +81,25 @@ namespace full_stack_project_backend.Controllers
                 return NotFound();
 
             return NoContent();
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpPut("{id:int}/role")]
+        public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateUserRoleDto dto)
+        {
+            var allowedRoles = new[] { "Learner", "ContentManager", "Administrator" };
+            if (!allowedRoles.Contains(dto.Role, StringComparer.OrdinalIgnoreCase))
+                return BadRequest(new { message = "Role must be Learner, ContentManager, or Administrator." });
+
+            var user = await _userRepository.GetUserById(id);
+            if (user == null)
+                return NotFound();
+
+            user.Role = allowedRoles.First(role =>
+                role.Equals(dto.Role, StringComparison.OrdinalIgnoreCase));
+
+            var updatedUser = await _userRepository.UpdateUser(id, user);
+            return Ok(new { updatedUser!.UserId, updatedUser.Username, updatedUser.Email, updatedUser.Role });
         }
 
         [AllowAnonymous]
@@ -110,7 +131,7 @@ namespace full_stack_project_backend.Controllers
                 accessToken,
                 refreshToken,
                 expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { user.UserId, user.Username, user.Email }
+                user = new { user.UserId, user.Username, user.Email, user.Role }
             });
         }
 
@@ -141,7 +162,7 @@ namespace full_stack_project_backend.Controllers
                 accessToken,
                 refreshToken = newRefresh,
                 expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { existing.UserId, existing.Username, existing.Email }
+                user = new { existing.UserId, existing.Username, existing.Email, existing.Role }
             });
         }
 

@@ -25,6 +25,8 @@ public sealed class MappingProfile : Profile
         CreateMap<User, UserDto>();
         CreateMap<CourseApplication, CourseApplicationResponse>();
         CreateMap<Payment, PaymentResponse>();
+        CreateMap<CreateCourseRequest, Course>();
+        CreateMap<UpdateCourseRequest, Course>();
 
         CreateMap<ProgramEntity, ProgramDto>()
             .ForCtorParam(

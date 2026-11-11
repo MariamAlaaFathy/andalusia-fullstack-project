@@ -71,6 +71,9 @@ namespace full_stack_project_backend.Repository
             if (!string.IsNullOrEmpty(updatedUser.Username))
                 user.Username = updatedUser.Username;
 
+            if (!string.IsNullOrEmpty(updatedUser.Role))
+                user.Role = updatedUser.Role;
+
             if (!string.IsNullOrEmpty(updatedUser.RefreshToken))
                 user.RefreshToken = updatedUser.RefreshToken;
 

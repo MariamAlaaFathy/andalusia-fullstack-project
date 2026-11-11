@@ -13,5 +13,19 @@
         public string Level { get; set; } = string.Empty;
         public List<string> Prerequisites { get; set; } = [];
         public List<string> LearningOutcomes { get; set; } = [];
+
+       
+
+        public string Title { get; set; } = string.Empty;
+
+    
+        public string Content { get; set; } = string.Empty;
+
+        public string? VideoUrl { get; set; }
+
+        public string? PdfUrl { get; set; }
+
+        public int Order { get; set; }
+
     }
 }

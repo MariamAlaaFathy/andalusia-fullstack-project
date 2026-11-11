@@ -49,5 +49,46 @@ namespace full_stack_project_backend.Repository
                 .Include(course => course.Program)
                 .ThenInclude(program => program.CareerPath)
                 .SingleOrDefaultAsync(course => course.Id == id, cancellationToken);
+
+
+        public async Task<Course> CreateCourseAsync(Course course, CancellationToken cancellationToken)
+        {
+            dbContext.Courses.Add(course);
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return course;
+        }
+
+        public async Task<Course?> GetCourseForUpdateAsync( int id, CancellationToken cancellationToken)
+        {
+            return await dbContext.Courses
+                .SingleOrDefaultAsync(
+                    course => course.Id == id,
+                    cancellationToken);
+        }
+
+        public async Task UpdateCourseAsync(
+            Course course,
+            CancellationToken cancellationToken)
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+
+        public async Task<bool> CourseHasApplicationsAsync( int courseId,CancellationToken cancellationToken)
+        {
+            return await dbContext.CourseApplications
+                .AsNoTracking()
+                .AnyAsync(application => application.CourseId == courseId,
+                    cancellationToken);
+        }
+
+        public async Task DeleteCourseAsync(Course course,CancellationToken cancellationToken)
+        {
+            dbContext.Courses.Remove(course);
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+
     }
 }

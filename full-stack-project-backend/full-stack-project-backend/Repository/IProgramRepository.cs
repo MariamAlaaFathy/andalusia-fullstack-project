@@ -14,4 +14,6 @@ public interface IProgramRepository
     Task<ProgramEntity?> GetProgramByIdAsync(
         int id,
         CancellationToken cancellationToken);
+
+    Task<bool> ProgramExistsAsync(int programId, CancellationToken cancellationToken);
 }

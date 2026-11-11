@@ -11,5 +11,15 @@ namespace full_stack_project_backend.Repository
             int pageSize,
             CancellationToken cancellationToken);
         Task<Course?> GetCourseByIdAsync(int id, CancellationToken cancellationToken);
+
+        Task<Course> CreateCourseAsync(Course course, CancellationToken cancellationToken);
+
+        Task<Course?> GetCourseForUpdateAsync( int id, CancellationToken cancellationToken);
+
+        Task UpdateCourseAsync(Course course,CancellationToken cancellationToken);
+        Task<bool> CourseHasApplicationsAsync(int courseId, CancellationToken cancellationToken);
+      Task DeleteCourseAsync(Course course,CancellationToken cancellationToken);
+
+  
     }
 }
