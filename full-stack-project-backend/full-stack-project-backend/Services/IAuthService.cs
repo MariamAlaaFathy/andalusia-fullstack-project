@@ -11,6 +11,14 @@ public interface IAuthService
     Task<AuthOperationResult> RefreshAsync(
         RefreshDto request,
         CancellationToken cancellationToken);
+
+    Task RequestPasswordResetAsync(
+        ForgotPasswordDto request,
+        CancellationToken cancellationToken);
+
+    Task<bool> ResetPasswordAsync(
+        ResetPasswordDto request,
+        CancellationToken cancellationToken);
 }
 
 public sealed record AuthUserResponse(

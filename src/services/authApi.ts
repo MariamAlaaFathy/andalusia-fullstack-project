@@ -9,6 +9,16 @@ type AuthSession = {
   user: User;
 };
 
+export type PasswordResetResponse = {
+  message: string;
+};
+
+export type PasswordResetRequest = {
+  email: string;
+  token: string;
+  newPassword: string;
+};
+
 const refreshTokenKey = "andalusia.refreshToken";
 let accessToken: string | null = null;
 let refreshInProgress: Promise<AuthSession | null> | null = null;
@@ -43,11 +53,30 @@ async function readPayload(response: Response): Promise<unknown> {
 
 function getErrorMessage(payload: unknown, status: number): string {
   if (isRecord(payload)) {
+    const validationErrors = payload.errors;
+    if (isRecord(validationErrors)) {
+      for (const messages of Object.values(validationErrors)) {
+        if (Array.isArray(messages)) {
+          const firstMessage = messages.find(
+            (message): message is string => typeof message === "string",
+          );
+          if (firstMessage) return firstMessage;
+        } else if (typeof messages === "string") {
+          return messages;
+        }
+      }
+    }
     if (typeof payload.message === "string") return payload.message;
     if (typeof payload.detail === "string") return payload.detail;
     if (typeof payload.title === "string") return payload.title;
   }
   return `The request failed with status ${status}.`;
+}
+
+function isPasswordResetResponse(
+  payload: unknown,
+): payload is PasswordResetResponse {
+  return isRecord(payload) && typeof payload.message === "string";
 }
 
 async function request<T>(
@@ -148,6 +177,24 @@ export const authApi = {
       "/api/auth/register",
       registration,
       (payload): payload is User => isUser(payload),
+    );
+  },
+
+  requestPasswordReset(email: string): Promise<PasswordResetResponse> {
+    return request(
+      "/api/auth/forgot-password",
+      { email },
+      isPasswordResetResponse,
+    );
+  },
+
+  resetPassword(
+    payload: PasswordResetRequest,
+  ): Promise<PasswordResetResponse> {
+    return request(
+      "/api/auth/reset-password",
+      payload,
+      isPasswordResetResponse,
     );
   },
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using full_stack_project_backend.Repository;
 using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace full_stack_project_backend.Controllers
 {
@@ -16,15 +17,18 @@ namespace full_stack_project_backend.Controllers
         private readonly IUserServices _userservices;
         private readonly IUserRepository _userRepository;
         private readonly IAuthService _authService;
+        private readonly IWebHostEnvironment _environment;
 
         public UserController(
             IUserServices userservices,
             IUserRepository userRepository,
-            IAuthService authService)
+            IAuthService authService,
+            IWebHostEnvironment environment)
         {
             _userservices = userservices;
             _userRepository = userRepository;
             _authService = authService;
+            _environment = environment;
         }
 
         [AllowAnonymous]
@@ -135,6 +139,52 @@ namespace full_stack_project_backend.Controllers
             return result.Session is null
                 ? Unauthorized(new { message = result.ErrorMessage ?? "Invalid refresh token." })
                 : Ok(result.Session);
+        }
+
+        [AllowAnonymous]
+        [EnableRateLimiting("password-reset")]
+        [HttpPost("~/api/auth/forgot-password")]
+        public async Task<IActionResult> ForgotPassword(
+            [FromBody] ForgotPasswordDto dto)
+        {
+            if (!_environment.IsDevelopment())
+            {
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    new { message = "Password reset email delivery is not configured." });
+            }
+
+            await _authService.RequestPasswordResetAsync(
+                dto,
+                HttpContext.RequestAborted);
+            return Ok(new
+            {
+                message = "If an account exists for that email, a reset link has been generated. In Development, check the backend logs."
+            });
+        }
+
+        [AllowAnonymous]
+        [EnableRateLimiting("password-reset")]
+        [HttpPost("~/api/auth/reset-password")]
+        public async Task<IActionResult> ResetPassword(
+            [FromBody] ResetPasswordDto dto)
+        {
+            if (!_environment.IsDevelopment())
+            {
+                return StatusCode(
+                    StatusCodes.Status503ServiceUnavailable,
+                    new { message = "Password reset is not available until an email provider is configured." });
+            }
+
+            var reset = await _authService.ResetPasswordAsync(
+                dto,
+                HttpContext.RequestAborted);
+            return reset
+                ? Ok(new { message = "Your password has been reset. You can now sign in." })
+                : BadRequest(new
+                {
+                    message = "This reset link is invalid or has expired. Request a new link and try again."
+                });
         }
 
         [HttpPost("logout")]

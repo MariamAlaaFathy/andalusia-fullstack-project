@@ -35,6 +35,8 @@ Courses, programs, career paths, and users are stored in the
 - `PUT`/`DELETE /api/course-content/lessons/{id}` (Content Manager or Admin JWT required)
 - `POST /api/auth/register` (also available at `/api/users`)
 - `POST /api/auth/login` (also available at `/api/users/login`)
+- `POST /api/auth/forgot-password` (Development-only simulated email)
+- `POST /api/auth/reset-password` (Development-only)
 - `POST /api/users/refresh`
 - `POST /api/users/logout` (JWT required)
 - `GET /api/notifications` (JWT required)
@@ -63,6 +65,21 @@ Registration creates the account and signs the user in. The access JWT is kept
 in memory and attached as a Bearer token to API calls; the rotating refresh
 token is kept in session storage and used to restore a session after a page
 reload or renew an expired access token. Logging out revokes the refresh token.
+
+### Password reset in Development
+
+The Forgot Password link opens `/forgot`, which handles both reset requests and
+the new-password form. In Development, the API stores only a SHA-256 hash of a
+random reset token, expires it after 30 minutes, and writes the reset link to
+the backend logs instead of sending email. The request response is the same
+whether or not the email belongs to an active account. The reset link opens the
+same `/forgot` page with the email and token query parameters.
+
+Both reset endpoints are rate limited. They return `503 Service Unavailable`
+outside Development until an email provider is configured. Override
+`PasswordReset__FrontendBaseUrl` when the frontend is not running at
+`http://localhost:5173/forgot`. Treat Development reset links in logs as
+secrets and do not use this simulated sender in production.
 
 ### Start locally
 

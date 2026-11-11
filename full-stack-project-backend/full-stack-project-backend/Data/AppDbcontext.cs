@@ -50,14 +50,19 @@ namespace full_stack_project_backend.Data
                     .IsUnique();
             });
 
-            modelBuilder.Entity<UserToken>()
-                .HasKey(userToken => userToken.UserId);
-
-            modelBuilder.Entity<UserToken>()
-                .HasOne(userToken => userToken.User)
-                .WithOne(user => user.UserToken)
-                .HasForeignKey<UserToken>(userToken => userToken.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<UserToken>(userToken =>
+            {
+                userToken.HasKey(item => item.UserId);
+                userToken.Property(item => item.PasswordResetTokenHash)
+                    .HasMaxLength(64);
+                userToken.HasIndex(item => item.PasswordResetTokenHash)
+                    .IsUnique()
+                    .HasFilter("[PasswordResetTokenHash] IS NOT NULL");
+                userToken.HasOne(item => item.User)
+                    .WithOne(user => user.UserToken)
+                    .HasForeignKey<UserToken>(item => item.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<Notification>(notification =>
             {

@@ -5,6 +5,8 @@ namespace full_stack_project_backend.Models
         public int UserId { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiry { get; set; }
+        public string? PasswordResetTokenHash { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
         public User User { get; set; } = null!;
     }
 }

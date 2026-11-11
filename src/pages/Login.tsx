@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useForm, useWatch, type SubmitHandler } from "react-hook-form";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { userContext, type Credentials } from "../types/UserContextType";
 
@@ -21,8 +21,10 @@ function Login() {
     handleSubmit,
     clearErrors,
     setError,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<Credentials>({ mode: "onChange" });
+  const email = useWatch({ control, name: "email" });
 
   const onSubmit: SubmitHandler<Credentials> = async (credentials) => {
     if (!context) return;
@@ -113,7 +115,11 @@ function Login() {
             </p>
           )}
 
-          <NavLink className="hover:text-red-500" to="/forgot">
+          <NavLink
+            className="hover:text-red-500"
+            to="/forgot"
+            state={email?.trim() ? { email: email.trim() } : undefined}
+          >
             Forgot password?
           </NavLink>
           <input

@@ -1,5 +1,3 @@
-type forgortype={
-    email:string
-}
-
-export type {forgortype}
+export type forgortype = {
+  email: string;
+};
