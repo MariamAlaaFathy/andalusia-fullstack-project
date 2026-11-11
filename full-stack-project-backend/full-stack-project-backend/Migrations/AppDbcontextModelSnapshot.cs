@@ -530,6 +530,37 @@ namespace full_stack_project_backend.Migrations
                     b.ToTable("CourseSessions");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsRead", "Date");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
@@ -799,6 +830,17 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.Notification", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Payment", b =>

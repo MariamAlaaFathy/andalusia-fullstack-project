@@ -14,7 +14,7 @@ export type CourseApplication = {
   courseId: number;
   courseName: string;
   amount: number;
-  status: "AwaitingPayment" | "Enrolled";
+  status: "AwaitingPayment" | "Pending" | "Approved" | "Enrolled";
   createdAt: string;
   payment: EnrollmentPayment | null;
 };
@@ -47,7 +47,10 @@ function isApplication(value: unknown): value is CourseApplication {
     typeof value.courseId === "number" &&
     typeof value.courseName === "string" &&
     typeof value.amount === "number" &&
-    (value.status === "AwaitingPayment" || value.status === "Enrolled") &&
+    (value.status === "AwaitingPayment" ||
+      value.status === "Pending" ||
+      value.status === "Approved" ||
+      value.status === "Enrolled") &&
     typeof value.createdAt === "string" &&
     (value.payment === null || isPayment(value.payment))
   );

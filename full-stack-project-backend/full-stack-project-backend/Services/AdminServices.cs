@@ -9,11 +9,16 @@ namespace full_stack_project_backend.Services
     {
         private readonly IAdminRepository _adminRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly INotificationService _notificationService;
 
-        public AdminServices(IAdminRepository adminRepository, IPasswordHasher<User> passwordHasher)
+        public AdminServices(
+            IAdminRepository adminRepository,
+            IPasswordHasher<User> passwordHasher,
+            INotificationService notificationService)
         {
             _adminRepository = adminRepository;
             _passwordHasher = passwordHasher;
+            _notificationService = notificationService;
         }
 
         public Task<IReadOnlyList<UserDto>> GetUsers() => _adminRepository.GetUsers();
@@ -23,7 +28,15 @@ namespace full_stack_project_backend.Services
         public async Task<UserDto> CreateUser(UserDto user)
         {
             user.Password = _passwordHasher.HashPassword(new User(), user.Password);
-            return await _adminRepository.CreateUser(user);
+            var createdUser = await _adminRepository.CreateUser(user);
+            if (createdUser.Role == "Learner")
+            {
+                await _notificationService.CreateAsync(
+                    createdUser.UserId,
+                    $"Welcome to Andalusia Academy, {createdUser.Username}! Your learner account is ready.",
+                    CancellationToken.None);
+            }
+            return createdUser;
         }
 
         public async Task<UserDto?> UpdateUser(int userId, UserDto user)

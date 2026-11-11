@@ -3,6 +3,8 @@ namespace full_stack_project_backend.Models;
 public enum CourseApplicationStatus
 {
     AwaitingPayment,
+    Pending,
+    Approved,
     Enrolled
 }
 

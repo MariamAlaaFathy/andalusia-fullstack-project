@@ -56,7 +56,10 @@ function Dashboard() {
     (application) => application.status === "Enrolled",
   ).length;
   const pendingCount = applications.filter(
-    (application) => application.status === "AwaitingPayment",
+    (application) =>
+      application.status === "AwaitingPayment" ||
+      application.status === "Pending" ||
+      application.status === "Approved",
   ).length;
   const payments = applications.flatMap((application) =>
     application.payment
@@ -151,7 +154,7 @@ function Dashboard() {
           }`}
         >
           <OverviewCard label="Applications" value={applications.length} />
-          <OverviewCard label="Awaiting payment" value={pendingCount} />
+          <OverviewCard label="Applications pending" value={pendingCount} />
           <OverviewCard label="Enrolled courses" value={enrolledCount} />
         </section>
 
@@ -212,7 +215,7 @@ function Dashboard() {
                           </span>
                         </div>
                       </div>
-                      {application.status === "AwaitingPayment" ? (
+                      {application.status !== "Enrolled" ? (
                         <Link
                           to={`/Apply/${application.courseId}`}
                           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#a9694f] px-4 py-2 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"

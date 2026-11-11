@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import LearnerLMS from "./pages/LearnerLMS";
 import InstructorDashboard from "./pages/InstructorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import Notifications from "./pages/Notifications";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
   {
     path: "/Dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/notifications",
+    element: <Notifications />,
   },
   {
     path: "/LearnerLMS",

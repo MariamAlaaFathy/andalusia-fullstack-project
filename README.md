@@ -27,6 +27,10 @@ Courses, programs, career paths, and users are stored in the
 - `POST /api/users/login`
 - `POST /api/users/refresh`
 - `POST /api/users/logout` (JWT required)
+- `GET /api/notifications` (JWT required)
+- `GET /api/notifications/unread-count` (JWT required)
+- `PATCH /api/notifications/{id}/read` (JWT required)
+- `PATCH /api/admin/applications/{id}/status` (Admin JWT required)
 - `POST /api/payments/create-checkout-session` (Learner JWT required)
 - `POST /api/payments/webhook` (Stripe signature required)
 
@@ -81,6 +85,14 @@ stripe listen --forward-to http://localhost:5075/api/payments/webhook
 Use the webhook signing secret printed by Stripe CLI as `Stripe__WebhookSecret`.
 The `checkout.session.completed` webhook updates the payment and enrollment
 status after successful payment.
+
+Learner notifications are stored in SQL Server and cover account creation,
+application status changes (Pending, Approved, or Enrolled), successful
+payments, newly scheduled course sessions, and assignment grading feedback.
+The header bell polls the unread count every 15 seconds and when the page
+becomes visible. Learners can read their inbox at `/notifications` and mark
+individual items as read. Apply the `AddNotificationsAndApplicationStatuses`
+migration before using these endpoints.
 
 ### Instructor workspace
 

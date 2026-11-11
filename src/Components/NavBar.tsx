@@ -1,9 +1,11 @@
 import { useContext, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { userContext } from "../types/UserContextType";
+import { notificationsContext } from "../context/NotificationsContext";
 
 function NavBar() {
   const context = useContext(userContext);
+  const notifications = useContext(notificationsContext);
   const [logoutError, setLogoutError] = useState("");
 
   async function handleLogout() {
@@ -103,6 +105,39 @@ function NavBar() {
                   My learning
                 </NavLink>
               </>
+            )}
+            {context.user.role === "Learner" && (
+              <NavLink
+                to="/notifications"
+                aria-label={`Notifications${notifications?.unreadCount ? `, ${notifications.unreadCount} unread` : ""}`}
+                title="Notifications"
+                className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[#765f52] transition-colors hover:bg-[#f1e0d6] hover:text-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+              >
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  className="h-6 w-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0"
+                  />
+                </svg>
+                {!!notifications?.unreadCount && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -right-0.5 -top-0.5 min-w-5 rounded-full bg-[#a55335] px-1 text-center text-xs font-bold leading-5 text-white"
+                  >
+                    {notifications.unreadCount > 99
+                      ? "99+"
+                      : notifications.unreadCount}
+                  </span>
+                )}
+              </NavLink>
             )}
             <span className="text-sm sm:text-base">
               Hi, {context.user.username}
