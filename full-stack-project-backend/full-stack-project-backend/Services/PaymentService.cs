@@ -8,7 +8,8 @@ namespace full_stack_project_backend.Services;
 
 public sealed class PaymentService(
     IEnrollmentRepository repository,
-    IConfiguration configuration) : IPaymentService
+    IConfiguration configuration,
+    INotificationService notificationService) : IPaymentService
 {
     public async Task<string> CreateCheckoutSessionAsync(
         int applicationId,
@@ -143,11 +144,19 @@ public sealed class PaymentService(
             return false;
         }
 
+        var isFirstConfirmation = payment.Status != PaymentStatus.Paid;
         payment.Status = PaymentStatus.Paid;
         payment.StripePaymentIntentId = paymentIntentId;
         payment.PaidAt ??= DateTime.UtcNow;
         payment.CourseApplication.Status = CourseApplicationStatus.Enrolled;
         await repository.SaveChangesAsync(cancellationToken);
+        if (isFirstConfirmation)
+        {
+            await notificationService.CreateAsync(
+                payment.CourseApplication.LearnerId,
+                $"Payment confirmed for {payment.CourseApplication.CourseName}. You are now enrolled.",
+                cancellationToken);
+        }
         return true;
     }
 

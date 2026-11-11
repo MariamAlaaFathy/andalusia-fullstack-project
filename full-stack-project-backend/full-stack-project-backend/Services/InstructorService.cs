@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace full_stack_project_backend.Services;
 
-public sealed class InstructorService(AppDbcontext dbContext) : IInstructorService
+public sealed class InstructorService(
+    AppDbcontext dbContext,
+    INotificationService notificationService) : IInstructorService
 {
     public async Task<IReadOnlyList<InstructorCourseResponse>> GetCoursesAsync(
         int instructorId,
@@ -174,6 +176,14 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
         };
         dbContext.CourseSessions.Add(session);
         await dbContext.SaveChangesAsync(cancellationToken);
+        var courseName = await dbContext.Courses
+            .Where(course => course.Id == courseId)
+            .Select(course => course.Name)
+            .FirstAsync(cancellationToken);
+        await notificationService.CreateForCourseLearnersAsync(
+            courseId,
+            $"A new session, {session.Title}, has been scheduled for {courseName} on {session.StartsAt.ToLocalTime():g}.",
+            cancellationToken);
         return ToSessionResponse(session);
     }
 
@@ -369,6 +379,7 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
 
         var submission = await dbContext.AssignmentSubmissions
             .Include(item => item.Learner)
+            .Include(item => item.CourseAssignment)
             .FirstOrDefaultAsync(
                 item => item.Id == submissionId &&
                     item.CourseAssignmentId == assignmentId,
@@ -378,6 +389,10 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
         submission.Grade = request.Grade;
         submission.Feedback = request.Feedback?.Trim();
         await dbContext.SaveChangesAsync(cancellationToken);
+        await notificationService.CreateAsync(
+            submission.LearnerId,
+            $"Your submission for {submission.CourseAssignment.Title} has been graded. Grade: {request.Grade:0.##}.{(string.IsNullOrWhiteSpace(submission.Feedback) ? string.Empty : $" Feedback: {submission.Feedback}")}",
+            cancellationToken);
 
         return new AssignmentSubmissionResponse(
             submission.Id,

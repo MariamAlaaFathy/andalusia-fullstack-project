@@ -21,6 +21,7 @@ namespace full_stack_project_backend.Data
         public DbSet<UserToken> UserTokens => Set<UserToken>();
         public DbSet<CourseApplication> CourseApplications => Set<CourseApplication>();
         public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<CourseInstructor> CourseInstructors => Set<CourseInstructor>();
         public DbSet<CourseSession> CourseSessions => Set<CourseSession>();
         public DbSet<SessionAttendance> SessionAttendances => Set<SessionAttendance>();
@@ -47,6 +48,22 @@ namespace full_stack_project_backend.Data
                 .WithOne(user => user.UserToken)
                 .HasForeignKey<UserToken>(userToken => userToken.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Notification>(notification =>
+            {
+                notification.Property(item => item.Text)
+                    .HasMaxLength(4000)
+                    .IsRequired();
+                notification.Property(item => item.Date)
+                    .IsRequired();
+                notification.Property(item => item.IsRead)
+                    .HasDefaultValue(false);
+                notification.HasOne(item => item.User)
+                    .WithMany()
+                    .HasForeignKey(item => item.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                notification.HasIndex(item => new { item.UserId, item.IsRead, item.Date });
+            });
 
             modelBuilder.Entity<CourseApplication>(application =>
             {

@@ -10,6 +10,7 @@ namespace full_stack_project_backend.Services;
 public sealed class EnrollmentService(
     IEnrollmentRepository repository,
     IMapper mapper,
+    INotificationService notificationService,
     ILogger<EnrollmentService> logger) : IEnrollmentService
 {
     public async Task<IReadOnlyList<CourseApplicationResponse>> GetMineAsync(
@@ -72,13 +73,19 @@ public sealed class EnrollmentService(
             Amount = course.Price,
             Status = course.Price == 0
                 ? CourseApplicationStatus.Enrolled
-                : CourseApplicationStatus.AwaitingPayment,
+                : CourseApplicationStatus.Pending,
             CreatedAt = DateTime.UtcNow
         };
 
         try
         {
             await repository.AddApplicationAsync(application, cancellationToken);
+            await notificationService.CreateAsync(
+                learnerId,
+                application.Status == CourseApplicationStatus.Enrolled
+                    ? $"You are now enrolled in {application.CourseName}."
+                    : $"Your application for {application.CourseName} is pending.",
+                cancellationToken);
             return (mapper.Map<CourseApplicationResponse>(application), true);
         }
         catch (DbUpdateException exception)
