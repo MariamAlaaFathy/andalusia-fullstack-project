@@ -8,6 +8,7 @@ namespace full_stack_project_backend.Repository
 
         public Task<User?> GetByEmail(string email);
         public Task<User?> GetByRefreshToken(string refreshToken);
+        public Task SetRefreshToken(int userId, string refreshToken, DateTime expiry);
 
         public Task<bool> DeleteUser(int userId);
         public Task<User?> UpdateUser(int id, User user);

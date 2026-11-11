@@ -15,6 +15,7 @@ public sealed class CareerPathRepository(AppDbcontext dbContext)
     {
         var query = dbContext.CareerPaths
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(careerPath => careerPath.Skills)
             .Include(careerPath => careerPath.Programs)
                 .ThenInclude(program => program.Courses)
@@ -45,6 +46,7 @@ public sealed class CareerPathRepository(AppDbcontext dbContext)
         CancellationToken cancellationToken) =>
         dbContext.CareerPaths
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(careerPath => careerPath.Skills)
             .Include(careerPath => careerPath.Programs)
                 .ThenInclude(program => program.Courses)

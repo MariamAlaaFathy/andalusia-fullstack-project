@@ -12,6 +12,13 @@ type Coursetype = {
   level: string;
   prerequisites: string[];
   learningOutcomes: string[];
+  instructors: CourseInstructor[];
+};
+
+type CourseInstructor = {
+  name: string;
+  email: string;
+  bio: string;
 };
 
 export type { Coursetype };

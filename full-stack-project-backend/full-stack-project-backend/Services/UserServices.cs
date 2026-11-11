@@ -8,11 +8,16 @@ namespace full_stack_project_backend.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
+        private readonly INotificationService _notificationService;
 
-        public UserServices(IUserRepository userRepository, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
+        public UserServices(
+            IUserRepository userRepository,
+            Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher,
+            INotificationService notificationService)
         {
             _userRepository = userRepository;
             _passwordHasher = passwordHasher;
+            _notificationService = notificationService;
         }
 
         public async Task<User> CreateUser(UserDto dto)
@@ -20,12 +25,18 @@ namespace full_stack_project_backend.Services
             var user = new User
             {
                 Username = dto.Username,
-                Email = dto.Email
+                Email = dto.Email,
+                Role = UserRoles.Learner
             };
 
             user.Password = _passwordHasher.HashPassword(user, dto.Password);
 
-            return await _userRepository.CreateUser(user);
+            var createdUser = await _userRepository.CreateUser(user);
+            await _notificationService.CreateAsync(
+                createdUser.UserId,
+                $"Welcome to Andalusia Academy, {createdUser.Username}! Your learner account is ready.",
+                CancellationToken.None);
+            return createdUser;
         }
 
         public async Task<User?> UpdateUser(int id, User updatedUser)

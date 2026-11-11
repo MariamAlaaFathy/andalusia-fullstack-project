@@ -1,11 +1,13 @@
 using full_stack_project_backend.Models;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace full_stack_project_backend.Controllers;
 
 [ApiController]
 [Route("api/CareerPaths")]
+[Authorize]
 public sealed class CareerPathsController(ICareerPathServices careerPathServices)
     : ControllerBase
 {

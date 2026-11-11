@@ -8,22 +8,26 @@ import {
 } from "../services/enrollmentApi";
 import { formatPrice } from "../utils/formatPrice";
 import { userContext } from "../types/UserContextType";
+import { notificationsContext } from "../context/NotificationsContext";
 
 type DashboardSection = "applications" | "payments";
 
 function Dashboard() {
   const context = useContext(userContext);
+  const notifications = useContext(notificationsContext);
   const userId = context?.user?.userId;
-  const hasDashboard = Boolean(context?.user);
+  const isLearner = context?.user?.role === "Learner";
+  const hasDashboard = isLearner;
   const [applications, setApplications] = useState<CourseApplication[]>([]);
   const [loadedUserId, setLoadedUserId] = useState<number>();
   const [errorMessage, setErrorMessage] = useState("");
   const [section, setSection] = useState<DashboardSection>("applications");
-  const isLoading = typeof userId === "number" && loadedUserId !== userId;
+  const isLoading =
+    isLearner && typeof userId === "number" && loadedUserId !== userId;
 
   useEffect(() => {
     if (context?.isLoading) return;
-    if (typeof userId !== "number") return;
+    if (!isLearner || typeof userId !== "number") return;
 
     const controller = new AbortController();
 
@@ -48,13 +52,16 @@ function Dashboard() {
 
     void loadApplications();
     return () => controller.abort();
-  }, [context?.isLoading, userId]);
+  }, [context?.isLoading, isLearner, userId]);
 
   const enrolledCount = applications.filter(
     (application) => application.status === "Enrolled",
   ).length;
   const pendingCount = applications.filter(
-    (application) => application.status === "AwaitingPayment",
+    (application) =>
+      application.status === "AwaitingPayment" ||
+      application.status === "Pending" ||
+      application.status === "Approved",
   ).length;
   const payments = applications.flatMap((application) =>
     application.payment
@@ -85,6 +92,15 @@ function Dashboard() {
           >
             Explore courses
           </Link>
+          {isLearner && (
+            <Link
+              to="/notifications"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+            >
+              Notifications
+              {notifications?.unreadCount ? ` (${notifications.unreadCount} unread)` : ""}
+            </Link>
+          )}
         </header>
 
         {context?.isLoading && (
@@ -121,6 +137,18 @@ function Dashboard() {
           </section>
         )}
 
+        {context?.user && !isLearner && (
+          <section className="mb-6 rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+            <h2 className="font-serif text-2xl font-bold">
+              Learner account required
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+              Applications and payments are only available to learner
+              accounts. Sign out and sign in with a learner account to continue.
+            </p>
+          </section>
+        )}
+
         {errorMessage && (
           <div
             role="alert"
@@ -137,7 +165,7 @@ function Dashboard() {
           }`}
         >
           <OverviewCard label="Applications" value={applications.length} />
-          <OverviewCard label="Awaiting payment" value={pendingCount} />
+          <OverviewCard label="Applications pending" value={pendingCount} />
           <OverviewCard label="Enrolled courses" value={enrolledCount} />
         </section>
 
@@ -197,8 +225,31 @@ function Dashboard() {
                             {formatPrice(application.amount)}
                           </span>
                         </div>
+                        {application.status === "Enrolled" && (
+                          <div className="mt-4 max-w-sm">
+                            <div className="mb-2 flex items-center justify-between text-xs">
+                              <span className="text-[#765f52]">Course progress</span>
+                              <span className="font-semibold text-[#2b2420]">
+                                {application.progress}%
+                              </span>
+                            </div>
+                            <div
+                              className="h-2 overflow-hidden rounded-full bg-[#eee2d5]"
+                              role="progressbar"
+                              aria-label={`${application.courseName} progress`}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
+                              aria-valuenow={application.progress}
+                            >
+                              <div
+                                className="h-full rounded-full bg-[#a9694f] transition-[width]"
+                                style={{ width: `${application.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {application.status === "AwaitingPayment" ? (
+                      {application.status !== "Enrolled" ? (
                         <Link
                           to={`/Apply/${application.courseId}`}
                           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg border border-[#a9694f] px-4 py-2 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"

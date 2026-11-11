@@ -35,9 +35,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
   }, []);
 
-  async function login(credentials: Credentials): Promise<void> {
+  async function login(credentials: Credentials): Promise<User> {
     const session = await authApi.login(credentials);
     setUser(session.user);
+    return session.user;
   }
 
   async function register(registration: Registration): Promise<void> {

@@ -34,7 +34,10 @@ namespace full_stack_project_backend.Services
 
             return new Pagedresult<CourseDto>
             {
-                Data = _mapper.Map<IReadOnlyList<CourseDto>>(courses),
+                Data = courses
+                    .AsEnumerable()
+                    .Select(course => _mapper.Map<CourseDto>(course))
+                    .ToArray(),
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount

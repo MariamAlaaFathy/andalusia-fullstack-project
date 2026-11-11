@@ -22,7 +22,8 @@ function isUser(value: unknown): value is User {
     isRecord(value) &&
     typeof value.userId === "number" &&
     typeof value.username === "string" &&
-    typeof value.email === "string"
+    typeof value.email === "string" &&
+    typeof value.role === "string"
   );
 }
 
@@ -135,7 +136,7 @@ function refreshSession(): Promise<AuthSession | null> {
 export const authApi = {
   async login(credentials: Credentials): Promise<AuthSession> {
     const session = await request(
-      "/api/users/login",
+      "/api/auth/login",
       credentials,
       isAuthSession,
     );
@@ -144,7 +145,7 @@ export const authApi = {
 
   async register(registration: Registration): Promise<void> {
     await request(
-      "/api/users",
+      "/api/auth/register",
       registration,
       (payload): payload is User => isUser(payload),
     );

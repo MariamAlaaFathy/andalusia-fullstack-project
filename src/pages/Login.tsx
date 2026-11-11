@@ -29,8 +29,13 @@ function Login() {
 
     clearErrors("root.server");
     try {
-      await context.login(credentials);
-      navigate(destination, { replace: true });
+      const user = await context.login(credentials);
+      navigate(
+        destination === "/" && user.role === "Admin"
+          ? "/AdminDashboard"
+          : destination,
+        { replace: true },
+      );
     } catch (error) {
       setError("root.server", {
         message:

@@ -1,8 +1,7 @@
-﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.DTOs;
 using full_stack_project_backend.Models;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using full_stack_project_backend.Repository;
 using System.Security.Claims;
@@ -11,24 +10,26 @@ namespace full_stack_project_backend.Controllers
 {
     [ApiController]
     [Route("api/users")]
-    [Authorize]
+    
     public class UserController : ControllerBase
     {
         private readonly IUserServices _userservices;
         private readonly IUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IAuthService _authService;
 
-        public UserController(IUserServices userservices, IUserRepository userRepository, ITokenService tokenService, IPasswordHasher<User> passwordHasher)
+        public UserController(
+            IUserServices userservices,
+            IUserRepository userRepository,
+            IAuthService authService)
         {
             _userservices = userservices;
             _userRepository = userRepository;
-            _tokenService = tokenService;
-            _passwordHasher = passwordHasher;
+            _authService = authService;
         }
 
         [AllowAnonymous]
         [HttpPost]
+        [HttpPost("~/api/auth/register")]
         public async Task<IActionResult> CreateUser([FromBody] UserDto dto)
         {
             if (await _userRepository.GetByEmail(dto.Email) != null)
@@ -36,7 +37,7 @@ namespace full_stack_project_backend.Controllers
 
             var user = await _userservices.CreateUser(dto);
 
-            return Ok(new { user.UserId, user.Username, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Role });
         }
 
         [HttpGet("{id}")]
@@ -50,7 +51,7 @@ namespace full_stack_project_backend.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new { user.UserId, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Bio });
         }
 
         [HttpPut("{id}")]
@@ -66,7 +67,7 @@ namespace full_stack_project_backend.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new { user.UserId, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Bio });
         }
 
         [HttpDelete("{id}")]
@@ -104,6 +105,7 @@ namespace full_stack_project_backend.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
+        [HttpPost("~/api/auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var user = await _userRepository.GetByEmail(dto.Email);
@@ -139,9 +141,9 @@ namespace full_stack_project_backend.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshDto dto)
         {
-            var existing = await _userRepository.GetByRefreshToken(dto.RefreshToken);
-            if (existing == null)
-                return Unauthorized(new { message = "Invalid refresh token" });
+            var result = await _authService.RefreshAsync(
+                dto,
+                HttpContext.RequestAborted);
 
             if (!existing.RefreshTokenExpiry.HasValue || existing.RefreshTokenExpiry.Value < DateTime.UtcNow)
                 return Unauthorized(new { message = "Refresh token expired" });
