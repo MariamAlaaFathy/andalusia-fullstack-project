@@ -15,7 +15,7 @@
             {
                 await _next(context);
             }
-            catch (ConflictException ex)
+            catch (ConflictException)
             {
                 context.Response.StatusCode = 409;
 

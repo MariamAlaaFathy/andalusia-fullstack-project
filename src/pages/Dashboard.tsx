@@ -225,6 +225,29 @@ function Dashboard() {
                             {formatPrice(application.amount)}
                           </span>
                         </div>
+                        {application.status === "Enrolled" && (
+                          <div className="mt-4 max-w-sm">
+                            <div className="mb-2 flex items-center justify-between text-xs">
+                              <span className="text-[#765f52]">Course progress</span>
+                              <span className="font-semibold text-[#2b2420]">
+                                {application.progress}%
+                              </span>
+                            </div>
+                            <div
+                              className="h-2 overflow-hidden rounded-full bg-[#eee2d5]"
+                              role="progressbar"
+                              aria-label={`${application.courseName} progress`}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
+                              aria-valuenow={application.progress}
+                            >
+                              <div
+                                className="h-full rounded-full bg-[#a9694f] transition-[width]"
+                                style={{ width: `${application.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                       {application.status !== "Enrolled" ? (
                         <Link

@@ -11,6 +11,7 @@ public sealed class EnrollmentService(
     IEnrollmentRepository repository,
     IMapper mapper,
     INotificationService notificationService,
+    ICourseProgressService courseProgressService,
     ILogger<EnrollmentService> logger) : IEnrollmentService
 {
     public async Task<IReadOnlyList<CourseApplicationResponse>> GetMineAsync(
@@ -18,6 +19,20 @@ public sealed class EnrollmentService(
         CancellationToken cancellationToken)
     {
         var applications = await repository.GetApplicationsAsync(
+            learnerId,
+            cancellationToken);
+        foreach (var courseApplications in applications
+                     .Where(application =>
+                         application.Status == CourseApplicationStatus.Enrolled)
+                     .GroupBy(application => application.CourseId))
+        {
+            await courseProgressService.RecalculateAsync(
+                courseApplications.Key,
+                courseApplications.Select(application => application.LearnerId).ToArray(),
+                cancellationToken);
+        }
+
+        applications = await repository.GetApplicationsAsync(
             learnerId,
             cancellationToken);
         return mapper.Map<IReadOnlyList<CourseApplicationResponse>>(applications);
@@ -80,13 +95,6 @@ public sealed class EnrollmentService(
         try
         {
             await repository.AddApplicationAsync(application, cancellationToken);
-            await notificationService.CreateAsync(
-                learnerId,
-                application.Status == CourseApplicationStatus.Enrolled
-                    ? $"You are now enrolled in {application.CourseName}."
-                    : $"Your application for {application.CourseName} is pending.",
-                cancellationToken);
-            return (mapper.Map<CourseApplicationResponse>(application), true);
         }
         catch (DbUpdateException exception)
         {
@@ -110,5 +118,13 @@ public sealed class EnrollmentService(
                 courseId);
             throw;
         }
+
+        await notificationService.CreateAsync(
+            learnerId,
+            application.Status == CourseApplicationStatus.Enrolled
+                ? $"You are now enrolled in {application.CourseName}."
+                : $"Your application for {application.CourseName} is pending.",
+            cancellationToken);
+        return (mapper.Map<CourseApplicationResponse>(application), true);
     }
 }

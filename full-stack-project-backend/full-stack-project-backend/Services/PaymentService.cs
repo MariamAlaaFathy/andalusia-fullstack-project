@@ -9,7 +9,8 @@ namespace full_stack_project_backend.Services;
 public sealed class PaymentService(
     IEnrollmentRepository repository,
     IConfiguration configuration,
-    INotificationService notificationService) : IPaymentService
+    INotificationService notificationService,
+    ILogger<PaymentService> logger) : IPaymentService
 {
     public async Task<string> CreateCheckoutSessionAsync(
         int applicationId,
@@ -114,18 +115,20 @@ public sealed class PaymentService(
                 ]
             },
             cancellationToken: cancellationToken);
-            Console.WriteLine($"[DEBUG] Stripe Session Created ID: {session.Id}");
 
         payment.StripeCheckoutSessionId = session.Id;
         payment.CheckoutExpiresAt = session.ExpiresAt;
         try
         {
             await repository.SaveChangesAsync(cancellationToken);
-            Console.WriteLine("[DEBUG] Payment session ID successfully saved to database.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Failed to save session ID: {ex.Message}");
+            logger.LogError(
+                ex,
+                "Could not persist Stripe checkout session {SessionId} for application {ApplicationId}.",
+                session.Id,
+                applicationId);
             throw;
         }
         return session.Url;

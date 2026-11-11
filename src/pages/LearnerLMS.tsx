@@ -1,34 +1,43 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 import { Link } from "react-router-dom";
 import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import { enrollmentApi } from "../services/enrollmentApi";
+import {
+  learnerAssignmentsApi,
+  type LearnerAssignment,
+} from "../services/learnerAssignmentsApi";
+import {
+  getLearnerAttendance,
+  type LearnerAttendanceSummary,
+} from "../services/learnerAttendanceApi";
 import { userContext } from "../types/UserContextType";
-
-type SessionStatus = "Completed" | "Upcoming";
-type AssignmentStatus = "Submitted" | "In progress" | "Not started";
 
 type LearningCourse = {
   id: number;
+  courseId: number;
   name: string;
   program: string;
   progress: number;
   schedule: string;
   location: string;
   materials: { title: string; detail: string; type: string }[];
-  sessions: { title: string; date: string; time: string; status: SessionStatus }[];
-  assignments: { title: string; due: string; status: AssignmentStatus }[];
-  attendance: { date: string; session: string; status: "Present" | "Absent" }[];
 };
 
 type LearnerTab = "courses" | "programs";
 
-const mockCourses: LearningCourse[] = [
+const learningContentTemplates: Omit<
+  LearningCourse,
+  "id" | "courseId" | "name" | "progress"
+>[] = [
   {
-    id: -1,
-    name: "C# Basics",
     program: "Backend Developer Program",
-    progress: 68,
     schedule: "Tuesdays & Thursdays · 6:00 PM",
     location: "Online · Live classroom",
     materials: [
@@ -36,27 +45,9 @@ const mockCourses: LearningCourse[] = [
       { title: "Variables and types", detail: "Module 2 · 24 min", type: "Video" },
       { title: "C# quick reference", detail: "Course handout · PDF", type: "Guide" },
     ],
-    sessions: [
-      { title: "Methods and parameters", date: "Oct 20, 2026", time: "6:00 PM", status: "Completed" },
-      { title: "Collections and loops", date: "Oct 24, 2026", time: "6:00 PM", status: "Upcoming" },
-      { title: "Working with classes", date: "Oct 27, 2026", time: "6:00 PM", status: "Upcoming" },
-    ],
-    assignments: [
-      { title: "Build a simple calculator", due: "Due Oct 25", status: "In progress" },
-      { title: "Practice: arrays and lists", due: "Submitted Oct 16", status: "Submitted" },
-      { title: "Object-oriented basics", due: "Due Oct 30", status: "Not started" },
-    ],
-    attendance: [
-      { date: "Oct 20, 2026", session: "Methods and parameters", status: "Present" },
-      { date: "Oct 15, 2026", session: "Control flow", status: "Present" },
-      { date: "Oct 13, 2026", session: "Data types", status: "Absent" },
-    ],
   },
   {
-    id: -2,
-    name: "ASP.NET Core",
     program: "Backend Developer Program",
-    progress: 32,
     schedule: "Mondays & Wednesdays · 7:00 PM",
     location: "Online · Live classroom",
     materials: [
@@ -64,39 +55,14 @@ const mockCourses: LearningCourse[] = [
       { title: "Routing and controllers", detail: "Module 2 · 32 min", type: "Video" },
       { title: "API workshop notes", detail: "Course handout · PDF", type: "Guide" },
     ],
-    sessions: [
-      { title: "REST API fundamentals", date: "Oct 19, 2026", time: "7:00 PM", status: "Completed" },
-      { title: "Dependency injection", date: "Oct 23, 2026", time: "7:00 PM", status: "Upcoming" },
-    ],
-    assignments: [
-      { title: "Create your first endpoint", due: "Due Oct 26", status: "In progress" },
-      { title: "API design checklist", due: "Due Oct 30", status: "Not started" },
-    ],
-    attendance: [
-      { date: "Oct 19, 2026", session: "REST API fundamentals", status: "Present" },
-      { date: "Oct 14, 2026", session: "Project setup", status: "Present" },
-    ],
   },
   {
-    id: -3,
-    name: "SQL Fundamentals",
     program: "Data Analyst Program",
-    progress: 14,
     schedule: "Saturdays · 11:00 AM",
     location: "Andalusia Academy · Room 2",
     materials: [
       { title: "Relational databases", detail: "Module 1 · 20 min", type: "Video" },
       { title: "SQL query workbook", detail: "Practice resource · PDF", type: "Workbook" },
-    ],
-    sessions: [
-      { title: "Tables and relationships", date: "Oct 24, 2026", time: "11:00 AM", status: "Upcoming" },
-      { title: "Your first SELECT query", date: "Oct 31, 2026", time: "11:00 AM", status: "Upcoming" },
-    ],
-    assignments: [
-      { title: "Explore a sample database", due: "Due Oct 29", status: "Not started" },
-    ],
-    attendance: [
-      { date: "Oct 17, 2026", session: "Database foundations", status: "Present" },
     ],
   },
 ];
@@ -132,8 +98,15 @@ function LearnerLMS() {
           (application) => application.status === "Enrolled",
         );
         const liveCourses = enrolled.map((application, index) => {
-          const template = mockCourses[index % mockCourses.length];
-          return { ...template, id: application.id, name: application.courseName };
+          const template =
+            learningContentTemplates[index % learningContentTemplates.length];
+          return {
+            ...template,
+            id: application.id,
+            courseId: application.courseId,
+            name: application.courseName,
+            progress: application.progress,
+          };
         });
         setCourses(liveCourses);
         setActiveCourseId((current) =>
@@ -145,17 +118,13 @@ function LearnerLMS() {
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Learner course data could not be loaded.", error);
-        setCourses(mockCourses);
-        setActiveCourseId((current) =>
-          mockCourses.some((course) => course.id === current)
-            ? current
-            : mockCourses[0].id,
-        );
+        setCourses([]);
+        setActiveCourseId(null);
         setIsOfflineFallback(true);
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Learner data is offline. Showing sample course content.",
+            : "Learner data is offline. Course attendance could not be loaded.",
         );
         setLoadedUserId(learnerId);
       }
@@ -166,6 +135,17 @@ function LearnerLMS() {
   }, [context?.isLoading, userId]);
 
   const activeCourse = courses.find((course) => course.id === activeCourseId);
+  const refreshActiveCourseProgress = useCallback(
+    (progress: number) => {
+      if (activeCourseId === null) return;
+      setCourses((current) =>
+        current.map((item) =>
+          item.id === activeCourseId ? { ...item, progress } : item,
+        ),
+      );
+    },
+    [activeCourseId],
+  );
   const programs = Array.from(
     new Set(courses.map((course) => course.program)),
   ).map((name) => {
@@ -233,7 +213,7 @@ function LearnerLMS() {
                 role="status"
                 className="mb-6 rounded-xl border border-[#dfd2c3] bg-[#f0e8da] p-4 text-sm text-[#765f52]"
               >
-                Showing sample learner data while the LMS API is unavailable.
+                Live learner and attendance data are unavailable.
                 <span className="mt-1 block text-xs">{errorMessage}</span>
               </div>
             )}
@@ -297,7 +277,12 @@ function LearnerLMS() {
                     </button>
                   ))}
                 </section>
-                {activeCourse && <CourseLearningView course={activeCourse} />}
+                {activeCourse && (
+                  <CourseLearningView
+                    course={activeCourse}
+                    onProgressRefreshed={refreshActiveCourseProgress}
+                  />
+                )}
               </div>
             ) : (
               <section aria-label="My programs" className="grid gap-4 md:grid-cols-2">
@@ -399,7 +384,13 @@ function ProgressMeter({ progress }: { progress: number }) {
   );
 }
 
-function CourseLearningView({ course }: { course: LearningCourse }) {
+function CourseLearningView({
+  course,
+  onProgressRefreshed,
+}: {
+  course: LearningCourse;
+  onProgressRefreshed: (progress: number) => void;
+}) {
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-7">
@@ -408,8 +399,7 @@ function CourseLearningView({ course }: { course: LearningCourse }) {
         </p>
         <h2 className="mt-2 font-serif text-3xl font-bold">{course.name}</h2>
         <p className="mt-2 text-xs text-[#765f52]">
-          Schedule, materials, assignments, and attendance are sample LMS
-          content.
+          Schedule and materials are sample LMS content.
         </p>
         <ProgressMeter progress={course.progress} />
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -417,6 +407,11 @@ function CourseLearningView({ course }: { course: LearningCourse }) {
           <InfoCard label="Location" value={course.location} />
         </div>
       </section>
+
+      <CourseAttendance
+        courseId={course.courseId}
+        onProgressRefreshed={onProgressRefreshed}
+      />
 
       <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
         <SectionHeading title="Learning materials" detail="Pick up where you left off" />
@@ -436,83 +431,441 @@ function CourseLearningView({ course }: { course: LearningCourse }) {
         </ul>
       </section>
 
-      <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
-        <SectionHeading title="Sessions" detail="Your live and recorded classes" />
-        <ul className="mt-4 divide-y divide-[#eee2d5]">
-          {course.sessions.map((session) => (
-            <li
-              key={`${session.date}-${session.title}`}
-              className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <h3 className="font-semibold">{session.title}</h3>
-                <p className="mt-1 text-sm text-[#765f52]">
-                  {session.date} · {session.time}
-                </p>
-              </div>
-              <StatusPill
-                label={session.status}
-                tone={session.status === "Completed" ? "green" : "neutral"}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
-        <SectionHeading title="Assignments" detail="Keep track of your next steps" />
-        <ul className="mt-4 divide-y divide-[#eee2d5]">
-          {course.assignments.map((assignment) => (
-            <li
-              key={assignment.title}
-              className="flex flex-col gap-2 py-4 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <h3 className="font-semibold">{assignment.title}</h3>
-                <p className="mt-1 text-sm text-[#765f52]">{assignment.due}</p>
-              </div>
-              <StatusPill
-                label={assignment.status}
-                tone={assignment.status === "Submitted" ? "green" : "neutral"}
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
-        <SectionHeading title="Attendance history" detail="Your recent class record" />
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[460px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-[#eee2d5] text-xs uppercase tracking-wide text-[#765f52]">
-                <th className="py-3 pr-3 font-semibold">Date</th>
-                <th className="py-3 pr-3 font-semibold">Session</th>
-                <th className="py-3 font-semibold">Attendance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {course.attendance.map((record) => (
-                <tr
-                  key={`${record.date}-${record.session}`}
-                  className="border-b border-[#eee2d5] last:border-0"
-                >
-                  <td className="py-3 pr-3 text-[#765f52]">{record.date}</td>
-                  <td className="py-3 pr-3 font-medium">{record.session}</td>
-                  <td className="py-3">
-                    <StatusPill
-                      label={record.status}
-                      tone={record.status === "Present" ? "green" : "rose"}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <CourseAssignments courseId={course.courseId} />
     </div>
   );
+}
+
+function CourseAttendance({
+  courseId,
+  onProgressRefreshed,
+}: {
+  courseId: number;
+  onProgressRefreshed: (progress: number) => void;
+}) {
+  const context = useContext(userContext);
+  const learnerId = context?.user?.userId;
+  const [state, setState] = useState<{
+    courseId: number;
+    learnerId: number;
+    summary: LearnerAttendanceSummary;
+    error: string;
+  } | null>(null);
+  const currentState =
+    state?.courseId === courseId && state.learnerId === learnerId
+      ? state
+      : null;
+  const summary = currentState?.summary;
+  const isLoading =
+    !context?.isLoading &&
+    context?.user?.role === "Learner" &&
+    typeof learnerId === "number" &&
+    courseId > 0 &&
+    currentState === null;
+
+  useEffect(() => {
+    if (
+      context?.isLoading ||
+      context?.user?.role !== "Learner" ||
+      typeof learnerId !== "number" ||
+      courseId <= 0
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const refreshAttendance = async () => {
+      try {
+        const result = await getLearnerAttendance(courseId, controller.signal);
+        if (controller.signal.aborted) return;
+        setState({ courseId, learnerId, summary: result, error: "" });
+        onProgressRefreshed(result.courseProgress);
+      } catch (error: unknown) {
+        if (controller.signal.aborted) return;
+        console.error("Course attendance could not be loaded.", error);
+        setState((current) => {
+          const existing =
+            current?.courseId === courseId && current.learnerId === learnerId
+              ? current.summary
+              : null;
+          return {
+            courseId,
+            learnerId,
+            summary: existing ?? {
+              courseId,
+              courseProgress: 0,
+              totalSessions: 0,
+              presentSessions: 0,
+              sessions: [],
+            },
+            error:
+              error instanceof Error
+                ? error.message
+                : "Course attendance could not be loaded.",
+          };
+        });
+      }
+    };
+
+    void refreshAttendance();
+    const refreshTimer = window.setInterval(() => {
+      void refreshAttendance();
+    }, 15000);
+
+    return () => {
+      controller.abort();
+      window.clearInterval(refreshTimer);
+    };
+  }, [
+    context?.isLoading,
+    context?.user?.role,
+    courseId,
+    learnerId,
+    onProgressRefreshed,
+  ]);
+
+  const totalSessions = summary
+    ? Math.max(summary.totalSessions, summary.sessions.length)
+    : 0;
+  const presentSessions = summary
+    ? Math.max(
+        summary.presentSessions,
+        summary.sessions.filter((session) => session.status === "Present")
+          .length,
+      )
+    : 0;
+  const attendancePercentage =
+    totalSessions > 0
+      ? Math.round((presentSessions / totalSessions) * 100)
+      : 0;
+
+  return (
+    <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
+      <SectionHeading
+        title="Sessions and attendance"
+        detail="Completed sessions and attendance marks recorded by your instructor"
+      />
+      {context?.user?.role !== "Learner" ? (
+        <p className="mt-4 text-sm text-[#765f52]">
+          Attendance is available to enrolled learners.
+        </p>
+      ) : courseId <= 0 ? (
+        <p className="mt-4 text-sm text-[#765f52]">
+          Live attendance is shown for courses linked to your learner account.
+        </p>
+      ) : isLoading ? (
+        <p className="mt-4 text-sm text-[#765f52]" role="status">
+          Loading attendance…
+        </p>
+      ) : currentState?.error ? (
+        <p className="mt-4 text-sm text-[#873d2d]" role="alert">
+          {currentState.error}
+        </p>
+      ) : summary ? (
+        <>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <StatusPill
+              label={`${presentSessions} of ${totalSessions} sessions attended`}
+              tone={
+                totalSessions > 0 && presentSessions === totalSessions
+                  ? "green"
+                  : "neutral"
+              }
+            />
+            <span className="text-sm text-[#765f52]">
+              {attendancePercentage}% attendance
+            </span>
+          </div>
+          <div
+            className="mt-3 h-2 overflow-hidden rounded-full bg-[#eee2d5]"
+            role="progressbar"
+            aria-label="Attendance"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={attendancePercentage}
+          >
+            <div
+              className="h-full rounded-full bg-[#a9694f] transition-[width]"
+              style={{ width: `${attendancePercentage}%` }}
+            />
+          </div>
+          {summary.sessions.length === 0 ? (
+            <p className="mt-4 text-sm text-[#765f52]">
+              No sessions have taken place yet.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-[#eee2d5]">
+              {summary.sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className="flex flex-col gap-2 py-3 first:pt-0 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <h3 className="font-medium">{session.title}</h3>
+                    <p className="mt-1 text-sm text-[#765f52]">
+                      {formatAssignmentDate(session.startsAt)}
+                    </p>
+                  </div>
+                  <StatusPill
+                    label={session.status}
+                    tone={
+                      session.status === "Present"
+                        ? "green"
+                        : session.status === "Absent"
+                          ? "rose"
+                          : "neutral"
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      ) : null}
+    </section>
+  );
+}
+
+function CourseAssignments({ courseId }: { courseId: number }) {
+  const context = useContext(userContext);
+  const learnerId = context?.user?.userId;
+  const [assignmentState, setAssignmentState] = useState<{
+    courseId: number;
+    learnerId: number;
+    assignments: LearnerAssignment[];
+    error: string;
+  } | null>(null);
+  const [submittingAssignmentId, setSubmittingAssignmentId] = useState<number | null>(
+    null,
+  );
+  const [submissionError, setSubmissionError] = useState("");
+  const currentState =
+    assignmentState?.courseId === courseId &&
+    assignmentState.learnerId === learnerId
+      ? assignmentState
+      : null;
+  const assignments = currentState?.assignments ?? [];
+  const isLoading =
+    !context?.isLoading &&
+    context?.user?.role === "Learner" &&
+    typeof learnerId === "number" &&
+    courseId > 0 &&
+    currentState === null;
+
+  useEffect(() => {
+    if (
+      context?.isLoading ||
+      context?.user?.role !== "Learner" ||
+      typeof learnerId !== "number" ||
+      courseId <= 0
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+    void learnerAssignmentsApi
+      .getForCourse(courseId, controller.signal)
+      .then((records) => {
+        if (!controller.signal.aborted) {
+          setAssignmentState({
+            courseId,
+            learnerId,
+            assignments: records,
+            error: "",
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        console.error("Course assignments could not be loaded.", error);
+        setAssignmentState({
+          courseId,
+          learnerId,
+          assignments: [],
+          error:
+            error instanceof Error
+              ? error.message
+              : "Course assignments could not be loaded.",
+        });
+      });
+
+    return () => controller.abort();
+  }, [context?.isLoading, context?.user?.role, courseId, learnerId]);
+
+  async function submitAssignment(
+    event: FormEvent<HTMLFormElement>,
+    assignmentId: number,
+  ) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const content = String(formData.get("submission") ?? "").trim();
+    if (!content || typeof learnerId !== "number") return;
+
+    setSubmissionError("");
+    setSubmittingAssignmentId(assignmentId);
+    try {
+      const submitted = await learnerAssignmentsApi.submit(
+        courseId,
+        assignmentId,
+        content,
+      );
+      setAssignmentState((current) =>
+        current &&
+        current.courseId === courseId &&
+        current.learnerId === learnerId
+          ? {
+              ...current,
+              assignments: current.assignments.map((assignment) =>
+                assignment.id === assignmentId
+                  ? {
+                      ...assignment,
+                      status: submitted.status,
+                      submission: submitted.content,
+                      submittedAt: submitted.submittedAt,
+                      grade: submitted.grade,
+                      feedback: submitted.feedback,
+                    }
+                  : assignment,
+              ),
+            }
+          : current,
+      );
+    } catch (error) {
+      console.error("Assignment submission could not be saved.", error);
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : "Assignment submission could not be saved.",
+      );
+    } finally {
+      setSubmittingAssignmentId(null);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6">
+      <SectionHeading
+        title="Assignments"
+        detail="Submit your work and track grading feedback"
+      />
+      {context?.user?.role !== "Learner" ? (
+        <p className="mt-4 text-sm text-[#765f52]">
+          Assignment submissions are available to enrolled learners.
+        </p>
+      ) : courseId <= 0 ? (
+        <p className="mt-4 text-sm text-[#765f52]">
+          Sign in while the assignment service is available to view course assignments.
+        </p>
+      ) : isLoading ? (
+        <p className="mt-4 text-sm text-[#765f52]" role="status">
+          Loading assignments…
+        </p>
+      ) : currentState?.error ? (
+        <p className="mt-4 text-sm text-[#873d2d]" role="alert">
+          {currentState.error}
+        </p>
+      ) : assignments.length === 0 ? (
+        <p className="mt-4 text-sm text-[#765f52]">
+          There are no assignments for this course yet.
+        </p>
+      ) : (
+        <>
+          {submissionError && (
+            <p className="mt-4 rounded-lg border border-[#e7b7aa] bg-[#f8e9e5] p-3 text-sm text-[#873d2d]" role="alert">
+              {submissionError}
+            </p>
+          )}
+          <ul className="mt-4 divide-y divide-[#eee2d5]">
+            {assignments.map((assignment) => (
+              <li key={assignment.id} className="py-5 first:pt-0 last:pb-0">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold">{assignment.title}</h3>
+                    <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-[#765f52]">
+                      {assignment.description}
+                    </p>
+                    <p className="mt-2 text-xs text-[#765f52]">
+                      Due {formatAssignmentDate(assignment.dueAt)}
+                    </p>
+                  </div>
+                  <StatusPill
+                    label={
+                      assignment.status === "NotSubmitted"
+                        ? "Not submitted"
+                        : assignment.status
+                    }
+                    tone={assignment.status === "NotSubmitted" ? "neutral" : "green"}
+                  />
+                </div>
+
+                {assignment.status === "NotSubmitted" ? (
+                  <form
+                    className="mt-4 space-y-3"
+                    onSubmit={(event) => void submitAssignment(event, assignment.id)}
+                  >
+                    <label className="block text-sm font-medium">
+                      Your work or repository link
+                      <textarea
+                        name="submission"
+                        required
+                        maxLength={8000}
+                        rows={4}
+                        placeholder="Paste a repository URL or describe your completed work."
+                        className="mt-2 w-full rounded-lg border border-[#dfd2c3] bg-white p-3 text-sm outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      disabled={submittingAssignmentId !== null}
+                      className="min-h-10 rounded-lg bg-[#a9694f] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#8f5640] disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {submittingAssignmentId === assignment.id
+                        ? "Submitting…"
+                        : "Submit assignment"}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="mt-4 rounded-xl bg-[#f7f1e8] p-4">
+                    <p className="text-sm font-semibold">
+                      {assignment.status}
+                      {assignment.submittedAt
+                        ? ` · ${formatAssignmentDate(assignment.submittedAt)}`
+                        : ""}
+                    </p>
+                    {assignment.submission && (
+                      <p className="mt-2 break-words whitespace-pre-wrap text-sm text-[#765f52]">
+                        {assignment.submission}
+                      </p>
+                    )}
+                    {assignment.grade !== null && (
+                      <p className="mt-3 text-sm font-semibold text-[#166534]">
+                        Score: {assignment.grade}/100
+                      </p>
+                    )}
+                    {assignment.feedback && (
+                      <p className="mt-2 whitespace-pre-wrap text-sm text-[#765f52]">
+                        Feedback: {assignment.feedback}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
+function formatAssignmentDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "Date unavailable"
+    : date.toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 }
 
 function InfoCard({ label, value }: { label: string; value: string }) {

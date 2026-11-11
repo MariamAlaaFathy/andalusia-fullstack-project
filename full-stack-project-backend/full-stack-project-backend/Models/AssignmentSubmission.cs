@@ -1,5 +1,11 @@
 namespace full_stack_project_backend.Models;
 
+public enum AssignmentSubmissionStatus
+{
+    Submitted,
+    Graded
+}
+
 public sealed class AssignmentSubmission
 {
     public int Id { get; set; }
@@ -9,6 +15,7 @@ public sealed class AssignmentSubmission
     public User Learner { get; set; } = null!;
     public string Content { get; set; } = string.Empty;
     public DateTime SubmittedAt { get; set; }
+    public AssignmentSubmissionStatus Status { get; set; }
     public decimal? Grade { get; set; }
     public string? Feedback { get; set; }
 }

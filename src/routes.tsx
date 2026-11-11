@@ -1,98 +1,131 @@
 import { createBrowserRouter } from "react-router-dom";
 
-import App from "./App";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Forgorpassword from "./pages/Forgorpassword";
-import Courses from "./pages/Courses";
-import CourseDetail from "./pages/CourseDetail";
-import Programs from "./pages/Programs";
-import Careerpath from "./pages/Careerpath";
-import Application from "./pages/Application";
-import Dashboard from "./pages/Dashboard";
-import LearnerLMS from "./pages/LearnerLMS";
-import InstructorDashboard from "./pages/InstructorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import Notifications from "./pages/Notifications";
-
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    lazy: async () => {
+      const { default: App } = await import("./App");
+      return { Component: App };
+    },
   },
   {
     path: "/About",
-    element: <About />,
+    lazy: async () => {
+      const { default: About } = await import("./pages/About");
+      return { Component: About };
+    },
   },
   {
     path: "/Contact",
-    element: <Contact />,
+    lazy: async () => {
+      const { default: Contact } = await import("./pages/Contact");
+      return { Component: Contact };
+    },
   },
   {
     path: "/Login",
-    element: <Login />,
+    lazy: async () => {
+      const { default: Login } = await import("./pages/Login");
+      return { Component: Login };
+    },
   },
   {
     path: "/Signup",
-    element: <Signup />,
+    lazy: async () => {
+      const { default: Signup } = await import("./pages/Signup");
+      return { Component: Signup };
+    },
   },
   {
     path: "/forgot",
-    element: <Forgorpassword />,
+    lazy: async () => {
+      const { default: Forgorpassword } = await import("./pages/Forgorpassword");
+      return { Component: Forgorpassword };
+    },
   },
   {
     path: "/Courses",
-    element: <Courses />,
+    lazy: async () => {
+      const { default: Courses } = await import("./pages/Courses");
+      return { Component: Courses };
+    },
   },
   {
     path: "/Courses/:courseId",
-    element: <CourseDetail />,
+    lazy: async () => {
+      const { default: CourseDetail } = await import("./pages/CourseDetail");
+      return { Component: CourseDetail };
+    },
   },
   {
     path: "/Apply/:courseId",
-    element: <Application />,
+    lazy: async () => {
+      const { default: Application } = await import("./pages/Application");
+      return { Component: Application };
+    },
   },
   {
     path: "/Dashboard",
-    element: <Dashboard />,
+    lazy: async () => {
+      const { default: Dashboard } = await import("./pages/Dashboard");
+      return { Component: Dashboard };
+    },
   },
   {
     path: "/notifications",
-    element: <Notifications />,
+    lazy: async () => {
+      const { default: Notifications } = await import("./pages/Notifications");
+      return { Component: Notifications };
+    },
   },
   {
     path: "/LearnerLMS",
-    element: <LearnerLMS />,
+    lazy: async () => {
+      const { default: LearnerLMS } = await import("./pages/LearnerLMS");
+      return { Component: LearnerLMS };
+    },
   },
   {
     path: "/InstructorDashboard",
-    element: <InstructorDashboard />,
+    lazy: async () => {
+      const { default: InstructorDashboard } = await import("./pages/InstructorDashboard");
+      return { Component: InstructorDashboard };
+    },
   },
   {
     path: "/AdminDashboard",
-    element: <AdminDashboard />,
+    lazy: async () => {
+      const { default: AdminDashboard } = await import("./pages/AdminDashboard");
+      return { Component: AdminDashboard };
+    },
   },
   {
     path: "/Programs",
-    element: <Programs />,
+    lazy: async () => {
+      const { default: Programs } = await import("./pages/Programs");
+      return { Component: Programs };
+    },
   },
   {
     path: "/Programs/:programId",
-    element: <Programs />,
+    lazy: async () => {
+      const { default: Programs } = await import("./pages/Programs");
+      return { Component: Programs };
+    },
   },
   {
     path: "/Careerpath",
-    element: <Careerpath />,
+    lazy: async () => {
+      const { default: Careerpath } = await import("./pages/Careerpath");
+      return { Component: Careerpath };
+    },
   },
   {
     path: "/Careerpath/:careerPathId",
-    element: <Careerpath />,
-  },
-  {
-    path: "/Courses",
-    element: <Courses />,
+    lazy: async () => {
+      const { default: Careerpath } = await import("./pages/Careerpath");
+      return { Component: Careerpath };
+    },
   },
 ]);
 

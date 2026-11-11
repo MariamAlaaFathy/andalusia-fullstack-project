@@ -40,7 +40,9 @@ namespace full_stack_project_backend.Repository
                 Username = user.Username,
                 Email = user.Email,
                 Password = user.Password,
-                Role = user.Role
+                Role = user.Role,
+                Bio = user.Bio,
+                IsActive = user.IsActive
             
             };
 
@@ -63,7 +65,23 @@ namespace full_stack_project_backend.Repository
             if (!string.IsNullOrWhiteSpace(user.Password))
                 entity.Password = user.Password;
             entity.Role = user.Role;
-        
+            entity.Bio = user.Bio;
+
+            await _context.SaveChangesAsync();
+            return ToDto(entity);
+        }
+
+        public async Task<UserDto?> SetUserActive(int userId, bool isActive)
+        {
+            var entity = await _context.Users
+                .Include(user => user.UserToken)
+                .FirstOrDefaultAsync(item => item.UserId == userId);
+            if (entity is null)
+                return null;
+
+            entity.IsActive = isActive;
+            if (!isActive && entity.UserToken is not null)
+                _context.UserTokens.Remove(entity.UserToken);
 
             await _context.SaveChangesAsync();
             return ToDto(entity);
@@ -82,6 +100,56 @@ namespace full_stack_project_backend.Repository
             return true;
         }
 
+        public async Task<bool?> AssignInstructorToCourse(
+            int courseId,
+            int instructorId,
+            CancellationToken cancellationToken)
+        {
+            var courseExists = await _context.Courses
+                .AnyAsync(course => course.Id == courseId, cancellationToken);
+            var instructorExists = await _context.Users
+                .AnyAsync(
+                    user => user.UserId == instructorId &&
+                        user.Role == UserRoles.Instructor,
+                    cancellationToken);
+            if (!courseExists || !instructorExists)
+                return null;
+
+            var assignmentExists = await _context.CourseInstructors
+                .AnyAsync(
+                    assignment => assignment.CourseId == courseId &&
+                        assignment.InstructorId == instructorId,
+                    cancellationToken);
+            if (assignmentExists)
+                return false;
+
+            _context.CourseInstructors.Add(new CourseInstructor
+            {
+                CourseId = courseId,
+                InstructorId = instructorId
+            });
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> RemoveInstructorFromCourse(
+            int courseId,
+            int instructorId,
+            CancellationToken cancellationToken)
+        {
+            var assignment = await _context.CourseInstructors
+                .FirstOrDefaultAsync(
+                    item => item.CourseId == courseId &&
+                        item.InstructorId == instructorId,
+                    cancellationToken);
+            if (assignment is null)
+                return false;
+
+            _context.CourseInstructors.Remove(assignment);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
         private static UserDto ToDto(User user)
         {
             return new UserDto
@@ -90,7 +158,9 @@ namespace full_stack_project_backend.Repository
                 Username = user.Username,
                 Email = user.Email,
                 Password = string.Empty,
-                Role = user.Role
+                Role = user.Role,
+                Bio = user.Bio,
+                IsActive = user.IsActive
             
             };
         }

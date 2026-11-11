@@ -39,6 +39,9 @@ public sealed class MappingProfile : Profile
         CreateMap<User, UserDto>();
         CreateMap<CourseApplication, CourseApplicationResponse>()
             .ForCtorParam(
+                nameof(CourseApplicationResponse.Progress),
+                options => options.MapFrom(application => application.Progress))
+            .ForCtorParam(
                 nameof(CourseApplicationResponse.Status),
                 options => options.MapFrom(application =>
                     application.Status.ToString()));

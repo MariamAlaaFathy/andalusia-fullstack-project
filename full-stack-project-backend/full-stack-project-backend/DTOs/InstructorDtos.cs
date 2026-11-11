@@ -56,6 +56,7 @@ public sealed record AssignmentSubmissionResponse(
     string StudentName,
     string Content,
     DateTime SubmittedAt,
+    string Status,
     decimal? Grade,
     string? Feedback);
 

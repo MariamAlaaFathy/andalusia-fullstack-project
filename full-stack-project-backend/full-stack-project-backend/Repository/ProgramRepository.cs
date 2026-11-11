@@ -15,6 +15,7 @@ public sealed class ProgramRepository(AppDbcontext dbContext) : IProgramReposito
     {
         var query = dbContext.Programs
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(program => program.CareerPath)
             .Include(program => program.Courses)
             .AsQueryable();
@@ -43,6 +44,7 @@ public sealed class ProgramRepository(AppDbcontext dbContext) : IProgramReposito
         CancellationToken cancellationToken) =>
         dbContext.Programs
             .AsNoTracking()
+            .AsSplitQuery()
             .Include(program => program.CareerPath)
             .Include(program => program.Courses)
             .SingleOrDefaultAsync(program => program.Id == id, cancellationToken);

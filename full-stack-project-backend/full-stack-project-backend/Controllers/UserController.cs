@@ -1,8 +1,7 @@
-﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.DTOs;
 using full_stack_project_backend.Models;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using full_stack_project_backend.Repository;
 using System.Security.Claims;
@@ -16,19 +15,21 @@ namespace full_stack_project_backend.Controllers
     {
         private readonly IUserServices _userservices;
         private readonly IUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IAuthService _authService;
 
-        public UserController(IUserServices userservices, IUserRepository userRepository, ITokenService tokenService, IPasswordHasher<User> passwordHasher)
+        public UserController(
+            IUserServices userservices,
+            IUserRepository userRepository,
+            IAuthService authService)
         {
             _userservices = userservices;
             _userRepository = userRepository;
-            _tokenService = tokenService;
-            _passwordHasher = passwordHasher;
+            _authService = authService;
         }
 
         [AllowAnonymous]
         [HttpPost]
+        [HttpPost("~/api/auth/register")]
         public async Task<IActionResult> CreateUser([FromBody] UserDto dto)
         {
             if (await _userRepository.GetByEmail(dto.Email) != null)
@@ -50,7 +51,7 @@ namespace full_stack_project_backend.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new { user.UserId, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Bio });
         }
 
         [HttpPut("{id}")]
@@ -64,7 +65,7 @@ namespace full_stack_project_backend.Controllers
             if (user == null)
                 return NotFound();
 
-            return Ok(new { user.UserId, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email, user.Bio });
         }
 
         [HttpDelete("{id}")]
@@ -83,66 +84,29 @@ namespace full_stack_project_backend.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
+        [HttpPost("~/api/auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _userRepository.GetByEmail(dto.Email);
+            var result = await _authService.LoginAsync(
+                dto,
+                HttpContext.RequestAborted);
 
-            if (user == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, dto.Password);
-            if (result == PasswordVerificationResult.Failed)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var accessToken = _tokenService.GenerateAccessToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-
-            await _userRepository.SetRefreshToken(
-                user.UserId,
-                refreshToken,
-                DateTime.UtcNow.AddDays(7));
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken,
-                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { user.UserId, user.Username, user.Email, user.Role }
-            });
+            return result.Session is null
+                ? Unauthorized(new { message = result.ErrorMessage })
+                : Ok(result.Session);
         }
 
         [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshDto dto)
         {
-            var existing = await _userRepository.GetByRefreshToken(dto.RefreshToken);
-            if (existing == null)
-                return Unauthorized(new { message = "Invalid refresh token" });
+            var result = await _authService.RefreshAsync(
+                dto,
+                HttpContext.RequestAborted);
 
-            if (existing.UserToken?.RefreshTokenExpiry is not DateTime expiry || expiry < DateTime.UtcNow)
-                return Unauthorized(new { message = "Refresh token expired" });
-
-            var accessToken = _tokenService.GenerateAccessToken(existing);
-            var newRefresh = _tokenService.GenerateRefreshToken();
-
-            await _userRepository.SetRefreshToken(
-                existing.UserId,
-                newRefresh,
-                DateTime.UtcNow.AddDays(7));
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken = newRefresh,
-                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new
-                {
-                    existing.UserId,
-                    existing.Username,
-                    existing.Email,
-                    existing.Role
-                }
-            });
+            return result.Session is null
+                ? Unauthorized(new { message = result.ErrorMessage })
+                : Ok(result.Session);
         }
 
         [HttpPost("logout")]

@@ -23,15 +23,23 @@ Courses, programs, career paths, and users are stored in the
 - `GET /api/Programs/{id}`
 - `GET /api/CareerPaths?search=&page=1&pageSize=9`
 - `GET /api/CareerPaths/{id}`
-- `POST /api/users` (register)
-- `POST /api/users/login`
+- `POST /api/auth/register` (also available at `/api/users`)
+- `POST /api/auth/login` (also available at `/api/users/login`)
 - `POST /api/users/refresh`
 - `POST /api/users/logout` (JWT required)
 - `GET /api/notifications` (JWT required)
 - `GET /api/notifications/unread-count` (JWT required)
 - `PATCH /api/notifications/{id}/read` (JWT required)
+- `GET /api/courses/{courseId}/assignments` (enrolled Learner or assigned Instructor JWT required)
+- `POST /api/courses/{courseId}/assignments` (assigned Instructor JWT required)
+- `POST /api/courses/{courseId}/assignments/{assignmentId}/submit` (enrolled Learner JWT required)
+- `GET /api/courses/{courseId}/assignments/{assignmentId}/submissions` (assigned Instructor JWT required)
+- `PUT /api/courses/{courseId}/assignments/{assignmentId}/submissions/{submissionId}/grade` (assigned Instructor JWT required)
+- `GET /api/courses/{courseId}/attendance` (enrolled Learner JWT required)
 - `PUT /api/instructor/courses/{courseId}/sessions/{sessionId}` (assigned Instructor JWT required)
 - `PATCH /api/admin/applications/{id}/status` (Admin JWT required)
+- `PATCH /api/admin/users/{id}/role` (Admin JWT required)
+- `PATCH /api/admin/users/{id}/status` (Admin JWT required; `{ "isActive": false }` suspends)
 - `POST /api/payments/create-checkout-session` (Learner JWT required)
 - `POST /api/payments/webhook` (Stripe signature required)
 
@@ -87,6 +95,26 @@ Use the webhook signing secret printed by Stripe CLI as `Stripe__WebhookSecret`.
 The `checkout.session.completed` webhook updates the payment and enrollment
 status after successful payment.
 
+Enrolled learners can list course assignments and submit text or repository
+links from the Assignments section in `/LearnerLMS`. Each assignment accepts
+one submission; its stored status is `Submitted` and changes to `Graded` when
+an instructor records a score. The learner view displays the submission, score,
+and instructor feedback. Apply the `AddAssignmentSubmissionStatus` migration
+and `AddAssignmentInstructor` migrations before using assignment workflows.
+
+The learner course view also shows attendance for past sessions, including
+present sessions out of total sessions held and each session's recorded status.
+Only the learner's own attendance for courses in which they are enrolled is
+returned. The attendance response includes the freshly recalculated
+`courseProgress` value as well as the attendance totals.
+Course progress is persisted on each enrollment and recalculated after
+instructor attendance or grading updates. It is the equal average of the
+learner's attendance percentage across sessions held and average score across
+graded assignments; when only one measure is available, that measure is used.
+When neither measure is available, progress is 0%. The learner dashboard and
+`/LearnerLMS` refresh the value from database-backed enrollment and attendance
+queries whenever course data is loaded.
+
 Learner notifications are stored in SQL Server and cover account creation,
 application status changes (Pending, Approved, or Enrolled), successful
 payments, newly scheduled or rescheduled course sessions, and assignment
@@ -109,10 +137,25 @@ with that email is left unchanged. For local demonstration, sign in with
 production; replace or remove the account before deploying outside local
 development.
 
-The instructor must sign in again to receive a token with the updated role.
+User profiles, roles, active status, and refresh-token records are persisted in
+SQL Server. Registration writes to `Users`; login and refresh issue stateless
+access JWTs and persist their refresh-token state in `UserTokens`. Supported
+roles are `Learner`, `Instructor`, `Admin`, and `Content Manager`. Suspending a
+user persists the status, removes their refresh token, and invalidates their
+existing access tokens on the next authenticated request. Apply the
+`AddUserActiveStatus` migration before using account suspension.
+
+Role or username changes invalidate existing access tokens; the user must
+refresh or sign in again to continue with the updated account state.
 Course API responses include assigned instructor name, email, and bio.
 Instructor APIs are restricted to assigned courses and support rosters,
 progress updates, sessions, attendance, assignments, and submission grading.
+Session edits are exposed at
+`PUT /api/instructor/courses/{courseId}/sessions/{sessionId}` and save schedule
+changes before notifying enrolled learners. Administrators can assign and
+unassign instructors through
+`PUT`/`DELETE /api/admin/courses/{courseId}/instructors/{instructorId}`; both
+operations update the `CourseInstructors` table.
 
 ### Admin workspace
 
@@ -123,12 +166,21 @@ existing account is left unchanged. Sign in with this account to open the admin
 dashboard. Admin user-management APIs require the Admin role. This shared demo
 credential is for local development only and must be replaced or removed
 before deploying outside local development.
+Creating an account through admin user management persists a welcome
+notification for the new account, regardless of role.
 
 The `SeedDemoLearner` migration also creates `learner@example.com` with the
 same local demo password when that email is not already in use. Use this
 learner account to test applications and Stripe checkout; admin and instructor
 accounts cannot enroll as learners. Demo credentials are not suitable for
 staging or production.
+
+On application startup in the Development environment, the backend applies
+pending EF Core migrations, then checks the `Users` table for these three demo
+email addresses and creates only missing accounts with ASP.NET Core Identity
+password hashes. Existing accounts are left unchanged. Startup seeding uses
+`Password123!` for local demonstration only and is intentionally disabled
+outside Development.
 
 In another terminal, run the frontend:
 

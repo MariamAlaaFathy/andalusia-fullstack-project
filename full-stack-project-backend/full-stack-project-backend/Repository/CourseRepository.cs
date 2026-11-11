@@ -15,6 +15,7 @@ namespace full_stack_project_backend.Repository
         {
             var query = dbContext.Courses
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(course => course.Program)
                 .ThenInclude(program => program.CareerPath)
                 .Include(course => course.Instructors)
@@ -48,6 +49,7 @@ namespace full_stack_project_backend.Repository
             CancellationToken cancellationToken) =>
             dbContext.Courses
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(course => course.Program)
                 .ThenInclude(program => program.CareerPath)
                 .Include(course => course.Instructors)

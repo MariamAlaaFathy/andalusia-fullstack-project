@@ -85,6 +85,8 @@ namespace full_stack_project_backend.Repository
 
             if (!string.IsNullOrEmpty(updatedUser.Username))
                 user.Username = updatedUser.Username;
+            if (updatedUser.Bio is not null)
+                user.Bio = updatedUser.Bio;
 
             await _context.SaveChangesAsync();
 

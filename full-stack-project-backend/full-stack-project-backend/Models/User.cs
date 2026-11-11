@@ -8,6 +8,9 @@
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = "Learner";
         public string Bio { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
         public UserToken? UserToken { get; set; }
+        public ICollection<CourseAssignment> CreatedAssignments { get; set; } = [];
+        public ICollection<AssignmentSubmission> AssignmentSubmissions { get; set; } = [];
     }
 }

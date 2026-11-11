@@ -33,9 +33,8 @@ namespace full_stack_project_backend.Data
 
             modelBuilder.Entity<User>(user =>
             {
-                user.Property(item => item.Role)
-                    .HasMaxLength(64)
-                    .HasDefaultValue("Learner");
+                user.Property(item => item.IsActive)
+                    .HasDefaultValue(true);
                 user.HasIndex(item => item.Email)
                     .IsUnique();
             });
@@ -156,12 +155,20 @@ namespace full_stack_project_backend.Data
                     .WithMany(course => course.Assignments)
                     .HasForeignKey(item => item.CourseId)
                     .OnDelete(DeleteBehavior.Cascade);
+                assignment.HasOne(item => item.Instructor)
+                    .WithMany(instructor => instructor.CreatedAssignments)
+                    .HasForeignKey(item => item.InstructorId)
+                    .OnDelete(DeleteBehavior.Restrict);
                 assignment.HasIndex(item => new { item.CourseId, item.DueAt });
             });
 
             modelBuilder.Entity<AssignmentSubmission>(submission =>
             {
                 submission.Property(item => item.Content).HasMaxLength(8000).IsRequired();
+                submission.Property(item => item.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(32)
+                    .HasDefaultValue(AssignmentSubmissionStatus.Submitted);
                 submission.Property(item => item.Grade).HasPrecision(5, 2);
                 submission.Property(item => item.Feedback).HasMaxLength(2000);
                 submission.HasOne(item => item.CourseAssignment)
@@ -169,7 +176,7 @@ namespace full_stack_project_backend.Data
                     .HasForeignKey(item => item.CourseAssignmentId)
                     .OnDelete(DeleteBehavior.Cascade);
                 submission.HasOne(item => item.Learner)
-                    .WithMany()
+                    .WithMany(learner => learner.AssignmentSubmissions)
                     .HasForeignKey(item => item.LearnerId)
                     .OnDelete(DeleteBehavior.Restrict);
                 submission.HasIndex(item => new

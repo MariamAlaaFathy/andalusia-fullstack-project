@@ -7,6 +7,7 @@ export type AdminUser = {
   email: string;
   role: string;
   isAdmin: boolean;
+  isActive: boolean;
 };
 
 export type UserPayload = {
@@ -38,7 +39,8 @@ function normalizeUser(raw: unknown): AdminUser {
     typeof raw.isAdmin === "boolean" ? raw.isAdmin : raw.role === "Admin";
   const role =
     typeof raw.role === "string" ? raw.role : isAdmin ? "Admin" : "Learner";
-  return { userId: id, name, email, role, isAdmin };
+  const isActive = typeof raw.isActive === "boolean" ? raw.isActive : true;
+  return { userId: id, name, email, role, isAdmin, isActive };
 }
 
 // Both "name" and "username" are sent so either DTO property binds.
@@ -128,6 +130,15 @@ export const adminApi = {
       await request<unknown>(`/${encodeURIComponent(id)}/role`, {
         method: "PATCH",
         body: JSON.stringify({ role, isAdmin }),
+      }),
+    );
+  },
+
+  async setUserActive(id: number, isActive: boolean): Promise<AdminUser> {
+    return normalizeUser(
+      await request<unknown>(`/${encodeURIComponent(id)}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive }),
       }),
     );
   },

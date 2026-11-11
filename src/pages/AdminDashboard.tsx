@@ -17,8 +17,7 @@ import {
 } from "../services/AdminApi";
 import { userContext } from "../types/UserContextType";
 
-// Adjust to the roles your backend accepts.
-const ROLE_OPTIONS = ["Learner", "Admin"];
+const ROLE_OPTIONS = ["Learner", "Instructor", "Admin", "Content Manager"];
 
 type FormState =
   | { mode: "create" }
@@ -68,7 +67,7 @@ function AdminDashboard() {
   }, [context?.isLoading, currentEmail, hasAccess]);
 
   const adminCount = users.filter((user) => user.isAdmin).length;
-  const learnerCount = users.length - adminCount;
+  const learnerCount = users.filter((user) => user.role === "Learner").length;
 
   const filteredUsers = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -117,6 +116,27 @@ function AdminDashboard() {
     } catch (error) {
       setErrorMessage(
         error instanceof Error ? error.message : "The role could not be changed.",
+      );
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function handleStatusChange(user: AdminUser) {
+    setBusyId(user.userId);
+    setNotice("");
+    setErrorMessage("");
+    try {
+      const updated = await adminApi.setUserActive(user.userId, !user.isActive);
+      replaceUser(updated);
+      setNotice(
+        `${user.name}'s account is ${updated.isActive ? "active" : "suspended"}.`,
+      );
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "The account status could not be changed.",
       );
     } finally {
       setBusyId(null);
@@ -323,10 +343,22 @@ function AdminDashboard() {
                             </label>
                           </td>
                           <td className="px-3 py-4 sm:px-4">
-                            <StatusBadge isAdmin={user.isAdmin} />
+                            <StatusBadge isActive={user.isActive} />
                           </td>
                           <td className="px-3 py-4 sm:px-4">
                             <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                disabled={isSelf || isBusy}
+                                onClick={() => void handleStatusChange(user)}
+                                className={`inline-flex min-h-11 items-center rounded-lg border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 ${
+                                  user.isActive
+                                    ? "border-[#e7b7aa] text-[#873d2d] hover:bg-[#f8e9e5] focus-visible:outline-[#873d2d]"
+                                    : "border-[#b9d3c2] text-[#166534] hover:bg-[#e5eee8] focus-visible:outline-[#166534]"
+                                }`}
+                              >
+                                {user.isActive ? "Suspend" : "Reactivate"}
+                              </button>
                               <button
                                 type="button"
                                 disabled={isBusy}
@@ -599,16 +631,16 @@ function OverviewCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-function StatusBadge({ isAdmin }: { isAdmin: boolean }) {
+function StatusBadge({ isActive }: { isActive: boolean }) {
   return (
     <span
       className={`rounded-full px-3 py-1 text-xs font-bold ${
-        isAdmin
+        isActive
           ? "bg-[#e5eee8] text-[#166534]"
-          : "bg-[#f3e7d8] text-[#8a5a2b]"
+          : "bg-[#f8e9e5] text-[#873d2d]"
       }`}
     >
-      {isAdmin ? "Administrator" : "Standard"}
+      {isActive ? "Active" : "Suspended"}
     </span>
   );
 }

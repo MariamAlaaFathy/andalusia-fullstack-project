@@ -4,7 +4,9 @@ import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import {
   instructorApi,
+  type AssignmentSubmission,
   type InstructorCourse,
+  type InstructorAssignment,
   type InstructorSession,
   type InstructorStudent,
 } from "../services/instructorApi";
@@ -436,6 +438,24 @@ function InstructorDashboard() {
                     canEdit={selectedSessionId !== null}
                   />
                 </div>
+                {selectedCourse && (
+                  <InstructorAssignmentsPanel
+                    key={selectedCourse.courseId}
+                    courseId={selectedCourse.courseId}
+                    onAssignmentCreated={() =>
+                      setCourses((current) =>
+                        current.map((course) =>
+                          course.courseId === selectedCourse.courseId
+                            ? {
+                                ...course,
+                                assignmentCount: course.assignmentCount + 1,
+                              }
+                            : course,
+                        ),
+                      )
+                    }
+                  />
+                )}
               </>
             )}
           </>
@@ -621,6 +641,304 @@ function CreateSessionPanel({
           </button>
         )}
       </form>
+    </section>
+  );
+}
+
+function InstructorAssignmentsPanel({
+  courseId,
+  onAssignmentCreated,
+}: {
+  courseId: number;
+  onAssignmentCreated: () => void;
+}) {
+  const [assignments, setAssignments] = useState<InstructorAssignment[]>([]);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(
+    null,
+  );
+  const [submissions, setSubmissions] = useState<AssignmentSubmission[]>([]);
+  const [loadedSubmissionsAssignmentId, setLoadedSubmissionsAssignmentId] =
+    useState<number | null>(null);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void instructorApi
+      .getAssignments(courseId, controller.signal)
+      .then((result) => {
+        if (controller.signal.aborted) return;
+        setAssignments(result);
+        setSelectedAssignmentId((current) =>
+          result.some((assignment) => assignment.id === current)
+            ? current
+            : null,
+        );
+        setError("");
+      })
+      .catch((cause: unknown) => {
+        if (controller.signal.aborted) return;
+        console.error("Course assignments could not be loaded.", cause);
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Course assignments could not be loaded.",
+        );
+      });
+
+    return () => controller.abort();
+  }, [courseId]);
+
+  useEffect(() => {
+    if (selectedAssignmentId === null) {
+      return;
+    }
+
+    const controller = new AbortController();
+    void instructorApi
+      .getSubmissions(courseId, selectedAssignmentId, controller.signal)
+      .then((result) => {
+        if (!controller.signal.aborted) {
+          setSubmissions(result);
+          setLoadedSubmissionsAssignmentId(selectedAssignmentId);
+        }
+      })
+      .catch((cause: unknown) => {
+        if (controller.signal.aborted) return;
+        console.error("Assignment submissions could not be loaded.", cause);
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "Assignment submissions could not be loaded.",
+        );
+      });
+
+    return () => controller.abort();
+  }, [courseId, selectedAssignmentId]);
+
+  async function createAssignment(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setError("");
+    setNotice("");
+    setIsSaving(true);
+    try {
+      const assignment = await instructorApi.createAssignment(courseId, {
+        title: String(formData.get("title")).trim(),
+        description: String(formData.get("description")).trim(),
+        dueAt: new Date(String(formData.get("dueAt"))).toISOString(),
+      });
+      setAssignments((current) =>
+        [...current, assignment].sort(
+          (left, right) =>
+            new Date(left.dueAt).getTime() - new Date(right.dueAt).getTime(),
+        ),
+      );
+      onAssignmentCreated();
+      setSelectedAssignmentId(assignment.id);
+      setNotice("Assignment saved.");
+      form.reset();
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Assignment could not be saved.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function gradeSubmission(
+    event: FormEvent<HTMLFormElement>,
+    submission: AssignmentSubmission,
+  ) {
+    event.preventDefault();
+    if (selectedAssignmentId === null) return;
+    const formData = new FormData(event.currentTarget);
+    const grade = Number(formData.get("grade"));
+    const feedback = String(formData.get("feedback")).trim();
+    setError("");
+    setNotice("");
+    try {
+      const updated = await instructorApi.gradeSubmission(
+        courseId,
+        selectedAssignmentId,
+        submission.id,
+        grade,
+        feedback,
+      );
+      setSubmissions((current) =>
+        current.map((item) => (item.id === updated.id ? updated : item)),
+      );
+      setNotice(`Grade saved for ${submission.studentName}.`);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Grade could not be saved.",
+      );
+    }
+  }
+
+  const visibleSubmissions =
+    loadedSubmissionsAssignmentId === selectedAssignmentId ? submissions : [];
+
+  return (
+    <section className="mt-6 rounded-2xl border border-[#dfd2c3] bg-white p-5 sm:p-6">
+      <div>
+        <h2 className="font-serif text-2xl font-bold">Assignments</h2>
+        <p className="mt-1 text-sm text-[#765f52]">
+          Create coursework, review learner submissions, and save scores and feedback.
+        </p>
+      </div>
+      {error && (
+        <p role="alert" className="mt-4 rounded-lg bg-[#f8e9e5] p-3 text-sm text-[#873d2d]">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="mt-4 rounded-lg bg-[#f0e8da] p-3 text-sm text-[#765f52]">
+          {notice}
+        </p>
+      )}
+      <div className="mt-5 grid items-start gap-6 lg:grid-cols-[minmax(250px,0.8fr)_minmax(0,1.2fr)]">
+        <form onSubmit={(event) => void createAssignment(event)} className="space-y-3 rounded-xl border border-[#eee2d5] p-4">
+          <h3 className="font-semibold">Create assignment</h3>
+          <label className="block text-sm font-medium">
+            Title
+            <input
+              required
+              name="title"
+              maxLength={200}
+              className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3"
+            />
+          </label>
+          <label className="block text-sm font-medium">
+            Instructions
+            <textarea
+              required
+              name="description"
+              maxLength={4000}
+              rows={4}
+              className="mt-1 w-full rounded-lg border border-[#dfd2c3] px-3 py-2"
+            />
+          </label>
+          <label className="block text-sm font-medium">
+            Due date
+            <input
+              required
+              name="dueAt"
+              type="datetime-local"
+              className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="min-h-10 w-full rounded-lg bg-[#a9694f] px-4 font-semibold text-white disabled:opacity-60"
+          >
+            {isSaving ? "Saving…" : "Create assignment"}
+          </button>
+        </form>
+
+        <div className="space-y-3">
+          {assignments.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-[#dfd2c3] p-5 text-sm text-[#765f52]">
+              No assignments have been created for this course.
+            </p>
+          ) : (
+            assignments.map((assignment) => (
+              <article key={assignment.id} className="rounded-xl border border-[#eee2d5] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">{assignment.title}</h3>
+                    <p className="mt-1 text-xs text-[#765f52]">
+                      Due {formatDate(assignment.dueAt)} · {assignment.submissionCount} submissions
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-expanded={selectedAssignmentId === assignment.id}
+                    onClick={() =>
+                      setSelectedAssignmentId((current) =>
+                        current === assignment.id ? null : assignment.id,
+                      )
+                    }
+                    className="rounded-lg border border-[#a9694f] px-3 py-2 text-xs font-semibold text-[#8f5640]"
+                  >
+                    {selectedAssignmentId === assignment.id ? "Hide submissions" : "Review submissions"}
+                  </button>
+                </div>
+                {assignment.description && (
+                  <p className="mt-3 whitespace-pre-wrap text-sm text-[#765f52]">
+                    {assignment.description}
+                  </p>
+                )}
+                {selectedAssignmentId === assignment.id && (
+                  <div className="mt-4 space-y-3 border-t border-[#eee2d5] pt-4">
+                    {visibleSubmissions.length === 0 ? (
+                      <p className="text-sm text-[#765f52]">
+                        {loadedSubmissionsAssignmentId === selectedAssignmentId
+                          ? "No enrolled learners have submitted this assignment yet."
+                          : "Loading submissions…"}
+                      </p>
+                    ) : (
+                      visibleSubmissions.map((submission) => (
+                        <form
+                          key={`${submission.id}:${submission.grade ?? ""}:${submission.feedback ?? ""}`}
+                          onSubmit={(event) => void gradeSubmission(event, submission)}
+                          className="rounded-lg bg-[#fffdfa] p-3"
+                        >
+                          <div className="flex flex-wrap justify-between gap-2">
+                            <span className="font-semibold">{submission.studentName}</span>
+                            <span className="text-xs text-[#765f52]">
+                              Submitted {formatDate(submission.submittedAt)} · {submission.status}
+                            </span>
+                          </div>
+                          <p className="mt-2 whitespace-pre-wrap break-words text-sm">
+                            {submission.content}
+                          </p>
+                          <div className="mt-3 grid gap-2 sm:grid-cols-[120px_minmax(0,1fr)_auto]">
+                            <label className="text-xs font-semibold text-[#765f52]">
+                              Score (0–100)
+                              <input
+                                required
+                                name="grade"
+                                type="number"
+                                min={0}
+                                max={100}
+                                step="0.01"
+                                defaultValue={submission.grade ?? ""}
+                                className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-2 text-sm text-[#2b2420]"
+                              />
+                            </label>
+                            <label className="text-xs font-semibold text-[#765f52]">
+                              Feedback
+                              <input
+                                name="feedback"
+                                maxLength={2000}
+                                defaultValue={submission.feedback ?? ""}
+                                className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-2 text-sm text-[#2b2420]"
+                              />
+                            </label>
+                            <button
+                              type="submit"
+                              className="self-end rounded-lg bg-[#a9694f] px-3 py-2.5 text-xs font-semibold text-white"
+                            >
+                              Save grade
+                            </button>
+                          </div>
+                        </form>
+                      ))
+                    )}
+                  </div>
+                )}
+              </article>
+            ))
+          )}
+        </div>
+      </div>
     </section>
   );
 }

@@ -49,6 +49,13 @@ namespace full_stack_project_backend.Migrations
                     b.Property<int>("LearnerId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)")
+                        .HasDefaultValue("Submitted");
+
                     b.Property<DateTime>("SubmittedAt")
                         .HasColumnType("datetime2");
 
@@ -469,12 +476,17 @@ namespace full_stack_project_backend.Migrations
                     b.Property<DateTime>("DueAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("InstructorId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("InstructorId");
 
                     b.HasIndex("CourseId", "DueAt");
 
@@ -700,6 +712,11 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -748,7 +765,7 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired();
 
                     b.HasOne("full_stack_project_backend.Models.User", "Learner")
-                        .WithMany()
+                        .WithMany("AssignmentSubmissions")
                         .HasForeignKey("LearnerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -799,7 +816,14 @@ namespace full_stack_project_backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("full_stack_project_backend.Models.User", "Instructor")
+                        .WithMany("CreatedAssignments")
+                        .HasForeignKey("InstructorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Course");
+
+                    b.Navigation("Instructor");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.CourseInstructor", b =>
@@ -933,6 +957,10 @@ namespace full_stack_project_backend.Migrations
 
             modelBuilder.Entity("full_stack_project_backend.Models.User", b =>
                 {
+                    b.Navigation("AssignmentSubmissions");
+
+                    b.Navigation("CreatedAssignments");
+
                     b.Navigation("UserToken");
                 });
 #pragma warning restore 612, 618

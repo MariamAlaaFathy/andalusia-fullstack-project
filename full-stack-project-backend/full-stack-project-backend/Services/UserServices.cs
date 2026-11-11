@@ -26,7 +26,7 @@ namespace full_stack_project_backend.Services
             {
                 Username = dto.Username,
                 Email = dto.Email,
-                Role = "Learner"
+                Role = UserRoles.Learner
             };
 
             user.Password = _passwordHasher.HashPassword(user, dto.Password);

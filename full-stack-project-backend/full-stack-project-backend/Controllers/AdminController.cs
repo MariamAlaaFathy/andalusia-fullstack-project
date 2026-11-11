@@ -2,6 +2,7 @@
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace full_stack_project_backend.Controllers
 {
@@ -47,10 +48,26 @@ namespace full_stack_project_backend.Controllers
             return updated is null ? NotFound() : Ok(updated);
         }
 
+        [HttpPatch("{id:int}/status")]
+        public async Task<IActionResult> SetUserActive(int id, [FromBody] UserStatusDto status)
+        {
+            if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var currentUserId) &&
+                currentUserId == id &&
+                !status.IsActive)
+            {
+                return BadRequest(new { message = "You cannot suspend your own account." });
+            }
+
+            var updated = await _adminServices.SetUserActive(id, status.IsActive);
+            return updated is null ? NotFound() : Ok(updated);
+        }
+
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             return await _adminServices.DeleteUser(id) ? NoContent() : NotFound();
         }
+
+        public sealed record UserStatusDto(bool IsActive);
     }
 }

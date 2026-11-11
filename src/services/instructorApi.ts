@@ -40,6 +40,7 @@ export type AssignmentSubmission = {
   studentName: string;
   content: string;
   submittedAt: string;
+  status: "Submitted" | "Graded";
   grade: number | null;
   feedback: string | null;
 };
@@ -101,6 +102,7 @@ function isAssignmentSubmission(value: unknown): value is AssignmentSubmission {
     typeof value.studentName === "string" &&
     typeof value.content === "string" &&
     typeof value.submittedAt === "string" &&
+    (value.status === "Submitted" || value.status === "Graded") &&
     (typeof value.grade === "number" || value.grade === null) &&
     (typeof value.feedback === "string" || value.feedback === null)
   );
@@ -231,7 +233,7 @@ export const instructorApi = {
 
   getAssignments(courseId: number, signal?: AbortSignal) {
     return request(
-      `/api/instructor/courses/${courseId}/assignments`,
+      `/api/courses/${courseId}/assignments`,
       isArrayOf(isInstructorAssignment),
       { signal },
     );
@@ -242,28 +244,33 @@ export const instructorApi = {
     assignment: Omit<InstructorAssignment, "id" | "submissionCount">,
   ) {
     return request(
-      `/api/instructor/courses/${courseId}/assignments`,
+      `/api/courses/${courseId}/assignments`,
       isInstructorAssignment,
       { method: "POST", body: JSON.stringify(assignment) },
     );
   },
 
-  getSubmissions(assignmentId: number, signal?: AbortSignal) {
+  getSubmissions(
+    courseId: number,
+    assignmentId: number,
+    signal?: AbortSignal,
+  ) {
     return request(
-      `/api/instructor/assignments/${assignmentId}/submissions`,
+      `/api/courses/${courseId}/assignments/${assignmentId}/submissions`,
       isArrayOf(isAssignmentSubmission),
       { signal },
     );
   },
 
   gradeSubmission(
+    courseId: number,
     assignmentId: number,
     submissionId: number,
     grade: number,
     feedback: string,
   ) {
     return request(
-      `/api/instructor/assignments/${assignmentId}/submissions/${submissionId}/grade`,
+      `/api/courses/${courseId}/assignments/${assignmentId}/submissions/${submissionId}/grade`,
       isAssignmentSubmission,
       { method: "PUT", body: JSON.stringify({ grade, feedback }) },
     );

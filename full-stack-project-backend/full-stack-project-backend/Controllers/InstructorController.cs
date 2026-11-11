@@ -78,6 +78,22 @@ public sealed class InstructorController(IInstructorService instructorService)
         return CreatedAtAction(nameof(GetSessions), new { courseId }, session);
     }
 
+    [HttpPut("courses/{courseId:int}/sessions/{sessionId:int}")]
+    public async Task<ActionResult<InstructorSessionResponse>> UpdateSession(
+        int courseId,
+        int sessionId,
+        [FromBody] CreateInstructorSessionRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetInstructorId(out var instructorId)) return Unauthorized();
+        return Ok(await instructorService.UpdateSessionAsync(
+            instructorId,
+            courseId,
+            sessionId,
+            request,
+            cancellationToken));
+    }
+
     [HttpPost("sessions/{sessionId:int}/attendance")]
     public async Task<ActionResult<IReadOnlyList<AttendanceEntryResponse>>> RecordAttendance(
         int sessionId,
@@ -105,6 +121,7 @@ public sealed class InstructorController(IInstructorService instructorService)
     }
 
     [HttpPost("courses/{courseId:int}/assignments")]
+    [HttpPost("~/api/courses/{courseId:int}/assignments")]
     public async Task<ActionResult<InstructorAssignmentResponse>> CreateAssignment(
         int courseId,
         [FromBody] CreateInstructorAssignmentRequest request,
@@ -117,35 +134,41 @@ public sealed class InstructorController(IInstructorService instructorService)
             request,
             cancellationToken);
         return CreatedAtAction(
-            nameof(GetSubmissions),
-            new { assignmentId = assignment.Id },
+            nameof(GetAssignments),
+            new { courseId },
             assignment);
     }
 
     [HttpGet("assignments/{assignmentId:int}/submissions")]
+    [HttpGet("~/api/courses/{courseId:int}/assignments/{assignmentId:int}/submissions")]
     public async Task<ActionResult<IReadOnlyList<AssignmentSubmissionResponse>>> GetSubmissions(
         int assignmentId,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromRoute] int? courseId = null)
     {
         if (!TryGetInstructorId(out var instructorId)) return Unauthorized();
         return Ok(await instructorService.GetSubmissionsAsync(
             instructorId,
             assignmentId,
+            courseId,
             cancellationToken));
     }
 
     [HttpPut("assignments/{assignmentId:int}/submissions/{submissionId:int}/grade")]
+    [HttpPut("~/api/courses/{courseId:int}/assignments/{assignmentId:int}/submissions/{submissionId:int}/grade")]
     public async Task<ActionResult<AssignmentSubmissionResponse>> GradeSubmission(
         int assignmentId,
         int submissionId,
         [FromBody] GradeSubmissionRequest request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        [FromRoute] int? courseId = null)
     {
         if (!TryGetInstructorId(out var instructorId)) return Unauthorized();
         return Ok(await instructorService.GradeSubmissionAsync(
             instructorId,
             assignmentId,
             submissionId,
+            courseId,
             request,
             cancellationToken));
     }

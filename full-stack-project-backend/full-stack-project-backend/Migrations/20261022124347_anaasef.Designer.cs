@@ -13,7 +13,7 @@ namespace full_stack_project_backend.Migrations
 {
     [DbContext(typeof(AppDbcontext))]
     [Migration("20261022124347_anaasef")]
-    partial class anaasef
+    partial class Anaasef
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

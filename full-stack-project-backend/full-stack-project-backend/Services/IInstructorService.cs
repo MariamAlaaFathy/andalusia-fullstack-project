@@ -58,12 +58,14 @@ public interface IInstructorService
     Task<IReadOnlyList<AssignmentSubmissionResponse>> GetSubmissionsAsync(
         int instructorId,
         int assignmentId,
+        int? courseId,
         CancellationToken cancellationToken);
 
     Task<AssignmentSubmissionResponse> GradeSubmissionAsync(
         int instructorId,
         int assignmentId,
         int submissionId,
+        int? courseId,
         GradeSubmissionRequest request,
         CancellationToken cancellationToken);
 }
