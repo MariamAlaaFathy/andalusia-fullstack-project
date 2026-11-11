@@ -28,29 +28,44 @@ function Notifications() {
 
   useEffect(() => {
     if (auth?.isLoading || !isLearner || typeof userId !== "number") return;
-    const controller = new AbortController();
-
-    void notificationsApi
-      .getMine(controller.signal)
-      .then((records) => {
-        if (!controller.signal.aborted) {
-          setLoadState({ userId, items: records, error: "" });
-        }
-      })
-      .catch((error: unknown) => {
-        if (controller.signal.aborted) return;
-        console.error("Notifications could not be loaded.", error);
-        setLoadState({
-          userId,
-          items: [],
-          error:
-            error instanceof Error
-              ? error.message
-              : "Notifications could not be loaded.",
+    let active = true;
+    let controller: AbortController | null = null;
+    const refresh = () => {
+      controller?.abort();
+      const requestController = new AbortController();
+      controller = requestController;
+      void notificationsApi
+        .getMine(requestController.signal)
+        .then((records) => {
+          if (active) setLoadState({ userId, items: records, error: "" });
+        })
+        .catch((error: unknown) => {
+          if (!active || requestController.signal.aborted) return;
+          console.error("Notifications could not be loaded.", error);
+          setLoadState({
+            userId,
+            items: [],
+            error:
+              error instanceof Error
+                ? error.message
+                : "Notifications could not be loaded.",
+          });
         });
-      });
+    };
 
-    return () => controller.abort();
+    refresh();
+    const intervalId = window.setInterval(refresh, 15000);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      active = false;
+      controller?.abort();
+      window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [auth?.isLoading, isLearner, userId]);
 
   async function markAsRead(notificationId: number) {

@@ -19,6 +19,7 @@ function InstructorDashboard() {
   const [sessions, setSessions] = useState<InstructorSession[]>([]);
   const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
   const [selectedSessionId, setSelectedSessionId] = useState<number | null>(null);
+  const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
   const [loadedInstructorId, setLoadedInstructorId] = useState<number | null>(
     null,
   );
@@ -31,6 +32,9 @@ function InstructorDashboard() {
       loadedInstructorId !== instructorId);
   const selectedCourse = courses.find(
     (course) => course.courseId === selectedCourseId,
+  );
+  const editingSession = sessions.find(
+    (session) => session.id === editingSessionId,
   );
   const displayedStudents =
     rosterCourseId === selectedCourseId ? students : [];
@@ -64,6 +68,7 @@ function InstructorDashboard() {
         setRosterCourseId(null);
         setSessions([]);
         setSelectedSessionId(null);
+        setEditingSessionId(null);
         setActionError("");
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -74,6 +79,7 @@ function InstructorDashboard() {
         setRosterCourseId(null);
         setSessions([]);
         setSelectedSessionId(null);
+        setEditingSessionId(null);
         setActionError(
           error instanceof Error
             ? error.message
@@ -108,6 +114,7 @@ function InstructorDashboard() {
             ? current
             : (courseSessions[0]?.id ?? null),
         );
+        setEditingSessionId(null);
       } catch (error) {
         if (controller.signal.aborted) return;
         console.error("Instructor roster could not be loaded.", error);
@@ -190,11 +197,29 @@ function InstructorDashboard() {
       location: String(formData.get("location")).trim(),
     };
     setActionError("");
+    setNotice("");
     try {
-      const created = await instructorApi.createSession(
-        selectedCourse.courseId,
-        session,
-      );
+      if (editingSessionId !== null) {
+        const updated = await instructorApi.updateSession(
+          selectedCourse.courseId,
+          editingSessionId,
+          session,
+        );
+        setSessions((current) =>
+          current
+            .map((item) => (item.id === updated.id ? updated : item))
+            .sort(
+              (left, right) =>
+                new Date(left.startsAt).getTime() -
+                new Date(right.startsAt).getTime(),
+            ),
+        );
+        setNotice("Session schedule updated. Enrolled learners have been notified.");
+        setEditingSessionId(null);
+        return;
+      }
+
+      const created = await instructorApi.createSession(selectedCourse.courseId, session);
       setSessions((current) =>
         [...current, created].sort(
           (left, right) =>
@@ -207,7 +232,7 @@ function InstructorDashboard() {
       setNotice("Session saved.");
     } catch (error) {
       setActionError(
-        error instanceof Error ? error.message : "Session could not be created.",
+        error instanceof Error ? error.message : "Session could not be saved.",
       );
     }
   }
@@ -323,9 +348,10 @@ function InstructorDashboard() {
                     Assigned course
                     <select
                       value={selectedCourseId ?? ""}
-                      onChange={(event) =>
-                        setSelectedCourseId(Number(event.target.value))
-                      }
+                      onChange={(event) => {
+                        setEditingSessionId(null);
+                        setSelectedCourseId(Number(event.target.value));
+                      }}
                       className="mt-2 min-h-11 w-full rounded-lg border border-[#dfd2c3] bg-white px-3 text-[#2b2420] outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20 sm:max-w-md"
                     >
                       {courses.map((course) => (
@@ -398,7 +424,16 @@ function InstructorDashboard() {
                   </section>
 
                   <CreateSessionPanel
+                    key={editingSession?.id ?? "new-session"}
                     onSubmit={(event) => void createSession(event)}
+                    session={editingSession ?? null}
+                    onEditSelected={() => {
+                      if (selectedSessionId !== null) {
+                        setEditingSessionId(selectedSessionId);
+                      }
+                    }}
+                    onCancelEdit={() => setEditingSessionId(null)}
+                    canEdit={selectedSessionId !== null}
                   />
                 </div>
               </>
@@ -491,14 +526,43 @@ function StudentCard({
 
 function CreateSessionPanel({
   onSubmit,
+  session,
+  onEditSelected,
+  onCancelEdit,
+  canEdit,
 }: {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  session: InstructorSession | null;
+  onEditSelected: () => void;
+  onCancelEdit: () => void;
+  canEdit: boolean;
 }) {
   return (
     <section className="rounded-2xl border border-[#dfd2c3] bg-white p-5">
-      <h2 className="font-serif text-xl font-bold">Plan a session</h2>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-serif text-xl font-bold">
+            {session ? "Update session" : "Plan a session"}
+          </h2>
+          <p className="mt-1 text-sm text-[#765f52]">
+            {session
+              ? "Save schedule changes and learners will be notified."
+              : "Add a class to the selected course schedule."}
+          </p>
+        </div>
+        {!session && (
+          <button
+            type="button"
+            disabled={!canEdit}
+            onClick={onEditSelected}
+            className="shrink-0 rounded-lg border border-[#a9694f] px-3 py-2 text-xs font-semibold text-[#8f5640] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Edit selected
+          </button>
+        )}
+      </div>
       <p className="mt-1 text-sm text-[#765f52]">
-        Add a class to the selected course schedule.
+        {session ? `Editing: ${session.title}` : ""}
       </p>
       <form onSubmit={onSubmit} className="mt-5 space-y-4">
         <label className="block text-sm font-medium">
@@ -507,6 +571,7 @@ function CreateSessionPanel({
             required
             name="title"
             maxLength={200}
+            defaultValue={session?.title ?? ""}
             className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3 outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20"
           />
         </label>
@@ -516,6 +581,7 @@ function CreateSessionPanel({
             required
             name="startsAt"
             type="datetime-local"
+            defaultValue={session ? toLocalDateTimeInput(session.startsAt) : ""}
             className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3 outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20"
           />
         </label>
@@ -525,6 +591,7 @@ function CreateSessionPanel({
             required
             name="endsAt"
             type="datetime-local"
+            defaultValue={session ? toLocalDateTimeInput(session.endsAt) : ""}
             className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3 outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20"
           />
         </label>
@@ -534,6 +601,7 @@ function CreateSessionPanel({
             required
             name="location"
             maxLength={300}
+            defaultValue={session?.location ?? ""}
             className="mt-1 min-h-10 w-full rounded-lg border border-[#dfd2c3] px-3 outline-none focus:border-[#a9694f] focus:ring-2 focus:ring-[#a9694f]/20"
           />
         </label>
@@ -541,11 +609,26 @@ function CreateSessionPanel({
           type="submit"
           className="min-h-11 w-full rounded-lg bg-[#a9694f] px-4 py-2.5 font-semibold text-white transition hover:bg-[#8f5640]"
         >
-          Create session
+          {session ? "Save schedule" : "Create session"}
         </button>
+        {session && (
+          <button
+            type="button"
+            onClick={onCancelEdit}
+            className="min-h-10 w-full rounded-lg border border-[#dfd2c3] px-4 py-2 text-sm font-semibold text-[#765f52]"
+          >
+            Cancel
+          </button>
+        )}
       </form>
     </section>
   );
+}
+
+function toLocalDateTimeInput(value: string) {
+  const date = new Date(value);
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
 }
 
 function formatDate(value: string) {

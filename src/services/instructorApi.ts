@@ -184,6 +184,18 @@ export const instructorApi = {
     );
   },
 
+  updateSession(
+    courseId: number,
+    sessionId: number,
+    session: Omit<InstructorSession, "id">,
+  ) {
+    return request(
+      `/api/instructor/courses/${courseId}/sessions/${sessionId}`,
+      isInstructorSession,
+      { method: "PUT", body: JSON.stringify(session) },
+    );
+  },
+
   recordAttendance(
     sessionId: number,
     studentId: number,

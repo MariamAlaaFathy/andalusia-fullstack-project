@@ -163,15 +163,7 @@ public sealed class InstructorService(
         CancellationToken cancellationToken)
     {
         await EnsureAssignedAsync(instructorId, courseId, cancellationToken);
-        if (string.IsNullOrWhiteSpace(request.Title) ||
-            request.Title.Length > 200 ||
-            string.IsNullOrWhiteSpace(request.Location) ||
-            request.Location.Length > 300 ||
-            request.EndsAt <= request.StartsAt)
-        {
-            throw new RequestValidationException(
-                "Provide a title, location, and end time after the start time.");
-        }
+        ValidateSessionRequest(request);
 
         var session = new CourseSession
         {
@@ -191,6 +183,48 @@ public sealed class InstructorService(
             courseId,
             $"A new session, {session.Title}, has been scheduled for {courseName} on {session.StartsAt.ToLocalTime():g}.",
             cancellationToken);
+        return ToSessionResponse(session);
+    }
+
+    public async Task<InstructorSessionResponse> UpdateSessionAsync(
+        int instructorId,
+        int courseId,
+        int sessionId,
+        CreateInstructorSessionRequest request,
+        CancellationToken cancellationToken)
+    {
+        await EnsureAssignedAsync(instructorId, courseId, cancellationToken);
+        ValidateSessionRequest(request);
+
+        var session = await dbContext.CourseSessions.FirstOrDefaultAsync(
+            item => item.Id == sessionId && item.CourseId == courseId,
+            cancellationToken)
+            ?? throw new NotFoundException("Course session not found.");
+
+        var title = request.Title.Trim();
+        var location = request.Location.Trim();
+        var hasChanged = session.Title != title ||
+            session.StartsAt != request.StartsAt ||
+            session.EndsAt != request.EndsAt ||
+            session.Location != location;
+        if (hasChanged)
+        {
+            session.Title = title;
+            session.StartsAt = request.StartsAt;
+            session.EndsAt = request.EndsAt;
+            session.Location = location;
+            await dbContext.SaveChangesAsync(cancellationToken);
+
+            var courseName = await dbContext.Courses
+                .Where(course => course.Id == courseId)
+                .Select(course => course.Name)
+                .FirstAsync(cancellationToken);
+            await notificationService.CreateForCourseLearnersAsync(
+                courseId,
+                $"The schedule for {session.Title} in {courseName} has been updated to {session.StartsAt.ToLocalTime():g}.",
+                cancellationToken);
+        }
+
         return ToSessionResponse(session);
     }
 
@@ -464,6 +498,20 @@ public sealed class InstructorService(
             ?? throw new NotFoundException("Assignment not found.");
         await EnsureAssignedAsync(instructorId, courseId, cancellationToken);
         return courseId;
+    }
+
+    private static void ValidateSessionRequest(
+        CreateInstructorSessionRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title) ||
+            request.Title.Length > 200 ||
+            string.IsNullOrWhiteSpace(request.Location) ||
+            request.Location.Length > 300 ||
+            request.EndsAt <= request.StartsAt)
+        {
+            throw new RequestValidationException(
+                "Provide a title, location, and end time after the start time.");
+        }
     }
 
     private static InstructorSessionResponse ToSessionResponse(

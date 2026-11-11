@@ -8,11 +8,13 @@ import {
 } from "../services/enrollmentApi";
 import { formatPrice } from "../utils/formatPrice";
 import { userContext } from "../types/UserContextType";
+import { notificationsContext } from "../context/NotificationsContext";
 
 type DashboardSection = "applications" | "payments";
 
 function Dashboard() {
   const context = useContext(userContext);
+  const notifications = useContext(notificationsContext);
   const userId = context?.user?.userId;
   const isLearner = context?.user?.role === "Learner";
   const hasDashboard = isLearner;
@@ -90,6 +92,15 @@ function Dashboard() {
           >
             Explore courses
           </Link>
+          {isLearner && (
+            <Link
+              to="/notifications"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#a9694f] px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+            >
+              Notifications
+              {notifications?.unreadCount ? ` (${notifications.unreadCount} unread)` : ""}
+            </Link>
+          )}
         </header>
 
         {context?.isLoading && (

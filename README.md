@@ -30,6 +30,7 @@ Courses, programs, career paths, and users are stored in the
 - `GET /api/notifications` (JWT required)
 - `GET /api/notifications/unread-count` (JWT required)
 - `PATCH /api/notifications/{id}/read` (JWT required)
+- `PUT /api/instructor/courses/{courseId}/sessions/{sessionId}` (assigned Instructor JWT required)
 - `PATCH /api/admin/applications/{id}/status` (Admin JWT required)
 - `POST /api/payments/create-checkout-session` (Learner JWT required)
 - `POST /api/payments/webhook` (Stripe signature required)
@@ -88,11 +89,11 @@ status after successful payment.
 
 Learner notifications are stored in SQL Server and cover account creation,
 application status changes (Pending, Approved, or Enrolled), successful
-payments, newly scheduled course sessions, and assignment grading feedback.
-The header bell polls the unread count every 15 seconds and when the page
-becomes visible. Learners can read their inbox at `/notifications` and mark
-individual items as read. Apply the `AddNotificationsAndApplicationStatuses`
-migration before using these endpoints.
+payments, newly scheduled or rescheduled course sessions, and assignment
+grading feedback. The header bell and open inbox refresh every 15 seconds and
+when the page becomes visible. Learners can read their inbox at `/notifications`
+and mark individual items as read. Apply the
+`AddNotificationsAndApplicationStatuses` migration before using these endpoints.
 
 ### Instructor workspace
 

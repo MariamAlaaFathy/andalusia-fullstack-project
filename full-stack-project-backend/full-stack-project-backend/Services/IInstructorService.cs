@@ -24,6 +24,13 @@ public interface IInstructorService
         CreateInstructorSessionRequest request,
         CancellationToken cancellationToken);
 
+    Task<InstructorSessionResponse> UpdateSessionAsync(
+        int instructorId,
+        int courseId,
+        int sessionId,
+        CreateInstructorSessionRequest request,
+        CancellationToken cancellationToken);
+
     Task<IReadOnlyList<AttendanceEntryResponse>> RecordAttendanceAsync(
         int instructorId,
         int sessionId,
