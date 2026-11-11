@@ -5,6 +5,7 @@ public sealed record CourseApplicationResponse(
     int CourseId,
     string CourseName,
     decimal Amount,
+    int Progress,
     string Status,
     DateTime CreatedAt,
     PaymentResponse? Payment);

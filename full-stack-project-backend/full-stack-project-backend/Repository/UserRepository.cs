@@ -50,10 +50,25 @@ namespace full_stack_project_backend.Repository
         public async Task<User?> GetByRefreshToken(string refreshToken)
         {
             return await _context.Users
-                .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+                .Include(user => user.UserToken)
+                .FirstOrDefaultAsync(user => user.UserToken != null
+                    && user.UserToken.RefreshToken == refreshToken);
         }
 
-        
+        public async Task SetRefreshToken(int userId, string refreshToken, DateTime expiry)
+        {
+            var userToken = await _context.UserTokens.FindAsync(userId);
+            if (userToken == null)
+            {
+                userToken = new UserToken { UserId = userId };
+                _context.UserTokens.Add(userToken);
+            }
+
+            userToken.RefreshToken = refreshToken;
+            userToken.RefreshTokenExpiry = expiry;
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<User?> UpdateUser(int id, User updatedUser)
         {
             var user = await _context.Users
@@ -79,6 +94,9 @@ namespace full_stack_project_backend.Repository
 
             if (updatedUser.RefreshTokenExpiry.HasValue)
                 user.RefreshTokenExpiry = updatedUser.RefreshTokenExpiry;
+                
+            if (updatedUser.Bio is not null)
+                user.Bio = updatedUser.Bio;
 
             await _context.SaveChangesAsync();
 
@@ -87,14 +105,11 @@ namespace full_stack_project_backend.Repository
 
         public async Task RevokeRefreshToken(int userId)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(existingUser => existingUser.UserId == userId);
-
-            if (user == null)
+            var userToken = await _context.UserTokens.FindAsync(userId);
+            if (userToken == null)
                 return;
 
-            user.RefreshToken = null;
-            user.RefreshTokenExpiry = null;
+            _context.UserTokens.Remove(userToken);
             await _context.SaveChangesAsync();
         }
     }

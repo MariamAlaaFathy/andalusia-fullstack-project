@@ -1,0 +1,13 @@
+﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
+
+namespace full_stack_project_backend.Services
+{
+    public interface IAdminServices
+    {
+        public Task<User> CreateAdmin( dto);
+        public Task<User?> UpdateAdmin(int id);
+        public Task<bool> DeleteAdmin(int id);
+        public Task<User?> GetAdminById(int id);
+    }
+}

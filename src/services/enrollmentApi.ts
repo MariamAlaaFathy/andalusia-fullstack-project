@@ -14,9 +14,14 @@ export type CourseApplication = {
   courseId: number;
   courseName: string;
   amount: number;
-  status: "AwaitingPayment" | "Enrolled";
+  progress: number;
+  status: "AwaitingPayment" | "Pending" | "Approved" | "Enrolled";
   createdAt: string;
   payment: EnrollmentPayment | null;
+};
+
+export type CheckoutSession = {
+  url: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -43,10 +48,21 @@ function isApplication(value: unknown): value is CourseApplication {
     typeof value.courseId === "number" &&
     typeof value.courseName === "string" &&
     typeof value.amount === "number" &&
-    (value.status === "AwaitingPayment" || value.status === "Enrolled") &&
+    typeof value.progress === "number" &&
+    Number.isInteger(value.progress) &&
+    value.progress >= 0 &&
+    value.progress <= 100 &&
+    (value.status === "AwaitingPayment" ||
+      value.status === "Pending" ||
+      value.status === "Approved" ||
+      value.status === "Enrolled") &&
     typeof value.createdAt === "string" &&
     (value.payment === null || isPayment(value.payment))
   );
+}
+
+function isCheckoutSession(value: unknown): value is CheckoutSession {
+  return isRecord(value) && typeof value.url === "string";
 }
 
 async function request<T>(
@@ -118,11 +134,10 @@ export const enrollmentApi = {
     });
   },
 
-  completeDemoPayment(applicationId: number) {
-    return request(
-      `/api/payments/application/${encodeURIComponent(applicationId)}/demo-payment`,
-      isApplication,
-      { method: "POST" },
-    );
+  createCheckoutSession(applicationId: number) {
+    return request("/api/payments/create-checkout-session", isCheckoutSession, {
+      method: "POST",
+      body: JSON.stringify({ applicationId }),
+    });
   },
 };

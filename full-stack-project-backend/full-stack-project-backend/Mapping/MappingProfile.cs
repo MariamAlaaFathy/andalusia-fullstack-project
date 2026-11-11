@@ -9,6 +9,17 @@ public sealed class MappingProfile : Profile
 {
     public MappingProfile()
     {
+        CreateMap<CourseInstructor, CourseInstructorDto>()
+            .ForMember(
+                instructor => instructor.Name,
+                options => options.MapFrom(assignment => assignment.Instructor.Username))
+            .ForMember(
+                instructor => instructor.Email,
+                options => options.MapFrom(assignment => assignment.Instructor.Email))
+            .ForMember(
+                instructor => instructor.Bio,
+                options => options.MapFrom(assignment => assignment.Instructor.Bio));
+
         CreateMap<Course, CourseDto>()
             .ForCtorParam(
                 nameof(CourseDto.ProgramName),
@@ -18,13 +29,26 @@ public sealed class MappingProfile : Profile
                 options => options.MapFrom(course => course.Program.CareerPathId))
             .ForCtorParam(
                 nameof(CourseDto.CareerPathName),
-                options => options.MapFrom(course => course.Program.CareerPath.Name));
+                options => options.MapFrom(course => course.Program.CareerPath.Name))
+            .ForCtorParam(
+                nameof(CourseDto.Instructors),
+                options => options.MapFrom(course => course.Instructors));
 
         CreateMap<Course, ProgramCourseDto>();
         CreateMap<Course, CareerPathCourseDto>();
         CreateMap<User, UserDto>();
-        CreateMap<CourseApplication, CourseApplicationResponse>();
-        CreateMap<Payment, PaymentResponse>();
+        CreateMap<CourseApplication, CourseApplicationResponse>()
+            .ForCtorParam(
+                nameof(CourseApplicationResponse.Progress),
+                options => options.MapFrom(application => application.Progress))
+            .ForCtorParam(
+                nameof(CourseApplicationResponse.Status),
+                options => options.MapFrom(application =>
+                    application.Status.ToString()));
+        CreateMap<Payment, PaymentResponse>()
+            .ForCtorParam(
+                nameof(PaymentResponse.Status),
+                options => options.MapFrom(payment => payment.Status.ToString()));
         CreateMap<CreateCourseRequest, Course>();
         CreateMap<UpdateCourseRequest, Course>();
 

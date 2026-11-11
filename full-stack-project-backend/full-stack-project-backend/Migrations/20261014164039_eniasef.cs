@@ -5,7 +5,7 @@
 namespace full_stack_project_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class eniasef : Migration
+    public partial class Eniasef : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

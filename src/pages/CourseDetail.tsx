@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CatalogEmpty, CatalogLoading } from "../Components/CatalogFeedback";
 import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import { catalogApi } from "../services/catalogApi";
 import type { Coursetype } from "../types/Coursetype";
+import { userContext } from "../types/UserContextType";
 
 function CourseDetail() {
+  const context = useContext(userContext);
   const { courseId } = useParams();
   const id = Number(courseId);
   const validId = Number.isSafeInteger(id) && id > 0;
@@ -114,6 +116,39 @@ function CourseDetail() {
 
                 <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
                   <h2 className="font-serif text-2xl font-bold">
+                    Meet your instructors
+                  </h2>
+                  {course.instructors.length ? (
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                      {course.instructors.map((instructor) => (
+                        <article
+                          key={instructor.email}
+                          className="rounded-xl border border-[#eee2d5] bg-[#fcfaf7] p-5"
+                        >
+                          <h3 className="font-semibold">{instructor.name}</h3>
+                          <a
+                            className="mt-1 block break-all text-sm text-[#a55335] hover:underline"
+                            href={`mailto:${instructor.email}`}
+                          >
+                            {instructor.email}
+                          </a>
+                          {instructor.bio && (
+                            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+                              {instructor.bio}
+                            </p>
+                          )}
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-[#765f52]">
+                      Instructor details will be added soon.
+                    </p>
+                  )}
+                </section>
+
+                <section className="rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+                  <h2 className="font-serif text-2xl font-bold">
                     Before you start
                   </h2>
                   {course.prerequisites.length ? (
@@ -160,12 +195,28 @@ function CourseDetail() {
                     </dd>
                   </div>
                 </dl>
-                <Link
-                  to={`/Apply/${course.id}`}
-                  className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#a9694f] px-5 py-2.5 text-center font-semibold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
-                >
-                  Apply / Enroll
-                </Link>
+                {context?.isLoading ? (
+                  <span
+                    role="status"
+                    className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-[#dfd2c3] px-5 py-2.5 text-center font-semibold text-[#765f52]"
+                  >
+                    Checking account access…
+                  </span>
+                ) : context?.user?.role === "Instructor" ? (
+                  <Link
+                    to="/InstructorDashboard"
+                    className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#a9694f] px-5 py-2.5 text-center font-semibold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+                  >
+                    Open teaching dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    to={`/Apply/${course.id}`}
+                    className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-[#a9694f] px-5 py-2.5 text-center font-semibold text-white transition hover:bg-[#8f5640] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
+                  >
+                    Apply / Enroll
+                  </Link>
+                )}
                 <div className="mt-5 border-t border-[#eee2d5] pt-4">
                   <h3 className="text-sm font-semibold">Part of this program</h3>
                   <Link

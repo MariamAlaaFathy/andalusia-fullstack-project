@@ -13,4 +13,5 @@ public sealed record CourseDto(
     string Duration,
     string Level,
     IReadOnlyList<string> Prerequisites,
-    IReadOnlyList<string> LearningOutcomes);
+    IReadOnlyList<string> LearningOutcomes,
+    IReadOnlyList<CourseInstructorDto> Instructors);

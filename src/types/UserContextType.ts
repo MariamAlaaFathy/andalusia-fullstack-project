@@ -13,7 +13,7 @@ type Registration = Credentials & {
 type UserContextType = {
   user: User | null;
   isLoading: boolean;
-  login: (credentials: Credentials) => Promise<void>;
+  login: (credentials: Credentials) => Promise<User>;
   register: (registration: Registration) => Promise<void>;
   logout: () => Promise<void>;
 };
