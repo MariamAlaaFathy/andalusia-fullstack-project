@@ -17,7 +17,7 @@ import {
   type LandingPageInput,
   type Lesson,
   type LessonInput,
-} from "../services/contentApi";
+} from "../types/ContentApi";
 
 type Tab = "lessons" | "landing";
 

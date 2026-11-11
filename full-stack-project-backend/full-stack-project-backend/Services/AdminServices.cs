@@ -1,0 +1,93 @@
+﻿using full_stack_project_backend.DTOs;
+using full_stack_project_backend.Models;
+using full_stack_project_backend.Repository;
+using Microsoft.AspNetCore.Identity;
+using Assignment_3.Middleware;
+
+namespace full_stack_project_backend.Services
+{
+    public class AdminServices : IAdminServices
+    {
+        private readonly IAdminRepository _adminRepository;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly INotificationService _notificationService;
+
+        public AdminServices(
+            IAdminRepository adminRepository,
+            IPasswordHasher<User> passwordHasher,
+            INotificationService notificationService)
+        {
+            _adminRepository = adminRepository;
+            _passwordHasher = passwordHasher;
+            _notificationService = notificationService;
+        }
+
+        public Task<IReadOnlyList<UserDto>> GetUsers() => _adminRepository.GetUsers();
+
+        public Task<UserDto?> GetUserById(int userId) => _adminRepository.GetUserById(userId);
+
+        public async Task<UserDto> CreateUser(UserDto user)
+        {
+            ValidateRole(user.Role);
+            user.Password = _passwordHasher.HashPassword(new User(), user.Password);
+            var createdUser = await _adminRepository.CreateUser(user);
+            await _notificationService.CreateAsync(
+                createdUser.UserId,
+                $"Welcome to Andalusia Academy, {createdUser.Username}! Your {createdUser.Role} account is ready.",
+                CancellationToken.None);
+            return createdUser;
+        }
+
+        public async Task<UserDto?> UpdateUser(int userId, UserDto user)
+        {
+            ValidateRole(user.Role);
+            if (!string.IsNullOrWhiteSpace(user.Password))
+                user.Password = _passwordHasher.HashPassword(new User(), user.Password);
+
+            return await _adminRepository.UpdateUser(userId, user);
+        }
+
+        public async Task<UserDto?> AssignRole(int userId, string role)
+        {
+            ValidateRole(role);
+            var user = await _adminRepository.GetUserById(userId);
+            if (user is null)
+                return null;
+
+            user.Role = role;
+            return await _adminRepository.UpdateUser(userId, user);
+        }
+
+        public Task<UserDto?> SetUserActive(int userId, bool isActive) =>
+            _adminRepository.SetUserActive(userId, isActive);
+
+        public Task<bool> DeleteUser(int userId) => _adminRepository.DeleteUser(userId);
+
+        public Task<bool?> AssignInstructorToCourse(
+            int courseId,
+            int instructorId,
+            CancellationToken cancellationToken) =>
+            _adminRepository.AssignInstructorToCourse(
+                courseId,
+                instructorId,
+                cancellationToken);
+
+        public Task<bool> RemoveInstructorFromCourse(
+            int courseId,
+            int instructorId,
+            CancellationToken cancellationToken) =>
+            _adminRepository.RemoveInstructorFromCourse(
+                courseId,
+                instructorId,
+                cancellationToken);
+
+        private static void ValidateRole(string role)
+        {
+            if (!UserRoles.IsSupported(role))
+            {
+                throw new RequestValidationException(
+                    "Role must be Learner, Instructor, Admin, or Content Manager.");
+            }
+        }
+    }
+}
