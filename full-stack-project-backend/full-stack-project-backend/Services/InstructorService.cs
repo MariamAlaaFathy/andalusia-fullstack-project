@@ -30,30 +30,37 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
             return [];
         }
 
-        var enrolledStudents = await dbContext.CourseApplications
+        var enrolledApplications = await dbContext.CourseApplications
             .AsNoTracking()
             .Where(application =>
                 courseIds.Contains(application.CourseId) &&
                 application.Status == CourseApplicationStatus.Enrolled)
-            .GroupBy(application => application.CourseId)
-            .Select(group => new { CourseId = group.Key, Count = group.Count() })
-            .ToDictionaryAsync(item => item.CourseId, item => item.Count, cancellationToken);
+            .Select(application => application.CourseId)
+            .ToListAsync(cancellationToken);
 
-        var upcomingSessions = await dbContext.CourseSessions
+        var upcomingSessionCourseIds = await dbContext.CourseSessions
             .AsNoTracking()
             .Where(session =>
                 courseIds.Contains(session.CourseId) &&
                 session.StartsAt > DateTime.UtcNow)
-            .GroupBy(session => session.CourseId)
-            .Select(group => new { CourseId = group.Key, Count = group.Count() })
-            .ToDictionaryAsync(item => item.CourseId, item => item.Count, cancellationToken);
+            .Select(session => session.CourseId)
+            .ToListAsync(cancellationToken);
 
-        var assignmentCounts = await dbContext.CourseAssignments
+        var assignmentCourseIds = await dbContext.CourseAssignments
             .AsNoTracking()
             .Where(assignment => courseIds.Contains(assignment.CourseId))
-            .GroupBy(assignment => assignment.CourseId)
-            .Select(group => new { CourseId = group.Key, Count = group.Count() })
-            .ToDictionaryAsync(item => item.CourseId, item => item.Count, cancellationToken);
+            .Select(assignment => assignment.CourseId)
+            .ToListAsync(cancellationToken);
+
+        var enrolledStudents = enrolledApplications
+            .GroupBy(courseId => courseId)
+            .ToDictionary(group => group.Key, group => group.Count());
+        var upcomingSessions = upcomingSessionCourseIds
+            .GroupBy(courseId => courseId)
+            .ToDictionary(group => group.Key, group => group.Count());
+        var assignmentCounts = assignmentCourseIds
+            .GroupBy(courseId => courseId)
+            .ToDictionary(group => group.Key, group => group.Count());
 
         return assignedCourses
             .Select(course => new InstructorCourseResponse(
@@ -277,17 +284,35 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
     {
         await EnsureAssignedAsync(instructorId, courseId, cancellationToken);
 
-        return await dbContext.CourseAssignments
+        var assignments = await dbContext.CourseAssignments
             .AsNoTracking()
             .Where(assignment => assignment.CourseId == courseId)
             .OrderBy(assignment => assignment.DueAt)
+            .ToListAsync(cancellationToken);
+
+        if (assignments.Count == 0)
+        {
+            return [];
+        }
+
+        var assignmentIds = assignments.Select(assignment => assignment.Id).ToArray();
+        var submissionAssignmentIds = await dbContext.AssignmentSubmissions
+            .AsNoTracking()
+            .Where(submission => assignmentIds.Contains(submission.CourseAssignmentId))
+            .Select(submission => submission.CourseAssignmentId)
+            .ToListAsync(cancellationToken);
+        var submissionCounts = submissionAssignmentIds
+            .GroupBy(assignmentId => assignmentId)
+            .ToDictionary(group => group.Key, group => group.Count());
+
+        return assignments
             .Select(assignment => new InstructorAssignmentResponse(
                 assignment.Id,
                 assignment.Title,
                 assignment.Description,
                 assignment.DueAt,
-                assignment.Submissions.Count))
-            .ToListAsync(cancellationToken);
+                submissionCounts.GetValueOrDefault(assignment.Id)))
+            .ToArray();
     }
 
     public async Task<InstructorAssignmentResponse> CreateAssignmentAsync(
@@ -329,14 +354,19 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
         int assignmentId,
         CancellationToken cancellationToken)
     {
-        await EnsureAssignmentAssignedAsync(
+        var courseId = await EnsureAssignmentAssignedAsync(
             instructorId,
             assignmentId,
             cancellationToken);
 
         return await dbContext.AssignmentSubmissions
             .AsNoTracking()
-            .Where(submission => submission.CourseAssignmentId == assignmentId)
+            .Where(submission =>
+                submission.CourseAssignmentId == assignmentId &&
+                dbContext.CourseApplications.Any(application =>
+                    application.CourseId == courseId &&
+                    application.LearnerId == submission.LearnerId &&
+                    application.Status == CourseApplicationStatus.Enrolled))
             .OrderBy(submission => submission.SubmittedAt)
             .Select(submission => new AssignmentSubmissionResponse(
                 submission.Id,
@@ -356,7 +386,7 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
         GradeSubmissionRequest request,
         CancellationToken cancellationToken)
     {
-        await EnsureAssignmentAssignedAsync(
+        var courseId = await EnsureAssignmentAssignedAsync(
             instructorId,
             assignmentId,
             cancellationToken);
@@ -371,7 +401,11 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
             .Include(item => item.Learner)
             .FirstOrDefaultAsync(
                 item => item.Id == submissionId &&
-                    item.CourseAssignmentId == assignmentId,
+                    item.CourseAssignmentId == assignmentId &&
+                    dbContext.CourseApplications.Any(application =>
+                        application.CourseId == courseId &&
+                        application.LearnerId == item.LearnerId &&
+                        application.Status == CourseApplicationStatus.Enrolled),
                 cancellationToken)
             ?? throw new NotFoundException("Assignment submission not found.");
 
@@ -403,7 +437,7 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
         }
     }
 
-    private async Task EnsureAssignmentAssignedAsync(
+    private async Task<int> EnsureAssignmentAssignedAsync(
         int instructorId,
         int assignmentId,
         CancellationToken cancellationToken)
@@ -414,6 +448,7 @@ public sealed class InstructorService(AppDbcontext dbContext) : IInstructorServi
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new NotFoundException("Assignment not found.");
         await EnsureAssignedAsync(instructorId, courseId, cancellationToken);
+        return courseId;
     }
 
     private static InstructorSessionResponse ToSessionResponse(
