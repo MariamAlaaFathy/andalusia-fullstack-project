@@ -1,27 +1,35 @@
+import { useEffect, useState } from "react";
 import NavBar from "../Components/NavBar";
 import Footer from "../Components/Footer";
 import { useNavigate } from "react-router-dom";
+import { contentApi, type AboutPageBlock } from "../types/ContentApi";
 
 export default function About() {
   const navigate = useNavigate();
+  const [blocks, setBlocks] = useState<AboutPageBlock[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const values = [
-    {
-      title: "Practical Learning",
-      description:
-        "Every course is built around real-world projects, giving you skills you can immediately apply in your job or portfolio.",
-    },
-    {
-      title: "Expert Mentorship",
-      description:
-        "Learn directly from industry practitioners who bring active experience and guidance to your learning journey.",
-    },
-    {
-      title: "Structured Growth",
-      description:
-        "Clear learning paths remove the guesswork, letting you focus on step-by-step progress towards your career goals.",
-    },
-  ];
+  useEffect(() => {
+    const controller = new AbortController();
+    void contentApi.getAbout(controller.signal)
+      .then((content) => {
+        if (!controller.signal.aborted) setBlocks(content);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "About content could not be loaded.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
+
+  const [intro, ...contentBlocks] = blocks;
 
   return (
     <div className="min-h-screen bg-[#FAF5F2] font-sans text-[#333333] flex flex-col justify-between">
@@ -30,67 +38,42 @@ export default function About() {
 
         <section className="bg-white border-b border-[#F2EDE9] py-12 sm:py-16 px-4 sm:px-6 lg:px-0">
           <div className="max-w-[1180px] mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 font-['El_Messiri',_serif]">
-              About Andalusia Academy
-            </h1>
-            <p className="text-[#666666] text-lg max-w-[700px] mx-auto leading-relaxed">
-              Empowering learners across the region with structured career
-              paths, hands-on technical training, and industry-aligned skills.
-            </p>
+            {isLoading ? (
+              <p role="status">Loading about content…</p>
+            ) : errorMessage ? (
+              <p role="alert" className="text-red-700">{errorMessage}</p>
+            ) : intro ? (
+              <>
+                <h1 className="mb-4 font-['El_Messiri',_serif] text-4xl font-bold md:text-5xl">
+                  {intro.title}
+                </h1>
+                <p className="mx-auto max-w-[700px] whitespace-pre-line text-lg leading-relaxed text-[#666666]">
+                  {intro.body}
+                </p>
+              </>
+            ) : (
+              <p>No About page content has been published yet.</p>
+            )}
           </div>
         </section>
 
-        <section className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0">
-          <div className="bg-white rounded-2xl p-8 md:p-12 border border-[#F2EDE9] shadow-sm flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-4 font-['El_Messiri',_serif]">
-                Our Mission
-              </h2>
-              <p className="text-[#666666] text-base leading-relaxed mb-4">
-                Andalusia Academy was created to bridge the gap between academic
-                education and practical industry demands. We provide accessible,
-                high-quality learning experiences designed to take you from
-                foundational concepts to market-ready expertise.
-              </p>
-              <p className="text-[#666666] text-base leading-relaxed">
-                Whether you are stepping into tech for the first time,
-                upskilling for a promotion, or training an engineering team, our
-                programs adapt to your goals.
-              </p>
-            </div>
-            <div className="flex-1 w-full h-[260px] bg-[#B57B65] rounded-xl flex items-center justify-center p-8 text-white text-center">
-              <div>
-                <p className="text-4xl font-bold font-['El_Messiri',_serif] mb-2">
-                  One Academy.
-                </p>
-                <p className="text-xl font-light text-[#F5E6E0]">
-                  Every Learning Moment.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="max-w-[1180px] mx-auto mb-16 sm:mb-20 px-4 sm:px-6 lg:px-0">
-          <h2 className="text-3xl font-bold mb-8 font-['El_Messiri',_serif] text-center md:text-left">
-            Why Learn With Us
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {values.map((item, idx) => (
+        {contentBlocks.length > 0 && (
+          <section className="mx-auto my-12 grid max-w-[1180px] gap-6 px-4 sm:my-16 sm:px-6 md:grid-cols-2 lg:px-0">
+            {contentBlocks.map((block) => (
               <div
-                key={idx}
-                className="bg-white rounded-2xl p-8 border border-[#F2EDE9] shadow-xs hover:border-[#A16F5E] transition-colors"
+                key={block.id}
+                className="rounded-2xl border border-[#F2EDE9] bg-white p-8 shadow-sm"
               >
-                <h3 className="text-xl font-bold mb-3 font-['El_Messiri',_serif]">
-                  {item.title}
-                </h3>
-                <p className="text-[#666666] text-sm leading-relaxed">
-                  {item.description}
+                <h2 className="mb-3 font-['El_Messiri',_serif] text-2xl font-bold">
+                  {block.title}
+                </h2>
+                <p className="whitespace-pre-line text-sm leading-relaxed text-[#666666]">
+                  {block.body}
                 </p>
               </div>
             ))}
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="bg-white border-t border-[#F2EDE9] py-16 px-4 text-center">
           <div className="max-w-[700px] mx-auto">

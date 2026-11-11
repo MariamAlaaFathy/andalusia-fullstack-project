@@ -3,20 +3,26 @@ namespace full_stack_project_backend.DTOs
 {
     public class CreateCourseRequest
     {
-        [Required]
-        public string Name { get; set; }
+        [Required, StringLength(200)]
+        public string Name { get; set; } = string.Empty;
 
-        public string Description { get; set; }
+        [Required, StringLength(4000)]
+        public string Description { get; set; } = string.Empty;
 
+        [Range(0, int.MaxValue)]
         public int Price { get; set; }
 
-        public string Category { get; set; }
+        [Required, StringLength(100)]
+        public string Category { get; set; } = string.Empty;
 
+        [Range(1, int.MaxValue)]
         public int ProgramId { get; set; }
 
-        public string Duration { get; set; }
+        [Required, StringLength(100)]
+        public string Duration { get; set; } = string.Empty;
 
-        public string Level { get; set; }
+        [Required, StringLength(100)]
+        public string Level { get; set; } = string.Empty;
 
         public List<string> Prerequisites { get; set; } = [];
 

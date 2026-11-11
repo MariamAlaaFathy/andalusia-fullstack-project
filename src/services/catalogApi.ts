@@ -96,8 +96,8 @@ async function readResponse<T>(
   if (!response.ok) {
     const detail =
       isRecord(payload) &&
-      typeof payload.detail === "string"
-        ? payload.detail
+      (typeof payload.detail === "string" || typeof payload.message === "string")
+        ? (typeof payload.detail === "string" ? payload.detail : payload.message as string)
         : `Request failed with status ${response.status}.`;
     throw new Error(detail);
   }
@@ -168,9 +168,10 @@ export const catalogApi = {
     search: string,
     page: number,
     signal?: AbortSignal,
+    pageSize = 100,
   ): Promise<PagedResult<Program>> {
     return get(
-      makeListUrl("Programs", search, page),
+      makeListUrl("Programs", search, page, pageSize),
       (value): value is PagedResult<Program> =>
         isPagedResult(value, isProgram),
       signal,
@@ -185,9 +186,10 @@ export const catalogApi = {
     search: string,
     page: number,
     signal?: AbortSignal,
+    pageSize = 100,
   ): Promise<PagedResult<CareerPath>> {
     return get(
-      makeListUrl("CareerPaths", search, page),
+      makeListUrl("CareerPaths", search, page, pageSize),
       (value): value is PagedResult<CareerPath> =>
         isPagedResult(value, isCareerPath),
       signal,
@@ -197,4 +199,95 @@ export const catalogApi = {
   getCareerPath(id: number, signal?: AbortSignal): Promise<CareerPath> {
     return get(`/api/CareerPaths/${id}`, isCareerPath, signal);
   },
+
+  createCourse(input: CourseInput): Promise<Coursetype> {
+    return mutate("/api/Courses", "POST", input, isCourse);
+  },
+
+  updateCourse(id: number, input: CourseInput): Promise<Coursetype> {
+    return mutate(`/api/Courses/${id}`, "PUT", input, isCourse);
+  },
+
+  deleteCourse(id: number): Promise<void> {
+    return remove(`/api/Courses/${id}`);
+  },
+
+  createProgram(input: ProgramInput): Promise<Program> {
+    return mutate("/api/Programs", "POST", input, isProgram);
+  },
+
+  updateProgram(id: number, input: ProgramInput): Promise<Program> {
+    return mutate(`/api/Programs/${id}`, "PUT", input, isProgram);
+  },
+
+  deleteProgram(id: number): Promise<void> {
+    return remove(`/api/Programs/${id}`);
+  },
+
+  createCareerPath(input: CareerPathInput): Promise<CareerPath> {
+    return mutate("/api/CareerPaths", "POST", input, isCareerPath);
+  },
+
+  updateCareerPath(id: number, input: CareerPathInput): Promise<CareerPath> {
+    return mutate(`/api/CareerPaths/${id}`, "PUT", input, isCareerPath);
+  },
+
+  deleteCareerPath(id: number): Promise<void> {
+    return remove(`/api/CareerPaths/${id}`);
+  },
 };
+
+export type CourseInput = Pick<
+  Coursetype,
+  | "name"
+  | "description"
+  | "price"
+  | "category"
+  | "programId"
+  | "duration"
+  | "level"
+  | "prerequisites"
+  | "learningOutcomes"
+>;
+
+export type ProgramInput = Pick<Program, "name" | "description" | "careerPathId">;
+export type CareerPathInput = Pick<CareerPath, "name" | "description" | "skills">;
+
+async function mutate<T>(
+  path: string,
+  method: "POST" | "PUT",
+  body: unknown,
+  isPayload: (value: unknown) => value is T,
+): Promise<T> {
+  let response: Response;
+  try {
+    response = await authenticatedFetch(`${apiBaseUrl}${path}`, {
+      method,
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    throw new Error("Could not connect to the catalog API.", { cause: error });
+  }
+  return readResponse(response, isPayload);
+}
+
+async function remove(path: string): Promise<void> {
+  let response: Response;
+  try {
+    response = await authenticatedFetch(`${apiBaseUrl}${path}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+    });
+  } catch (error) {
+    throw new Error("Could not connect to the catalog API.", { cause: error });
+  }
+  if (!response.ok) {
+    const payload: unknown = await response.json().catch(() => null);
+    const message = isRecord(payload) &&
+      (typeof payload.detail === "string" || typeof payload.message === "string")
+      ? (typeof payload.detail === "string" ? payload.detail : payload.message as string)
+      : `Request failed with status ${response.status}.`;
+    throw new Error(message);
+  }
+}

@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import NavBar from "../Components/NavBar";
 import Footer from "../Components/Footer";
+import { contentApi, type ContactPageSettings } from "../types/ContentApi";
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [settings, setSettings] = useState<ContactPageSettings | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -11,10 +14,35 @@ export default function Contact() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const controller = new AbortController();
+    void contentApi.getContactSettings(controller.signal)
+      .then((content) => {
+        if (!controller.signal.aborted) setSettings(content);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setErrorMessage(
+            error instanceof Error ? error.message : "Contact information could not be loaded.",
+          );
+        }
+      });
+    return () => controller.abort();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.name && formData.email && formData.message) {
+    setErrorMessage("");
+    try {
+      await contentApi.submitContactMessage({
+        ...formData,
+        subject: formData.subject.trim() || null,
+      });
       setSubmitted(true);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Your message could not be sent.",
+      );
     }
   };
 
@@ -29,8 +57,7 @@ export default function Contact() {
               Contact Us
             </h1>
             <p className="text-[#666666] text-lg max-w-[600px] mx-auto leading-relaxed">
-              Have questions about our programs, course tracks, or team pricing?
-              We're here to help.
+              {settings?.introduction ?? "Loading contact information…"}
             </p>
           </div>
         </section>
@@ -52,7 +79,12 @@ export default function Contact() {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form onSubmit={(event) => void handleSubmit(event)} className="space-y-5">
+                {errorMessage && (
+                  <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {errorMessage}
+                  </p>
+                )}
                 <div>
                   <label className="block text-xs font-bold uppercase text-[#666666] mb-2 tracking-wider">
                     Full Name
@@ -122,6 +154,9 @@ export default function Contact() {
                 >
                   Send Message
                 </button>
+                <p className="text-xs leading-relaxed text-[#765f52]">
+                  Your message will be saved for the academy team to review.
+                </p>
               </form>
             )}
           </div>
@@ -145,15 +180,18 @@ export default function Contact() {
                     <p className="font-bold text-[#333333] mb-1">
                       Our Location
                     </p>
-                    <a
-                      href="https://maps.google.com/?q=39+Khaleel+El-Khayat+Basha,+Abu+an+Nawatir,+Sidi+Gaber,+Alexandria+Governorate"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#666666] hover:text-[#A16F5E] leading-relaxed transition-colors block"
-                    >
-                      39 Khaleel El-Khayat Basha, Abu an Nawatir, Sidi Gaber,
-                      Alexandria Governorate
-                    </a>
+                    {settings?.mapUrl ? (
+                      <a
+                        href={settings.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#666666] hover:text-[#A16F5E] leading-relaxed transition-colors block"
+                      >
+                        {settings.address}
+                      </a>
+                    ) : (
+                      <p className="text-[#666666] leading-relaxed">{settings?.address ?? ""}</p>
+                    )}
                   </div>
                 </div>
 
@@ -167,9 +205,9 @@ export default function Contact() {
                   </svg>
                   <div>
                     <p className="font-bold text-[#333333] mb-1">Email Us</p>
-                    <p className="text-[#666666]">
-                      andalusiaacadem@andalusia.com
-                    </p>
+                    <a className="text-[#666666] hover:text-[#A16F5E]" href={`mailto:${settings?.email ?? ""}`}>
+                      {settings?.email ?? ""}
+                    </a>
                   </div>
                 </div>
 
@@ -183,7 +221,9 @@ export default function Contact() {
                   </svg>
                   <div>
                     <p className="font-bold text-[#333333] mb-1">Call Us</p>
-                    <p className="text-[#666666]">01202317780</p>
+                    <a className="text-[#666666] hover:text-[#A16F5E]" href={`tel:${settings?.phone ?? ""}`}>
+                      {settings?.phone ?? ""}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -193,10 +233,8 @@ export default function Contact() {
               <h4 className="font-bold text-lg mb-2 font-['El_Messiri',_serif]">
                 Working Hours
               </h4>
-              <p className="text-sm text-[#F5E6E0] leading-relaxed">
-                Sunday – Thursday: 9:00 AM – 5:00 PM
-                <br />
-                Friday & Saturday: Closed
+              <p className="text-sm text-[#F5E6E0] leading-relaxed whitespace-pre-line">
+                {settings?.workingHours ?? ""}
               </p>
             </div>
           </div>

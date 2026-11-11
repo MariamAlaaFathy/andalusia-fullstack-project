@@ -84,20 +84,27 @@ namespace full_stack_project_backend.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = UserRoles.Admin)]
         [HttpPut("{id:int}/role")]
         public async Task<IActionResult> UpdateRole(int id, [FromBody] UpdateUserRoleDto dto)
         {
-            var allowedRoles = new[] { "Learner", "ContentManager", "Administrator" };
-            if (!allowedRoles.Contains(dto.Role, StringComparer.OrdinalIgnoreCase))
-                return BadRequest(new { message = "Role must be Learner, ContentManager, or Administrator." });
+            var allowedRoles = new[]
+            {
+                UserRoles.Learner,
+                UserRoles.Instructor,
+                UserRoles.Admin,
+                UserRoles.ContentManager
+            };
+            var role = allowedRoles.FirstOrDefault(candidate =>
+                candidate.Equals(dto.Role, StringComparison.OrdinalIgnoreCase));
+            if (role is null)
+                return BadRequest(new { message = "Role must be Learner, Instructor, Admin, or Content Manager." });
 
             var user = await _userRepository.GetUserById(id);
             if (user == null)
                 return NotFound();
 
-            user.Role = allowedRoles.First(role =>
-                role.Equals(dto.Role, StringComparison.OrdinalIgnoreCase));
+            user.Role = role;
 
             var updatedUser = await _userRepository.UpdateUser(id, user);
             return Ok(new { updatedUser!.UserId, updatedUser.Username, updatedUser.Email, updatedUser.Role });
@@ -108,33 +115,13 @@ namespace full_stack_project_backend.Controllers
         [HttpPost("~/api/auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _userRepository.GetByEmail(dto.Email);
+            var result = await _authService.LoginAsync(
+                dto,
+                HttpContext.RequestAborted);
 
-            if (user == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, dto.Password);
-            if (result == PasswordVerificationResult.Failed)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var accessToken = _tokenService.GenerateAccessToken(user);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-
-            var updated = new User
-            {
-                RefreshToken = refreshToken,
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
-            };
-
-            await _userRepository.UpdateUser(user.UserId, updated);
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken,
-                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { user.UserId, user.Username, user.Email, user.Role }
-            });
+            return result.Session is null
+                ? Unauthorized(new { message = result.ErrorMessage ?? "Invalid credentials." })
+                : Ok(result.Session);
         }
 
         [AllowAnonymous]
@@ -145,27 +132,9 @@ namespace full_stack_project_backend.Controllers
                 dto,
                 HttpContext.RequestAborted);
 
-            if (!existing.RefreshTokenExpiry.HasValue || existing.RefreshTokenExpiry.Value < DateTime.UtcNow)
-                return Unauthorized(new { message = "Refresh token expired" });
-
-            var accessToken = _tokenService.GenerateAccessToken(existing);
-            var newRefresh = _tokenService.GenerateRefreshToken();
-
-            var updated = new User
-            {
-                RefreshToken = newRefresh,
-                RefreshTokenExpiry = DateTime.UtcNow.AddDays(7)
-            };
-
-            await _userRepository.UpdateUser(existing.UserId, updated);
-
-            return Ok(new
-            {
-                accessToken,
-                refreshToken = newRefresh,
-                expiresInMinutes = _tokenService.GetAccessTokenExpiryMinutes(),
-                user = new { existing.UserId, existing.Username, existing.Email, existing.Role }
-            });
+            return result.Session is null
+                ? Unauthorized(new { message = result.ErrorMessage ?? "Invalid refresh token." })
+                : Ok(result.Session);
         }
 
         [HttpPost("logout")]

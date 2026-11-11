@@ -23,6 +23,16 @@ Courses, programs, career paths, and users are stored in the
 - `GET /api/Programs/{id}`
 - `GET /api/CareerPaths?search=&page=1&pageSize=9`
 - `GET /api/CareerPaths/{id}`
+- `GET /api/landing-page` (public hero content and featured courses)
+- `PUT /api/landing-page/hero` (Content Manager or Admin JWT required)
+- `PUT /api/landing-page/featured-courses` (Content Manager or Admin JWT required)
+- `GET /api/course-content/courses/{courseId}` (public course modules and lessons)
+- `GET /api/course-content/modules` (Content Manager or Admin JWT required)
+- `GET /api/course-content/lessons` (Content Manager or Admin JWT required)
+- `POST /api/course-content/courses/{courseId}/modules` (Content Manager or Admin JWT required)
+- `POST /api/course-content/modules/{moduleId}/lessons` (Content Manager or Admin JWT required)
+- `PUT`/`DELETE /api/course-content/modules/{id}` (Content Manager or Admin JWT required)
+- `PUT`/`DELETE /api/course-content/lessons/{id}` (Content Manager or Admin JWT required)
 - `POST /api/auth/register` (also available at `/api/users`)
 - `POST /api/auth/login` (also available at `/api/users/login`)
 - `POST /api/users/refresh`

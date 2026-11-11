@@ -1,34 +1,33 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import type { LandingPageHighlight } from "../types/ContentApi";
 
-export default function ForBusinessSection() {
-  const navigate = useNavigate();
+export default function ForBusinessSection({ highlights }: { highlights: LandingPageHighlight[] }) {
+  if (!highlights.length) return null;
+
   return (
     <div
       id="for-business"
-      className="max-w-[1180px] mx-auto my-12 sm:my-16 px-4 sm:px-6 lg:px-0 flex flex-col md:flex-row items-center justify-between gap-8 sm:gap-12"
+      className="mx-auto my-12 grid max-w-[1180px] gap-6 px-4 sm:my-16 sm:px-6 lg:grid-cols-2 lg:px-0"
     >
-      <div className="flex-1 text-center md:text-left">
-        <h2 className="text-3xl font-bold text-[#333333] mb-5 font-['El_Messiri',_serif]">
-          For business
-        </h2>
-        <p className="text-[#666666] text-base leading-relaxed mb-8 max-w-[500px] mx-auto md:mx-0">
-          Upskill your team with cohort pricing, progress reporting and a
-          dedicated account contact.
-        </p>
-        <button
-          className="border-2 border-[#A16F5E] text-[#A16F5E] hover:bg-[#A16F5E] hover:text-white font-bold px-6 py-3 rounded-md transition-colors cursor-pointer text-sm"
-          onClick={() => navigate("/contact")}
+      {highlights.map((highlight) => (
+        <article
+          key={highlight.id}
+          className="rounded-2xl border border-[#F2EDE9] bg-white p-8 shadow-sm"
         >
-          Talk to our team
-        </button>
-      </div>
-      <div className="flex-1 w-full h-[320px] rounded-2xl overflow-hidden shadow-sm border border-[#F2EDE9]">
-        <img
-          src="https://api.andalusia-academy.com/storage/AHA-EG/home-sliders/June2026/TptYKO0SkgH01vFsvQmWwfY0LFawHmACY1TO0Qhz.webp"
-          alt="For Business Banner"
-          className="w-full h-full object-cover"
-        />
-      </div>
+          <h2 className="mb-4 font-['El_Messiri',_serif] text-3xl font-bold text-[#333333]">
+            {highlight.title}
+          </h2>
+          <p className="mb-6 max-w-[500px] text-base leading-relaxed text-[#666666]">
+            {highlight.description}
+          </p>
+          <Link
+            to="/Contact"
+            className="inline-flex rounded-md border-2 border-[#A16F5E] px-6 py-3 text-sm font-bold text-[#A16F5E] transition-colors hover:bg-[#A16F5E] hover:text-white"
+          >
+            Talk to our team
+          </Link>
+        </article>
+      ))}
     </div>
   );
 }

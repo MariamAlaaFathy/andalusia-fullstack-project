@@ -409,11 +409,12 @@ function AdminDashboard() {
 
       {deleteTarget && (
         <Dialog
-          title="Delete this user?"
+          title="Permanently delete this user?"
           onClose={() => setDeleteTarget(null)}
         >
           <p className="text-sm leading-relaxed text-[#765f52]">
-            {deleteTarget.name} ({deleteTarget.email}) will lose access to the
+            Delete {deleteTarget.name} ({deleteTarget.email})? Their account
+            will be permanently removed and they will lose access to the
             platform. This action cannot be undone.
           </p>
           <div className="mt-6 flex flex-wrap justify-end gap-3">
@@ -422,14 +423,14 @@ function AdminDashboard() {
               onClick={() => setDeleteTarget(null)}
               className="inline-flex min-h-11 items-center rounded-lg border border-[#d8cabc] bg-white px-5 py-2.5 font-semibold text-[#8f5640] transition hover:bg-[#f7f1e8] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a9694f]"
             >
-              Keep user
+              Cancel
             </button>
             <button
               type="button"
               onClick={() => void handleDelete()}
               className="inline-flex min-h-11 items-center rounded-lg bg-[#873d2d] px-5 py-2.5 font-semibold text-white transition hover:bg-[#6e3124] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#873d2d]"
             >
-              Delete user
+              Delete account
             </button>
           </div>
         </Dialog>

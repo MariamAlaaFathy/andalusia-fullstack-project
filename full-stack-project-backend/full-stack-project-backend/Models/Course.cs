@@ -17,18 +17,5 @@
         public ICollection<CourseSession> Sessions { get; set; } = [];
         public ICollection<CourseAssignment> Assignments { get; set; } = [];
 
-       
-
-        public string Title { get; set; } = string.Empty;
-
-    
-        public string Content { get; set; } = string.Empty;
-
-        public string? VideoUrl { get; set; }
-
-        public string? PdfUrl { get; set; }
-
-        public int Order { get; set; }
-
     }
 }

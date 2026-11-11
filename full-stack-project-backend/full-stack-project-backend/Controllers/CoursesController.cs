@@ -4,7 +4,6 @@ using full_stack_project_backend.Models;
 using full_stack_project_backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 
 namespace full_stack_project_backend.Controllers
@@ -42,45 +41,48 @@ namespace full_stack_project_backend.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         public async Task<IActionResult> CreateCourse(
         [FromBody] CreateCourseRequest request,
         CancellationToken cancellationToken)
         {
-            var createdCourse = await _courseServices.CreateCourseAsync(
-         request,
-        cancellationToken);
-
-            return CreatedAtAction(
-                nameof(GetCourse),
-                new { id = createdCourse.Id },
-                createdCourse);
+            try
+            {
+                var createdCourse = await _courseServices.CreateCourseAsync(request, cancellationToken);
+                return CreatedAtAction(
+                    nameof(GetCourse),
+                    new { id = createdCourse.Id },
+                    createdCourse);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         public async Task<IActionResult> UpdateCourse(
             int id,
             [FromBody] UpdateCourseRequest request,
             CancellationToken cancellationToken)
         {
-            var updatedCourse = await _courseServices.UpdateCourseAsync(
-                id,
-                request,
-                cancellationToken);
-
-            if (updatedCourse is null)
+            try
             {
-                return NotFound();
+                var updatedCourse = await _courseServices.UpdateCourseAsync(id, request, cancellationToken);
+                if (updatedCourse is null) return NotFound();
+                return Ok(updatedCourse);
             }
-
-            return Ok(updatedCourse);
+            catch (KeyNotFoundException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         public async Task<IActionResult> DeleteCourse(
             int id,
             CancellationToken cancellationToken)

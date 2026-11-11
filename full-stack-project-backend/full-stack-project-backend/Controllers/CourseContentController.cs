@@ -30,13 +30,63 @@ namespace full_stack_project_backend.Controllers
                 .ThenBy(module => module.Id)
                 .ToListAsync(cancellationToken);
 
-            foreach (var module in modules)
-                module.Lessons = module.Lessons.OrderBy(lesson => lesson.Order).ThenBy(lesson => lesson.Id).ToList();
+            return Ok(modules.Select(module => new CourseContentModuleDto(
+                module.Id,
+                module.CourseId,
+                module.Title,
+                module.Description,
+                module.Order,
+                module.Lessons
+                    .OrderBy(lesson => lesson.Order)
+                    .ThenBy(lesson => lesson.Id)
+                    .Select(ToDto)
+                    .ToList())));
+        }
+
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
+        [HttpGet("modules")]
+        public async Task<IActionResult> GetModules(CancellationToken cancellationToken)
+        {
+            var modules = await dbContext.CourseModules
+                .AsNoTracking()
+                .OrderBy(module => module.CourseId)
+                .ThenBy(module => module.Order)
+                .ThenBy(module => module.Id)
+                .Select(module => new CourseModuleSummaryDto(
+                    module.Id,
+                    module.CourseId,
+                    module.Title,
+                    module.Description,
+                    module.Order))
+                .ToListAsync(cancellationToken);
 
             return Ok(modules);
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
+        [HttpGet("lessons")]
+        public async Task<IActionResult> GetLessons(CancellationToken cancellationToken)
+        {
+            var lessons = await dbContext.Lessons
+                .AsNoTracking()
+                .OrderBy(lesson => lesson.ModuleId)
+                .ThenBy(lesson => lesson.Order)
+                .ThenBy(lesson => lesson.Id)
+                .Select(lesson => new LessonDto(
+                    lesson.Id,
+                    lesson.Title,
+                    lesson.Description,
+                    lesson.Content,
+                    lesson.VideoUrl,
+                    lesson.PdfUrl,
+                    lesson.Order,
+                    lesson.ModuleId))
+                .ToListAsync(cancellationToken);
+
+            return Ok(lessons);
+        }
+
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpPost("courses/{courseId:int}/modules")]
         public async Task<IActionResult> CreateModule(
             int courseId,
@@ -46,23 +96,23 @@ namespace full_stack_project_backend.Controllers
             if (!await dbContext.Courses.AnyAsync(course => course.Id == courseId, cancellationToken))
                 return NotFound(new { message = "Course not found." });
 
-            if (string.IsNullOrWhiteSpace(request.Title))
-                return BadRequest(new { message = "Module title is required." });
-
             var module = new CourseModule
             {
                 CourseId = courseId,
                 Title = request.Title.Trim(),
-                Description = request.Description,
+                Description = request.Description ?? string.Empty,
                 Order = request.Order
             };
 
             dbContext.CourseModules.Add(module);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return CreatedAtAction(nameof(GetCourseContent), new { courseId }, module);
+            return CreatedAtAction(
+                nameof(GetCourseContent),
+                new { courseId },
+                new CourseModuleSummaryDto(module.Id, module.CourseId, module.Title, module.Description, module.Order));
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpPut("modules/{id:int}")]
         public async Task<IActionResult> UpdateModule(
             int id,
@@ -73,17 +123,14 @@ namespace full_stack_project_backend.Controllers
             if (module is null)
                 return NotFound();
 
-            if (string.IsNullOrWhiteSpace(request.Title))
-                return BadRequest(new { message = "Module title is required." });
-
             module.Title = request.Title.Trim();
-            module.Description = request.Description;
+            module.Description = request.Description ?? string.Empty;
             module.Order = request.Order;
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Ok(module);
+            return Ok(new CourseModuleSummaryDto(module.Id, module.CourseId, module.Title, module.Description, module.Order));
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpDelete("modules/{id:int}")]
         public async Task<IActionResult> DeleteModule(int id, CancellationToken cancellationToken)
         {
@@ -96,7 +143,7 @@ namespace full_stack_project_backend.Controllers
             return NoContent();
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpPost("modules/{moduleId:int}/lessons")]
         public async Task<IActionResult> CreateLesson(
             int moduleId,
@@ -106,26 +153,23 @@ namespace full_stack_project_backend.Controllers
             if (!await dbContext.CourseModules.AnyAsync(module => module.Id == moduleId, cancellationToken))
                 return NotFound(new { message = "Module not found." });
 
-            if (string.IsNullOrWhiteSpace(request.Title))
-                return BadRequest(new { message = "Lesson title is required." });
-
             var lesson = new Lesson
             {
                 ModuleId = moduleId,
                 Title = request.Title.Trim(),
-                Description = request.Description,
-                Content = request.Content,
-                VideoUrl = request.VideoUrl,
-                PdfUrl = request.PdfUrl,
+                Description = request.Description ?? string.Empty,
+                Content = request.Content ?? string.Empty,
+                VideoUrl = NormalizeUrl(request.VideoUrl),
+                PdfUrl = NormalizeUrl(request.PdfUrl),
                 Order = request.Order
             };
 
             dbContext.Lessons.Add(lesson);
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Ok(lesson);
+            return Ok(ToDto(lesson));
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpPut("lessons/{id:int}")]
         public async Task<IActionResult> UpdateLesson(
             int id,
@@ -136,20 +180,17 @@ namespace full_stack_project_backend.Controllers
             if (lesson is null)
                 return NotFound();
 
-            if (string.IsNullOrWhiteSpace(request.Title))
-                return BadRequest(new { message = "Lesson title is required." });
-
             lesson.Title = request.Title.Trim();
-            lesson.Description = request.Description;
-            lesson.Content = request.Content;
-            lesson.VideoUrl = request.VideoUrl;
-            lesson.PdfUrl = request.PdfUrl;
+            lesson.Description = request.Description ?? string.Empty;
+            lesson.Content = request.Content ?? string.Empty;
+            lesson.VideoUrl = NormalizeUrl(request.VideoUrl);
+            lesson.PdfUrl = NormalizeUrl(request.PdfUrl);
             lesson.Order = request.Order;
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Ok(lesson);
+            return Ok(ToDto(lesson));
         }
 
-        [Authorize(Roles = "ContentManager,Administrator")]
+        [Authorize(Roles = UserRoles.ContentManager + "," + UserRoles.Admin)]
         [HttpDelete("lessons/{id:int}")]
         public async Task<IActionResult> DeleteLesson(int id, CancellationToken cancellationToken)
         {
@@ -161,5 +202,19 @@ namespace full_stack_project_backend.Controllers
             await dbContext.SaveChangesAsync(cancellationToken);
             return NoContent();
         }
+
+        private static LessonDto ToDto(Lesson lesson) =>
+            new(
+                lesson.Id,
+                lesson.Title,
+                lesson.Description,
+                lesson.Content,
+                lesson.VideoUrl,
+                lesson.PdfUrl,
+                lesson.Order,
+                lesson.ModuleId);
+
+        private static string? NormalizeUrl(string? value) =>
+            string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 }

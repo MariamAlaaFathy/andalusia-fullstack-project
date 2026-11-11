@@ -89,12 +89,6 @@ namespace full_stack_project_backend.Repository
             if (!string.IsNullOrEmpty(updatedUser.Role))
                 user.Role = updatedUser.Role;
 
-            if (!string.IsNullOrEmpty(updatedUser.RefreshToken))
-                user.RefreshToken = updatedUser.RefreshToken;
-
-            if (updatedUser.RefreshTokenExpiry.HasValue)
-                user.RefreshTokenExpiry = updatedUser.RefreshTokenExpiry;
-                
             if (updatedUser.Bio is not null)
                 user.Bio = updatedUser.Bio;
 

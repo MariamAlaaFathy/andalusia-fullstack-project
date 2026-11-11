@@ -22,6 +22,69 @@ namespace full_stack_project_backend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("full_stack_project_backend.Models.AboutPageBlock", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AboutPageBlocks");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Body = "Empowering learners across the region with structured career paths, hands-on technical training, and industry-aligned skills.",
+                            Order = 0,
+                            Title = "About Andalusia Academy"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Body = "Andalusia Academy was created to bridge the gap between academic education and practical industry demands. We provide accessible, high-quality learning experiences designed to take you from foundational concepts to market-ready expertise. Whether you are stepping into tech for the first time, upskilling for a promotion, or training an engineering team, our programs adapt to your goals.",
+                            Order = 1,
+                            Title = "Our Mission"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Body = "Every course is built around real-world projects, giving you skills you can immediately apply in your job or portfolio.",
+                            Order = 2,
+                            Title = "Practical Learning"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Body = "Learn directly from industry practitioners who bring active experience and guidance to your learning journey.",
+                            Order = 3,
+                            Title = "Expert Mentorship"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Body = "Clear learning paths remove the guesswork, letting you focus on step-by-step progress towards your career goals.",
+                            Order = 4,
+                            Title = "Structured Growth"
+                        });
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.AssignmentSubmission", b =>
                 {
                     b.Property<int>("Id")
@@ -216,6 +279,99 @@ namespace full_stack_project_backend.Migrations
                             CareerPathId = 3,
                             Name = "Statistics"
                         });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.ContactPageSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("Introduction")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("MapUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("WorkingHours")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ContactPageSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Address = "39 Khaleel El-Khayat Basha, Abu an Nawatir, Sidi Gaber, Alexandria Governorate",
+                            Email = "andalusiaacadem@andalusia.com",
+                            Introduction = "Have questions about our programs, course tracks, or team pricing? We're here to help.",
+                            MapUrl = "https://maps.google.com/?q=39+Khaleel+El-Khayat+Basha,+Abu+an+Nawatir,+Sidi+Gaber,+Alexandria+Governorate",
+                            Phone = "01202317780",
+                            WorkingHours = "Sunday – Thursday: 9:00 AM – 5:00 PM; Friday & Saturday: Closed"
+                        });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.ContactSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("SubmittedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsRead", "SubmittedAtUtc");
+
+                    b.ToTable("ContactSubmissions");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Course", b =>
@@ -508,6 +664,35 @@ namespace full_stack_project_backend.Migrations
                     b.ToTable("CourseInstructors");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseModule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("CourseModules");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>
                 {
                     b.Property<int>("Id")
@@ -540,6 +725,287 @@ namespace full_stack_project_backend.Migrations
                     b.HasIndex("CourseId", "StartsAt");
 
                     b.ToTable("CourseSessions");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.FeaturedCourse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CourseId")
+                        .IsUnique();
+
+                    b.ToTable("FeaturedCourses");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.LandingPageBanner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CallToActionText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CallToActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LandingPageBanners");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CallToActionText = "Join waitlist",
+                            Description = "Launching next month — join the waitlist to get early access and a founding-cohort discount.",
+                            IsPublished = true,
+                            Order = 0,
+                            Title = "New: Full Stack Development (.NET)"
+                        });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.LandingPageContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CallToActionText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CallToActionUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HeroImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HeroSubtitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HeroTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LandingPageContents");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CallToActionText = "",
+                            HeroSubtitle = "",
+                            HeroTitle = "",
+                            UpdatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                        });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.LandingPageFaq", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Answer")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Question")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LandingPageFaqs");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.LandingPageHighlight", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LandingPageHighlights");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Upskill your team with cohort pricing, progress reporting and a dedicated account contact.",
+                            IsPublished = true,
+                            Order = 0,
+                            Title = "For business"
+                        });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.LandingPageTestimonial", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Quote")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("Role")
+                        .HasMaxLength(160)
+                        .HasColumnType("nvarchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LandingPageTestimonials");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Author = "Abdlhamid Medhat",
+                            IsPublished = true,
+                            Order = 0,
+                            Quote = "Courses and conferences are well-organized and professionally managed. Andalusia Academy offers accredited courses and conferences for medical and non-medical professionals."
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Author = "Amr Gamal",
+                            IsPublished = true,
+                            Order = 1,
+                            Quote = "Your future starts with one click. Join thousands of successful learners."
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Author = "Karim Fakhry",
+                            IsPublished = true,
+                            Order = 2,
+                            Quote = "Every graduate starts with a lesson. Learn today, lead tomorrow."
+                        });
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.Lesson", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ModuleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PdfUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VideoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModuleId");
+
+                    b.ToTable("Lessons");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Notification", b =>
@@ -845,6 +1311,17 @@ namespace full_stack_project_backend.Migrations
                     b.Navigation("Instructor");
                 });
 
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseModule", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
             modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>
                 {
                     b.HasOne("full_stack_project_backend.Models.Course", "Course")
@@ -854,6 +1331,28 @@ namespace full_stack_project_backend.Migrations
                         .IsRequired();
 
                     b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.FeaturedCourse", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.Lesson", b =>
+                {
+                    b.HasOne("full_stack_project_backend.Models.CourseModule", "Module")
+                        .WithMany("Lessons")
+                        .HasForeignKey("ModuleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Module");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.Notification", b =>
@@ -943,6 +1442,11 @@ namespace full_stack_project_backend.Migrations
             modelBuilder.Entity("full_stack_project_backend.Models.CourseAssignment", b =>
                 {
                     b.Navigation("Submissions");
+                });
+
+            modelBuilder.Entity("full_stack_project_backend.Models.CourseModule", b =>
+                {
+                    b.Navigation("Lessons");
                 });
 
             modelBuilder.Entity("full_stack_project_backend.Models.CourseSession", b =>

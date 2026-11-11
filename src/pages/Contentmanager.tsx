@@ -7,19 +7,29 @@ import {
   type ReactNode,
 } from "react";
 import { Link } from "react-router-dom";
+import ConfirmDialog from "../Components/ConfirmDialog";
 import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import { userContext } from "../types/UserContextType";
 import {
   contentApi,
+  type CourseModuleInput,
   type CourseModuleSummary,
   type LandingPageContent,
   type LandingPageInput,
   type Lesson,
   type LessonInput,
 } from "../types/ContentApi";
+import { catalogApi } from "../services/catalogApi";
+import {
+  AboutBlocksPanel,
+  CatalogManagementPanel,
+  ContactInboxPanel,
+  ContactSettingsPanel,
+  LandingItemsPanel,
+} from "./ContentManagementPanels";
 
-type Tab = "lessons" | "landing";
+type Tab = "lessons" | "landing" | "catalog" | "about" | "contact" | "inbox";
 
 const emptyLesson: LessonInput = {
   title: "",
@@ -29,6 +39,12 @@ const emptyLesson: LessonInput = {
   pdfUrl: "",
   order: 1,
   moduleId: 0,
+};
+const emptyModule: CourseModuleInput = {
+  courseId: 0,
+  title: "",
+  description: "",
+  order: 1,
 };
 
 const inputClass =
@@ -40,6 +56,8 @@ const secondaryButton =
 
 function ContentManager() {
   const context = useContext(userContext);
+  const hasAccess =
+    context?.user?.role === "Content Manager" || context?.user?.role === "Admin";
   const [tab, setTab] = useState<Tab>("lessons");
 
   return (
@@ -54,8 +72,8 @@ function ContentManager() {
             Manage content
           </h1>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#765f52]">
-            Create and edit lessons, and update the text and image shown on the
-            landing page.
+            Manage the landing page, catalog, About and Contact pages, lessons,
+            and visitor messages.
           </p>
         </header>
 
@@ -83,18 +101,43 @@ function ContentManager() {
           </section>
         )}
 
-        {context?.user && (
+        {context?.user && !hasAccess && (
+          <section className="mb-6 rounded-2xl border border-[#dfd2c3] bg-white p-6 sm:p-8">
+            <h2 className="font-serif text-2xl font-bold">Access restricted</h2>
+            <p className="mt-3 text-sm leading-relaxed text-[#765f52]">
+              This area is available to content managers and administrators.
+            </p>
+          </section>
+        )}
+
+        {context?.user && hasAccess && (
           <section className="overflow-hidden rounded-2xl border border-[#dfd2c3] bg-white">
             <div className="flex flex-wrap items-center gap-2 border-b border-[#eee2d5] p-4 sm:px-6">
-              <TabButton selected={tab === "lessons"} onClick={() => setTab("lessons")}>
-                Lessons
-              </TabButton>
-              <TabButton selected={tab === "landing"} onClick={() => setTab("landing")}>
-                Landing page
-              </TabButton>
+              {([
+                ["lessons", "Lessons"],
+                ["landing", "Landing page"],
+                ["catalog", "Catalog"],
+                ["about", "About page"],
+                ["contact", "Contact page"],
+                ["inbox", "Messages"],
+              ] as const).map(([id, label]) => (
+                <TabButton key={id} selected={tab === id} onClick={() => setTab(id)}>
+                  {label}
+                </TabButton>
+              ))}
             </div>
             <div className="p-4 sm:p-6">
-              {tab === "lessons" ? <LessonsPanel /> : <LandingPanel />}
+              {tab === "lessons" && <LessonsPanel />}
+              {tab === "landing" && (
+                <div className="space-y-10">
+                  <LandingPanel />
+                  <LandingItemsPanel />
+                </div>
+              )}
+              {tab === "catalog" && <CatalogManagementPanel />}
+              {tab === "about" && <AboutBlocksPanel />}
+              {tab === "contact" && <ContactSettingsPanel />}
+              {tab === "inbox" && <ContactInboxPanel />}
             </div>
           </section>
         )}
@@ -106,28 +149,42 @@ function ContentManager() {
 
 /* ---------------------------- Lessons ---------------------------- */
 
+type LessonDeleteTarget =
+  | { type: "module"; module: CourseModuleSummary }
+  | { type: "lesson"; lesson: Lesson };
+
 function LessonsPanel() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [modules, setModules] = useState<CourseModuleSummary[]>([]);
+  const [courses, setCourses] = useState<Array<{ id: number; name: string }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [notice, setNotice] = useState("");
   const [moduleFilter, setModuleFilter] = useState<number | "all">("all");
   const [editingId, setEditingId] = useState<number | "new" | null>(null);
   const [form, setForm] = useState<LessonInput>(emptyLesson);
+  const [isCreatingModule, setIsCreatingModule] = useState(false);
+  const [moduleEditingId, setModuleEditingId] = useState<number | null>(null);
+  const [moduleForm, setModuleForm] = useState<CourseModuleInput>(emptyModule);
   const [isSaving, setIsSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<LessonDeleteTarget | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
       try {
-        const [lessonRecords, moduleRecords] = await Promise.all([
+        const [lessonRecords, moduleRecords, courseRecords] = await Promise.all([
           contentApi.getLessons(controller.signal),
           contentApi.getModules(controller.signal),
+          catalogApi.getCourses("", "", 1, controller.signal, 100),
         ]);
         if (controller.signal.aborted) return;
         setLessons(lessonRecords);
         setModules(moduleRecords);
+        setCourses(
+          courseRecords.data.map(({ id, name }) => ({ id, name })),
+        );
       } catch (error) {
         if (controller.signal.aborted) return;
         setErrorMessage(
@@ -155,6 +212,8 @@ function LessonsPanel() {
   function startNew() {
     setNotice("");
     setErrorMessage("");
+    setIsCreatingModule(false);
+    setModuleEditingId(null);
     setForm({
       ...emptyLesson,
       moduleId:
@@ -166,6 +225,8 @@ function LessonsPanel() {
   function startEdit(lesson: Lesson) {
     setNotice("");
     setErrorMessage("");
+    setIsCreatingModule(false);
+    setModuleEditingId(null);
     setForm({
       title: lesson.title,
       description: lesson.description,
@@ -176,6 +237,77 @@ function LessonsPanel() {
       moduleId: lesson.moduleId,
     });
     setEditingId(lesson.id);
+  }
+
+  function startCreateModule() {
+    setNotice("");
+    setErrorMessage("");
+    setEditingId(null);
+    setModuleEditingId(null);
+    setModuleForm({ ...emptyModule, courseId: courses[0]?.id ?? 0 });
+    setIsCreatingModule(true);
+  }
+
+  function startEditModule(module: CourseModuleSummary) {
+    setNotice("");
+    setErrorMessage("");
+    setEditingId(null);
+    setModuleEditingId(module.id);
+    setModuleForm({
+      courseId: module.courseId,
+      title: module.title,
+      description: module.description,
+      order: module.order,
+    });
+    setIsCreatingModule(true);
+  }
+
+  async function handleCreateModule(event: FormEvent) {
+    event.preventDefault();
+    setIsSaving(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      const input = {
+        title: moduleForm.title,
+        description: moduleForm.description,
+        order: moduleForm.order,
+      };
+      const saved = moduleEditingId === null
+        ? await contentApi.createModule(moduleForm.courseId, input)
+        : await contentApi.updateModule(moduleEditingId, input);
+      setModules((current) => moduleEditingId === null
+        ? [...current, saved]
+        : current.map((module) => module.id === saved.id ? saved : module));
+      setModuleFilter(saved.id);
+      setIsCreatingModule(false);
+      setNotice(moduleEditingId === null ? "Module created." : "Module updated.");
+      setModuleEditingId(null);
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "The module could not be created.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDeleteModule(module: CourseModuleSummary) {
+    setIsDeleting(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      await contentApi.deleteModule(module.id);
+      setModules((current) => current.filter((item) => item.id !== module.id));
+      setLessons((current) => current.filter((lesson) => lesson.moduleId !== module.id));
+      if (moduleFilter === module.id) setModuleFilter("all");
+      setNotice("Module and its lessons deleted.");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "The module could not be deleted.");
+    } finally {
+      setDeleteTarget(null);
+      setIsDeleting(false);
+    }
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -217,7 +349,7 @@ function LessonsPanel() {
   }
 
   async function handleDelete(lesson: Lesson) {
-    if (!window.confirm(`Delete "${lesson.title}"? This cannot be undone.`)) return;
+    setIsDeleting(true);
     setErrorMessage("");
     setNotice("");
     try {
@@ -228,6 +360,9 @@ function LessonsPanel() {
       setErrorMessage(
         error instanceof Error ? error.message : "The lesson could not be deleted.",
       );
+    } finally {
+      setDeleteTarget(null);
+      setIsDeleting(false);
     }
   }
 
@@ -243,7 +378,96 @@ function LessonsPanel() {
     <div>
       <Feedback error={errorMessage} notice={notice} />
 
-      {editingId !== null ? (
+      {isCreatingModule ? (
+        <form onSubmit={handleCreateModule} className="space-y-5">
+          <h2 className="font-serif text-2xl font-bold">
+            {moduleEditingId === null ? "New module" : "Edit module"}
+          </h2>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label="Course" htmlFor="module-course">
+              <select
+                id="module-course"
+                required
+                disabled={moduleEditingId !== null}
+                className={inputClass}
+                value={moduleForm.courseId}
+                onChange={(e) =>
+                  setModuleForm({ ...moduleForm, courseId: Number(e.target.value) })
+                }
+              >
+                <option value={0} disabled>
+                  Select a course
+                </option>
+                {courses.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Title" htmlFor="module-title">
+              <input
+                id="module-title"
+                required
+                maxLength={200}
+                className={inputClass}
+                value={moduleForm.title}
+                onChange={(e) =>
+                  setModuleForm({ ...moduleForm, title: e.target.value })
+                }
+              />
+            </Field>
+          </div>
+          <Field label="Description" htmlFor="module-description">
+            <input
+              id="module-description"
+              maxLength={2000}
+              className={inputClass}
+              value={moduleForm.description}
+              onChange={(e) =>
+                setModuleForm({ ...moduleForm, description: e.target.value })
+              }
+            />
+          </Field>
+          <Field label="Order" htmlFor="module-order">
+            <input
+              id="module-order"
+              type="number"
+              min={1}
+              required
+              className={inputClass}
+              value={moduleForm.order}
+              onChange={(e) =>
+                setModuleForm({ ...moduleForm, order: Number(e.target.value) })
+              }
+            />
+          </Field>
+          {!courses.length && (
+            <p className="text-sm text-[#765f52]">
+              Create a course before adding a module.
+            </p>
+          )}
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={isSaving || !courses.length}
+              className={primaryButton}
+            >
+              {isSaving ? "Saving…" : moduleEditingId === null ? "Create module" : "Save module"}
+            </button>
+            <button
+              type="button"
+              className={secondaryButton}
+              onClick={() => {
+                setIsCreatingModule(false);
+                setModuleEditingId(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      ) : editingId !== null ? (
         <form onSubmit={handleSubmit} className="space-y-5">
           <h2 className="font-serif text-2xl font-bold">
             {editingId === "new" ? "New lesson" : "Edit lesson"}
@@ -254,6 +478,7 @@ function LessonsPanel() {
               <input
                 id="lesson-title"
                 required
+                maxLength={200}
                 className={inputClass}
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -284,6 +509,7 @@ function LessonsPanel() {
           <Field label="Description" htmlFor="lesson-description">
             <input
               id="lesson-description"
+              maxLength={2000}
               className={inputClass}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -293,6 +519,7 @@ function LessonsPanel() {
           <Field label="Content" htmlFor="lesson-content">
             <textarea
               id="lesson-content"
+              maxLength={20000}
               rows={8}
               className={inputClass}
               value={form.content}
@@ -305,6 +532,7 @@ function LessonsPanel() {
               <input
                 id="lesson-video"
                 type="url"
+                maxLength={2048}
                 className={inputClass}
                 placeholder="https://"
                 value={form.videoUrl ?? ""}
@@ -315,6 +543,7 @@ function LessonsPanel() {
               <input
                 id="lesson-pdf"
                 type="url"
+                maxLength={2048}
                 className={inputClass}
                 placeholder="https://"
                 value={form.pdfUrl ?? ""}
@@ -374,10 +603,46 @@ function LessonsPanel() {
                 ))}
               </select>
             </div>
-            <button type="button" onClick={startNew} className={primaryButton}>
-              Add lesson
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={startCreateModule}
+                className={secondaryButton}
+              >
+                Add module
+              </button>
+              <button
+                type="button"
+                onClick={startNew}
+                disabled={!modules.length}
+                className={primaryButton}
+              >
+                Add lesson
+              </button>
+            </div>
           </div>
+
+          {modules.length > 0 && (
+            <section className="mb-6 space-y-3">
+              <h2 className="font-serif text-xl font-bold">Course modules</h2>
+              {modules
+                .filter((module) => moduleFilter === "all" || module.id === moduleFilter)
+                .map((module) => (
+                  <article key={module.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#eee2d5] p-4">
+                    <div>
+                      <p className="font-semibold">{module.title}</p>
+                      <p className="text-xs text-[#765f52]">
+                        {courses.find((course) => course.id === module.courseId)?.name ?? `Course ${module.courseId}`} · Module {module.order}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" className={secondaryButton} onClick={() => startEditModule(module)}>Edit</button>
+                      <button type="button" className="rounded-lg border border-[#e7b7aa] px-4 py-2 text-sm font-semibold text-[#873d2d]" onClick={() => setDeleteTarget({ type: "module", module })}>Delete</button>
+                    </div>
+                  </article>
+                ))}
+            </section>
+          )}
 
           {visibleLessons.length ? (
             <div className="space-y-4">
@@ -414,7 +679,7 @@ function LessonsPanel() {
                     <button
                       type="button"
                       className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[#e7b7aa] px-4 py-2 font-semibold text-[#873d2d] transition hover:bg-[#f8e9e5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#873d2d]"
-                      onClick={() => void handleDelete(lesson)}
+                      onClick={() => setDeleteTarget({ type: "lesson", lesson })}
                     >
                       Delete
                     </button>
@@ -438,6 +703,24 @@ function LessonsPanel() {
           )}
         </>
       )}
+      {deleteTarget && (
+        <ConfirmDialog
+          title={deleteTarget.type === "module" ? "Delete module and lessons?" : "Delete this lesson?"}
+          message={
+            deleteTarget.type === "module"
+              ? `The module "${deleteTarget.module.title}" and every lesson inside it will be permanently deleted.`
+              : `The lesson "${deleteTarget.lesson.title}" will be permanently deleted from its module.`
+          }
+          confirmLabel={deleteTarget.type === "module" ? "Delete module and lessons" : "Delete lesson"}
+          isBusy={isDeleting}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={() =>
+            void (deleteTarget.type === "module"
+              ? handleDeleteModule(deleteTarget.module)
+              : handleDelete(deleteTarget.lesson))
+          }
+        />
+      )}
     </div>
   );
 }
@@ -455,6 +738,8 @@ const emptyLanding: LandingPageInput = {
 function LandingPanel() {
   const [form, setForm] = useState<LandingPageInput>(emptyLanding);
   const [updatedAt, setUpdatedAt] = useState("");
+  const [courses, setCourses] = useState<Array<{ id: number; name: string }>>([]);
+  const [featuredCourseIds, setFeaturedCourseIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -475,8 +760,20 @@ function LandingPanel() {
     const controller = new AbortController();
     async function load() {
       try {
-        const content = await contentApi.getLanding(controller.signal);
-        if (!controller.signal.aborted) apply(content);
+        const [content, coursePage] = await Promise.all([
+          contentApi.getLandingPage(controller.signal),
+          catalogApi.getCourses("", "", 1, controller.signal, 100),
+        ]);
+        if (controller.signal.aborted) return;
+        if (content.hero) apply(content.hero);
+        setFeaturedCourseIds(content.featuredCourses.map((course) => course.id));
+        const courseOptions = new Map(
+          [...coursePage.data, ...content.featuredCourses].map((course) => [
+            course.id,
+            { id: course.id, name: course.name },
+          ]),
+        );
+        setCourses([...courseOptions.values()]);
       } catch (error) {
         if (controller.signal.aborted) return;
         setErrorMessage(
@@ -514,6 +811,25 @@ function LandingPanel() {
     }
   }
 
+  async function handleFeaturedCoursesSubmit(event: FormEvent) {
+    event.preventDefault();
+    setIsSaving(true);
+    setErrorMessage("");
+    setNotice("");
+    try {
+      await contentApi.updateFeaturedCourses(featuredCourseIds);
+      setNotice("Featured courses updated.");
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Featured courses could not be updated.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   if (isLoading) {
     return (
       <p role="status" className="py-10 text-center text-sm text-[#765f52]">
@@ -523,7 +839,9 @@ function LandingPanel() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="space-y-10">
+      <Feedback error={errorMessage} notice={notice} />
+      <form onSubmit={handleSubmit} className="space-y-5">
       <div>
         <h2 className="font-serif text-2xl font-bold">Landing page</h2>
         {updatedAt && (
@@ -533,12 +851,11 @@ function LandingPanel() {
         )}
       </div>
 
-      <Feedback error={errorMessage} notice={notice} />
-
       <Field label="Hero title" htmlFor="hero-title">
         <input
           id="hero-title"
           required
+          maxLength={160}
           className={inputClass}
           value={form.heroTitle}
           onChange={(e) => setForm({ ...form, heroTitle: e.target.value })}
@@ -548,6 +865,8 @@ function LandingPanel() {
       <Field label="Hero subtitle" htmlFor="hero-subtitle">
         <textarea
           id="hero-subtitle"
+          required
+          maxLength={500}
           rows={3}
           className={inputClass}
           value={form.heroSubtitle}
@@ -558,6 +877,7 @@ function LandingPanel() {
       <Field label="Hero image URL" htmlFor="hero-image">
         <input
           id="hero-image"
+          maxLength={2048}
           className={inputClass}
           placeholder="landscape2.jpg or https://"
           value={form.heroImageUrl ?? ""}
@@ -578,6 +898,7 @@ function LandingPanel() {
           <input
             id="cta-text"
             required
+            maxLength={80}
             className={inputClass}
             value={form.callToActionText}
             onChange={(e) =>
@@ -588,6 +909,7 @@ function LandingPanel() {
         <Field label="Button link" htmlFor="cta-url">
           <input
             id="cta-url"
+            maxLength={2048}
             className={inputClass}
             placeholder="/Programs"
             value={form.callToActionUrl ?? ""}
@@ -601,7 +923,53 @@ function LandingPanel() {
       <button type="submit" disabled={isSaving} className={primaryButton}>
         {isSaving ? "Saving…" : "Save changes"}
       </button>
-    </form>
+      </form>
+
+      <form onSubmit={handleFeaturedCoursesSubmit} className="space-y-5">
+        <div>
+          <h2 className="font-serif text-2xl font-bold">Featured courses</h2>
+          <p className="mt-1 text-sm text-[#765f52]">
+            Select courses to display on the public homepage.
+          </p>
+        </div>
+        {courses.length ? (
+          <fieldset className="space-y-3">
+            <legend className="sr-only">Choose featured courses</legend>
+            {courses.map((course) => (
+              <label
+                key={course.id}
+                className="flex items-center gap-3 rounded-lg border border-[#eee2d5] p-3 text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={featuredCourseIds.includes(course.id)}
+                  onChange={(event) =>
+                    setFeaturedCourseIds((current) =>
+                      event.target.checked
+                        ? [...current, course.id]
+                        : current.filter((id) => id !== course.id),
+                    )
+                  }
+                  className="h-4 w-4 accent-[#a9694f]"
+                />
+                <span>{course.name}</span>
+              </label>
+            ))}
+          </fieldset>
+        ) : (
+          <p className="text-sm text-[#765f52]">
+            No courses are available to feature.
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={isSaving || !courses.length}
+          className={primaryButton}
+        >
+          {isSaving ? "Saving…" : "Save featured courses"}
+        </button>
+      </form>
+    </div>
   );
 }
 

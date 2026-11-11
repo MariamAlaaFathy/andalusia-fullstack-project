@@ -17,6 +17,13 @@ namespace full_stack_project_backend.Data
         public DbSet<Lesson> Lessons => Set<Lesson>();
         public DbSet<LandingPageContent> LandingPageContents => Set<LandingPageContent>();
         public DbSet<FeaturedCourse> FeaturedCourses => Set<FeaturedCourse>();
+        public DbSet<LandingPageBanner> LandingPageBanners => Set<LandingPageBanner>();
+        public DbSet<LandingPageHighlight> LandingPageHighlights => Set<LandingPageHighlight>();
+        public DbSet<LandingPageTestimonial> LandingPageTestimonials => Set<LandingPageTestimonial>();
+        public DbSet<LandingPageFaq> LandingPageFaqs => Set<LandingPageFaq>();
+        public DbSet<AboutPageBlock> AboutPageBlocks => Set<AboutPageBlock>();
+        public DbSet<ContactPageSettings> ContactPageSettings => Set<ContactPageSettings>();
+        public DbSet<ContactSubmission> ContactSubmissions => Set<ContactSubmission>();
 
         public DbSet<ProgramEntity> Programs => Set<ProgramEntity>();
         public DbSet<CareerPath> CareerPaths => Set<CareerPath>();
@@ -106,7 +113,148 @@ namespace full_stack_project_backend.Data
                 .IsUnique();
 
             modelBuilder.Entity<LandingPageContent>()
-                .HasData(new LandingPageContent { Id = 1 });
+                .HasData(new LandingPageContent
+                {
+                    Id = 1,
+                    UpdatedAtUtc = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                });
+
+            modelBuilder.Entity<LandingPageBanner>(entity =>
+            {
+                entity.Property(item => item.Title).HasMaxLength(160).IsRequired();
+                entity.Property(item => item.Description).HasMaxLength(1000).IsRequired();
+                entity.HasData(new LandingPageBanner
+                {
+                    Id = 1,
+                    Title = "New: Full Stack Development (.NET)",
+                    Description = "Launching next month — join the waitlist to get early access and a founding-cohort discount.",
+                    CallToActionText = "Join waitlist",
+                    Order = 0,
+                    IsPublished = true
+                });
+            });
+
+            modelBuilder.Entity<LandingPageHighlight>(entity =>
+            {
+                entity.Property(item => item.Title).HasMaxLength(160).IsRequired();
+                entity.Property(item => item.Description).HasMaxLength(1000).IsRequired();
+                entity.HasData(new LandingPageHighlight
+                {
+                    Id = 1,
+                    Title = "For business",
+                    Description = "Upskill your team with cohort pricing, progress reporting and a dedicated account contact.",
+                    Order = 0,
+                    IsPublished = true
+                });
+            });
+
+            modelBuilder.Entity<LandingPageTestimonial>(entity =>
+            {
+                entity.Property(item => item.Quote).HasMaxLength(2000).IsRequired();
+                entity.Property(item => item.Author).HasMaxLength(120).IsRequired();
+                entity.Property(item => item.Role).HasMaxLength(160);
+                entity.HasData(
+                    new LandingPageTestimonial
+                    {
+                        Id = 1,
+                        Quote = "Courses and conferences are well-organized and professionally managed. Andalusia Academy offers accredited courses and conferences for medical and non-medical professionals.",
+                        Author = "Abdlhamid Medhat",
+                        Order = 0,
+                        IsPublished = true
+                    },
+                    new LandingPageTestimonial
+                    {
+                        Id = 2,
+                        Quote = "Your future starts with one click. Join thousands of successful learners.",
+                        Author = "Amr Gamal",
+                        Order = 1,
+                        IsPublished = true
+                    },
+                    new LandingPageTestimonial
+                    {
+                        Id = 3,
+                        Quote = "Every graduate starts with a lesson. Learn today, lead tomorrow.",
+                        Author = "Karim Fakhry",
+                        Order = 2,
+                        IsPublished = true
+                    });
+            });
+
+            modelBuilder.Entity<LandingPageFaq>(entity =>
+            {
+                entity.Property(item => item.Question).HasMaxLength(500).IsRequired();
+                entity.Property(item => item.Answer).HasMaxLength(4000).IsRequired();
+            });
+
+            modelBuilder.Entity<AboutPageBlock>(entity =>
+            {
+                entity.Property(item => item.Title).HasMaxLength(160).IsRequired();
+                entity.Property(item => item.Body).HasMaxLength(4000).IsRequired();
+                entity.HasData(
+                    new AboutPageBlock
+                    {
+                        Id = 1,
+                        Title = "About Andalusia Academy",
+                        Body = "Empowering learners across the region with structured career paths, hands-on technical training, and industry-aligned skills.",
+                        Order = 0
+                    },
+                    new AboutPageBlock
+                    {
+                        Id = 2,
+                        Title = "Our Mission",
+                        Body = "Andalusia Academy was created to bridge the gap between academic education and practical industry demands. We provide accessible, high-quality learning experiences designed to take you from foundational concepts to market-ready expertise. Whether you are stepping into tech for the first time, upskilling for a promotion, or training an engineering team, our programs adapt to your goals.",
+                        Order = 1
+                    },
+                    new AboutPageBlock
+                    {
+                        Id = 3,
+                        Title = "Practical Learning",
+                        Body = "Every course is built around real-world projects, giving you skills you can immediately apply in your job or portfolio.",
+                        Order = 2
+                    },
+                    new AboutPageBlock
+                    {
+                        Id = 4,
+                        Title = "Expert Mentorship",
+                        Body = "Learn directly from industry practitioners who bring active experience and guidance to your learning journey.",
+                        Order = 3
+                    },
+                    new AboutPageBlock
+                    {
+                        Id = 5,
+                        Title = "Structured Growth",
+                        Body = "Clear learning paths remove the guesswork, letting you focus on step-by-step progress towards your career goals.",
+                        Order = 4
+                    });
+            });
+
+            modelBuilder.Entity<ContactPageSettings>(entity =>
+            {
+                entity.Property(item => item.Introduction).HasMaxLength(1000).IsRequired();
+                entity.Property(item => item.Address).HasMaxLength(500).IsRequired();
+                entity.Property(item => item.Email).HasMaxLength(254).IsRequired();
+                entity.Property(item => item.Phone).HasMaxLength(64).IsRequired();
+                entity.Property(item => item.WorkingHours).HasMaxLength(500).IsRequired();
+                entity.HasData(new ContactPageSettings
+                {
+                    Id = 1,
+                    Introduction = "Have questions about our programs, course tracks, or team pricing? We're here to help.",
+                    Address = "39 Khaleel El-Khayat Basha, Abu an Nawatir, Sidi Gaber, Alexandria Governorate",
+                    Email = "andalusiaacadem@andalusia.com",
+                    Phone = "01202317780",
+                    WorkingHours = "Sunday – Thursday: 9:00 AM – 5:00 PM; Friday & Saturday: Closed",
+                    MapUrl = "https://maps.google.com/?q=39+Khaleel+El-Khayat+Basha,+Abu+an+Nawatir,+Sidi+Gaber,+Alexandria+Governorate"
+                });
+            });
+
+            modelBuilder.Entity<ContactSubmission>(entity =>
+            {
+                entity.Property(item => item.Name).HasMaxLength(120).IsRequired();
+                entity.Property(item => item.Email).HasMaxLength(254).IsRequired();
+                entity.Property(item => item.Subject).HasMaxLength(200);
+                entity.Property(item => item.Message).HasMaxLength(4000).IsRequired();
+                entity.HasIndex(item => new { item.IsRead, item.SubmittedAtUtc });
+            });
                 application.HasOne(item => item.Payment)
                     .WithOne(payment => payment.CourseApplication)
                     .HasForeignKey<Payment>(payment => payment.CourseApplicationId)

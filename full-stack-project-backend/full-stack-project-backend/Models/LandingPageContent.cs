@@ -8,6 +8,6 @@ namespace full_stack_project_backend.Models
         public string? HeroImageUrl { get; set; }
         public string CallToActionText { get; set; } = string.Empty;
         public string? CallToActionUrl { get; set; }
-        public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAtUtc { get; set; }
     }
 }

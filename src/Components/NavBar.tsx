@@ -90,6 +90,13 @@ function NavBar() {
               >
                 Teaching
               </NavLink>
+            ) : context.user.role === "Content Manager" ? (
+              <NavLink
+                to="/ContentManager"
+                className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+              >
+                Content
+              </NavLink>
             ) : (
               <>
                 <NavLink
@@ -105,6 +112,14 @@ function NavBar() {
                   My learning
                 </NavLink>
               </>
+            )}
+            {context.user.role === "Admin" && (
+              <NavLink
+                to="/ContentManager"
+                className="text-sm font-semibold text-[#8f5640] transition-colors hover:text-[#A16F5E] sm:text-base"
+              >
+                Content
+              </NavLink>
             )}
             {context.user.role === "Learner" && (
               <NavLink

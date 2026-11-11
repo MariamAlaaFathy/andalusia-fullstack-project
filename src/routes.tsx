@@ -100,6 +100,13 @@ const router = createBrowserRouter([
     },
   },
   {
+    path: "/ContentManager",
+    lazy: async () => {
+      const { default: ContentManager } = await import("./pages/Contentmanager");
+      return { Component: ContentManager };
+    },
+  },
+  {
     path: "/Programs",
     lazy: async () => {
       const { default: Programs } = await import("./pages/Programs");
